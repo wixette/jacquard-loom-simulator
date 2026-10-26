@@ -1,17 +1,18 @@
-// The learner page (index.html). With ?selftest it also runs every milestone's acceptance
+// M2 developer page: the prototype learner page, which was the site's main page until the
+// main app (design/public-app.md). With ?selftest it also runs every milestone's acceptance
 // checks in the page (the 3D ones on the files the page loads), and the label checks on its
 // views, as the developer pages do.
 
-import pkg from "../package.json" with { type: "json" };
-import { checkClothSteady } from "./accept/clothCheck.js";
-import { checkLabels } from "./accept/labelCheck.js";
-import { runM0Checks } from "./accept/m0Checks.js";
-import { runM1Checks } from "./accept/m1Checks.js";
-import { runM2Checks, runM2PageChecks } from "./accept/m2Checks.js";
-import { selftestRequested, showSelftest } from "./accept/selftestPanel.js";
-import { createLearnerPage } from "./app/learnerPage.js";
-/** @import { CheckResult } from "./accept/harness.js" */
-/** @import { Unit, UnitId } from "./scene/units.js" */
+import pkg from "../../package.json" with { type: "json" };
+import { checkClothSteady } from "../../js/accept/clothCheck.js";
+import { checkLabels } from "../../js/accept/labelCheck.js";
+import { runM0Checks } from "../../js/accept/m0Checks.js";
+import { runM1Checks } from "../../js/accept/m1Checks.js";
+import { runM2Checks, runM2PageChecks } from "../../js/accept/m2Checks.js";
+import { selftestRequested, showSelftest } from "../../js/accept/selftestPanel.js";
+import { createLearnerPage } from "../../js/app/learnerPage.js";
+/** @import { CheckResult } from "../../js/accept/harness.js" */
+/** @import { Unit, UnitId } from "../../js/scene/units.js" */
 
 const learner = createLearnerPage();
 /** @type {HTMLElement} */ (document.getElementById("version")).textContent = pkg.version;
@@ -44,7 +45,7 @@ async function selftest() {
   }
   // The 3D parts: the M3 and M4 checks on the files the page loads, then the page's own.
   try {
-    const [{ runM3Checks }, { runM4Checks, runM4PageChecks }] = await Promise.all([import("./accept/m3Checks.js"), import("./accept/m4Checks.js")]);
+    const [{ runM3Checks }, { runM4Checks, runM4PageChecks }] = await Promise.all([import("../../js/accept/m3Checks.js"), import("../../js/accept/m4Checks.js")]);
     const parts = await learner.mechanism("3d");
     if (parts?.view.context) {
       const units = /** @type {Record<UnitId, Unit>} */ (parts.view.units);

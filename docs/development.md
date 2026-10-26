@@ -12,8 +12,8 @@ pnpm serve
 
 `pnpm serve` (`tools/serve.mjs`) is a small static server that turns caching off, so a changed file is always fetched again while you work; any static server works too (`python3 -m http.server 8000`), but a browser may then keep an old stylesheet until a hard reload.
 
-- <http://localhost:8000/> is the learner page (`index.html`).
-- <http://localhost:8000/dev/> lists the developer pages, one per milestone. They are not linked from the learner page.
+- <http://localhost:8000/> is the main app (`index.html`; until M6, a page that points to the prototypes).
+- <http://localhost:8000/dev/> lists the developer pages, one per milestone, the prototype learner page among them (`dev/03-learner/`). The main app does not link to them.
 
 Pages cannot be opened from `file://`, because browsers do not load modules from there.
 
@@ -21,9 +21,9 @@ Pages cannot be opened from `file://`, because browsers do not load modules from
 
 | Option | Where | What it does |
 |---|---|---|
-| `?lesson=L3` | learner page | Open a lesson (L1 to L10) |
-| `?view=3d` | learner page | Open the mechanism pane on the parts in 3D |
-| `#…` (a copied link) | learner page, `dev/02-loom/` | Open the loom with those cards, at that moment (the format is a public contract: `js/sim/link.js`) |
+| `?lesson=L3` | `dev/03-learner/` | Open a lesson (L1 to L10) |
+| `?view=3d` | `dev/03-learner/` | Open the mechanism pane on the parts in 3D |
+| `#…` (a copied link) | `dev/03-learner/`, `dev/02-loom/` | Open the loom with those cards, at that moment (`js/sim/link.js`; the main app's links are designed in M5 and frozen from 0.1.0) |
 | `?text=…&mode=damask` or `direct` | `dev/06-name-game/` | Open the name game with that text |
 | `?selftest` | every page | Run the page's acceptance checks and show the results |
 
@@ -43,11 +43,12 @@ Pages cannot be opened from `file://`, because browsers do not load modules from
 | `pnpm check:refs` | No private references, local paths or broken links (`tools/check-refs.mjs`) |
 | `pnpm build:model` | Rebuilds the five units and the ghosted machine into `assets/` with Blender, headless |
 | `pnpm vendor` | Copies three.js and the font from `node_modules` into `vendor/`, and writes the icons the pages use into one module |
+| `pnpm selftest` | Every page's `?selftest`, run in headless Chrome: the browser half of the checks |
 | `pnpm shots` | Screenshots of every view, from headless Chrome, into `shots/` (`--out`, `--only`): for reviewing a change of the theme or the layout side by side |
 | `pnpm stamp` | Writes the version into every file name the pages load |
 | `reuse lint` | Every file's licence is declared (REUSE; CI runs it) |
 
-Before a commit: `pnpm check:refs`, `pnpm typecheck`, `pnpm test`, and the `?selftest` of the pages a change touches. After a change to `params/` or `blender/scripts/`: `pnpm build:model`, and commit the new `.glb` files with it.
+Before a commit: `pnpm check:refs`, `pnpm typecheck`, `pnpm test`, and `pnpm selftest` (or the `?selftest` of the pages a change touches). After a change to `params/` or `blender/scripts/`: `pnpm build:model`, and commit the new `.glb` files with it.
 
 ## Versions and releases
 

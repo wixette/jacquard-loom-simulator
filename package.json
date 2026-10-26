@@ -22,6 +22,7 @@
     "version": "node tools/stamp.mjs",
     "serve": "node tools/serve.mjs 8000",
     "shots": "node tools/shots.mjs",
+    "selftest": "node tools/selftest.mjs",
     "vendor": "node tools/vendor.mjs",
     "build:model": "\"${BLENDER:-/Applications/Blender.app/Contents/MacOS/Blender}\" --background --factory-startup --python-exit-code 1 --python blender/scripts/build_units.py"
   },

@@ -36,14 +36,14 @@ const WEAVE = "await click('#fwd', 6 * 5 + 2);";
 
 /** @type {Shot[]} */
 const SHOTS = [
-  { name: "learner", path: "index.html", setup: WEAVE },
-  { name: "learner-follow", path: "index.html", setup: `${WEAVE} await tap("svg.section .hook.caught");` },
-  { name: "learner-3d", path: "index.html?view=3d", ready: LOADED_3D, setup: "await sleep(1500);" },
+  { name: "learner", path: "dev/03-learner/", setup: WEAVE },
+  { name: "learner-follow", path: "dev/03-learner/", setup: `${WEAVE} await tap("svg.section .hook.caught");` },
+  { name: "learner-3d", path: "dev/03-learner/?view=3d", ready: LOADED_3D, setup: "await sleep(1500);" },
   { name: "section", path: "dev/01-section/", setup: WEAVE },
   { name: "loom", path: "dev/02-loom/", setup: WEAVE },
-  { name: "learner-needles", path: "index.html", setup: `${WEAVE} await click('[data-view="needles"]'); await sleep(300);` },
-  { name: "learner-crooks", path: "index.html", setup: `${WEAVE} await click('[data-view="crooks"]'); await sleep(300);` },
-  { name: "learner-bits", path: "index.html", setup: `${WEAVE} await click('#fwd', 6 * 6); await click('#bits'); await sleep(300);` },
+  { name: "learner-needles", path: "dev/03-learner/", setup: `${WEAVE} await click('[data-view="needles"]'); await sleep(300);` },
+  { name: "learner-crooks", path: "dev/03-learner/", setup: `${WEAVE} await click('[data-view="crooks"]'); await sleep(300);` },
+  { name: "learner-bits", path: "dev/03-learner/", setup: `${WEAVE} await click('#fwd', 6 * 6); await click('#bits'); await sleep(300);` },
   ...["selector", "cylinder", "griffe", "harness", "shed"].map((u) => ({
     name: `units-${u}`,
     path: "dev/04-units/",
@@ -52,7 +52,7 @@ const SHOTS = [
   })),
   { name: "machine", path: "dev/05-machine/", ready: LOADED_3D, setup: "await click('#fwd', 2); await sleep(2500);" },
   { name: "name-game", path: "dev/06-name-game/?text=Ada", setup: "await click('#all'); await sleep(800);" },
-  { name: "learner-phone", path: "index.html", setup: WEAVE, size: [390, 844] },
+  { name: "learner-phone", path: "dev/03-learner/", setup: WEAVE, size: [390, 844] },
 ];
 
 const { values } = parseArgs({ options: { out: { type: "string", default: "shots" }, only: { type: "string" }, set: { type: "string", multiple: true } } });
