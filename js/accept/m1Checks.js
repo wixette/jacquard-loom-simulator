@@ -4,6 +4,7 @@
 // drive the loom through the page's own methods and measure the shapes the page draws.
 // Run by tests/accept/m1.accept.test.js and by dev/02-loom's ?selftest.
 
+import { say, t } from "../l10n/l10n.js";
 import { cylinderOut } from "../sim/cycle.js";
 import {
   addCard,
@@ -21,7 +22,7 @@ import {
   toggleHole,
 } from "../sim/deck.js";
 import { decodeLink, encodeLink } from "../sim/link.js";
-import { Loom, POSITIONS, STOP_NAMES, STOPS } from "../sim/loom.js";
+import { Loom, POSITIONS, STOP_KEYS, STOPS } from "../sim/loom.js";
 import { P } from "../sim/params.js";
 import { endCount, hookOfEnd, rowOfCard } from "../sim/tieup.js";
 import { followCell, traceOf } from "../sim/trace.js";
@@ -384,7 +385,8 @@ function bigHeadSteps() {
         break;
       }
       n++;
-      if (!r.message.startsWith(STOP_NAMES[i % STOPS.length])) bad.push(`${H} hooks step ${i + 1}: "${r.message.slice(0, 24)}"`);
+      const words = say(r.message, "en");
+      if (!words.startsWith(t(STOP_KEYS[i % STOPS.length], {}, "en"))) bad.push(`${H} hooks step ${i + 1}: "${words.slice(0, 24)}"`);
       if (JSON.stringify([loom.snapshot().head, loom.cloth.length, loom.snapshot().pendingRow !== null]) === before) bad.push(`${H} hooks step ${i + 1} changed nothing`);
     }
     for (let i = 0; i < 6 * 9; i++) loom.stepBack();

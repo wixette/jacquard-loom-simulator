@@ -2,6 +2,9 @@
 // hooks 1…H across the warp; a point tie runs 1…H…2 and so mirrors the figure (research
 // notes-mechanism, the harness). Warp ends and hooks are numbered from 1.
 
+import { msg } from "../l10n/l10n.js";
+/** @import { Msg } from "../l10n/l10n.js" */
+
 /**
  * @typedef {{ kind: "straight", repeats: number } | { kind: "point" }} Tie
  */
@@ -60,7 +63,8 @@ export function rowOfCard(tie, card, hooks) {
 }
 
 /**
+ * The tie-up's name, as a message.
  * @param {Tie} tie
- * @returns {string}
+ * @returns {Msg}
  */
-export const tieLabel = (tie) => (tie.kind === "point" ? "point tie" : tie.repeats === 1 ? "straight tie" : `straight tie × ${tie.repeats}`);
+export const tieLabel = (tie) => (tie.kind === "point" ? msg("tie.point") : tie.repeats === 1 ? msg("tie.straight") : msg("tie.straightN", { n: tie.repeats }));

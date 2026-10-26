@@ -6,6 +6,7 @@
 //
 // clothCells() is pure (it says what each cell shows); ClothView draws it on a canvas.
 
+import { t, tn } from "../l10n/l10n.js";
 import { hookOfEnd } from "../sim/tieup.js";
 import { token } from "../ui/theme.js";
 /** @import { Snapshot } from "../sim/loom.js" */
@@ -204,8 +205,8 @@ export class ClothView {
       g.fillStyle = token("--label", "#c9d0d9");
       g.font = `12px ${token("--font", "system-ui, sans-serif")}`;
       g.textAlign = "left";
-      g.fillText("No cloth yet.", this.left, this.top + 12);
+      g.fillText(t("cloth.none"), this.left, this.top + 12);
     }
-    this.canvas.setAttribute("aria-label", `The cloth, ${o.face}: ${snap.cloth.length} picks woven across ${ends} warp ends`);
+    this.canvas.setAttribute("aria-label", tn("cloth.name", snap.cloth.length, { face: t(o.face === "front" ? "cloth.front" : "cloth.back"), ends }));
   }
 }

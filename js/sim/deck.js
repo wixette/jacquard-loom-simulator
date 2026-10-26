@@ -144,23 +144,24 @@ export const setLoop = (deck, loop) => ({ ...deck, loop });
  * Ready-made decks for the 8-hook cross-row of M0, as strings, the first card first.
  * The arrow is the research's worked example (research/data/operation_cycle.json): its
  * design is read bottom line first, so the first card is the arrow's shaft.
- * @type {Record<string, { label: string, rows: string[], loop: boolean }>}
+ * Each is named by a message key (its name for the reader).
+ * @type {Record<string, { name: string, rows: string[], loop: boolean }>}
  */
 export const PRESETS = {
-  plain: { label: "Plain weave (2 cards)", rows: ["O.O.O.O.", ".O.O.O.O"], loop: true },
-  twill: { label: "2/2 twill (4 cards)", rows: ["OO..OO..", ".OO..OO.", "..OO..OO", "O..OO..O"], loop: true },
+  plain: { name: "preset.plain", rows: ["O.O.O.O.", ".O.O.O.O"], loop: true },
+  twill: { name: "preset.twill", rows: ["OO..OO..", ".OO..OO.", "..OO..OO", "O..OO..O"], loop: true },
   satin: {
-    label: "8-end satin, step 3 (8 cards)",
+    name: "preset.satin",
     rows: ["O.......", "...O....", "......O.", ".O......", "....O...", ".......O", "..O.....", ".....O.."],
     loop: true,
   },
   arrow: {
-    label: "The arrow (8 cards, the research example)",
+    name: "preset.arrow",
     rows: ["...OO...", "...OO...", "...OO...", "...OO...", "O..OO..O", ".O.OO.O.", "..OOOO..", "...OO..."],
     loop: false,
   },
-  blank: { label: "One blank card", rows: ["........"], loop: false },
-  full: { label: "One fully cut card", rows: ["OOOOOOOO"], loop: false },
+  blank: { name: "preset.blank", rows: ["........"], loop: false },
+  full: { name: "preset.full", rows: ["OOOOOOOO"], loop: false },
 };
 
 /** The hook counts a head can have: 8 x c hooks, c = 1 to 8 (design/simulator-plan.md §4.1). */

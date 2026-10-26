@@ -9,11 +9,13 @@
 // reverse cord turns the cylinder back for the next lift, which weaves the previous
 // card again; the page names this simplification.)
 
+import { msg } from "../l10n/l10n.js";
 import { beaten, battenSwing, shuttleAcross, weftInShed } from "./cycle.js";
 import { cardForPick, cardIndexForPick } from "./deck.js";
 import { headState } from "./head.js";
 import { P } from "./params.js";
 import { endCount, hookOfEnd, rowOfCard, STRAIGHT } from "./tieup.js";
+/** @import { Msg } from "../l10n/l10n.js" */
 /** @import { Deck } from "./deck.js" */
 /** @import { HeadState } from "./head.js" */
 /** @import { Tie } from "./tieup.js" */
@@ -21,8 +23,11 @@ import { endCount, hookOfEnd, rowOfCard, STRAIGHT } from "./tieup.js";
 /** The step stops within a pick, as fractions of the pick; 1 is the next pick's start. */
 export const STOPS = P.stops;
 
-/** What each stop shows, in order (the last is also where the next pick starts). */
-export const STOP_NAMES = ["Hooks taken", "Shed open", "Shuttle across", "Beaten up", "Shed closed", "Next card pressed"];
+/** What each stop shows, in order (the last is also where the next pick starts): message keys. */
+export const STOP_KEYS = ["stop.taken", "stop.open", "stop.across", "stop.beaten", "stop.closed", "stop.next"];
+
+/** The moments a pick can be left at (POSITIONS), as named inside a sentence: message keys. */
+const MOMENT_KEYS = ["moment.rest", "moment.taken", "moment.open", "moment.across", "moment.beaten", "moment.closed"];
 
 /**
  * The moments a pick can be left at between steps: 0 is at rest (its card pressed), then the
@@ -50,7 +55,7 @@ const EPS = 1e-9;
  */
 
 /**
- * @typedef {{ ok: true, message: string } | { ok: false, reason: string }} StepResult
+ * @typedef {{ ok: true, message: Msg } | { ok: false, reason: Msg }} StepResult
  */
 
 /**
@@ -70,12 +75,6 @@ function selectionFor(deck, pick) {
  * @returns {number[]}
  */
 const liftedHooks = (card, hooks) => [...Array(hooks).keys()].filter((k) => !card || card[k]).map((k) => k + 1);
-
-/**
- * Numbers in words: "4", "4 and 5", "1, 4 and 8"; more than a dozen are counted instead.
- * @param {number[]} xs
- */
-const list = (xs) => (xs.length === 0 ? "none" : xs.length === 1 ? `${xs[0]}` : xs.length > 12 ? `(${xs.length} of them)` : `${xs.slice(0, -1).join(", ")} and ${xs[xs.length - 1]}`);
 
 export class Loom {
   /**
@@ -120,14 +119,12 @@ export class Loom {
 
   /**
    * Whether the next pick can start from rest, and if not, why.
-   * @returns {{ ok: true } | { ok: false, reason: string }}
+   * @returns {{ ok: true } | { ok: false, reason: Msg }}
    */
   canStart() {
     const n = this.deck.cards.length;
-    if (n === 0) return { ok: false, reason: "There are no cards in the chain: add a card." };
-    if (cardForPick(this.deck, this.pick) === null) {
-      return { ok: false, reason: `The chain has run out after ${n} card${n === 1 ? "" : "s"}: close the loop, add cards, or step back.` };
-    }
+    if (n === 0) return { ok: false, reason: msg("loom.noCards") };
+    if (cardForPick(this.deck, this.pick) === null) return { ok: false, reason: msg("loom.runOut", {}, n) };
     return { ok: true };
   }
 
@@ -201,23 +198,23 @@ export class Loom {
    */
   stepBack() {
     if (this.phi < EPS) {
-      if (this.pick === 0) return { ok: false, reason: "This is the start: nothing has been woven yet." };
+      if (this.pick === 0) return { ok: false, reason: msg("loom.start") };
       this.moveTo(this.pick - 1, STOPS[STOPS.length - 2]);
-      return { ok: true, message: `Back: ${STOP_NAMES[STOPS.length - 2].toLowerCase()} of pick ${this.pick + 1}; the next card is off the needles again.` };
+      return { ok: true, message: msg("loom.back.card", { pick: this.pick + 1 }) };
     }
     const before = [0, ...STOPS.slice(0, -1)].filter((s) => s < this.phi - EPS);
     const to = before[before.length - 1];
     const wasBeaten = beaten(this.phi);
     this.moveTo(this.pick, to);
-    const name = to === 0 ? "at rest before the pick" : STOP_NAMES[STOPS.indexOf(to)].toLowerCase();
-    return { ok: true, message: `Back: ${name} of pick ${this.pick + 1}${wasBeaten && !beaten(to) ? "; its row is out of the cloth again" : ""}.` };
+    const moment = msg(MOMENT_KEYS[POSITIONS.indexOf(to)]);
+    return { ok: true, message: msg(wasBeaten && !beaten(to) ? "loom.back.unwoven" : "loom.back", { moment, pick: this.pick + 1 }) };
   }
 
   /**
    * Runs the loom on by dphi (for playing). Stops at the end of a pick when the next one
    * cannot start, and says why.
    * @param {number} dphi
-   * @returns {{ ok: true } | { ok: false, reason: string }}
+   * @returns {{ ok: true } | { ok: false, reason: Msg }}
    */
   advance(dphi) {
     if (this.phi < EPS) {
@@ -234,7 +231,7 @@ export class Loom {
    * What happened at stop i of pick `pick`.
    * @param {number} i
    * @param {number} pick
-   * @returns {string}
+   * @returns {Msg}
    */
   stopMessage(i, pick) {
     const hooks = this.deck.hooks;
@@ -242,22 +239,27 @@ export class Loom {
     const next = cardForPick(this.deck, pick + 1);
     const n = pick + 1;
     const lifted = liftedHooks(card, hooks);
+    const cardNo = (cardIndexForPick(this.deck, pick) ?? 0) + 1;
     switch (i) {
       case 0:
-        if (lifted.length === 0) return `Hooks taken: none. Card ${(cardIndexForPick(this.deck, pick) ?? 0) + 1} has no holes, so every needle and hook was pushed off the knives.`;
-        return `Hooks taken: the knives have caught hook${lifted.length === 1 ? "" : "s"} ${list(lifted)}, whose needle${lifted.length === 1 ? "" : "s"} went into holes in card ${(cardIndexForPick(this.deck, pick) ?? 0) + 1}.`;
+        if (lifted.length === 0) return msg("loom.taken.none", { card: cardNo });
+        return msg("loom.taken", { hooks: lifted, card: cardNo }, lifted.length);
       case 1:
-        if (lifted.length === 0) return "Shed open: no warp end is lifted, so the weft will lie over the whole warp. The cylinder has swung out and turned to the next card.";
-        return `Shed open: hook${lifted.length === 1 ? "" : "s"} ${list(lifted)} ${lifted.length === 1 ? "has" : "have"} lifted ${lifted.length === 1 ? "its warp ends" : "their warp ends"}. The cylinder has swung out and turned to the next card.`;
+        if (lifted.length === 0) return msg("loom.open.none");
+        return msg("loom.open", { hooks: lifted }, lifted.length);
       case 2:
-        return `Shuttle across: the weft of pick ${n} lies in the shed, under the lifted ends and over the rest.`;
+        return msg("loom.across", { pick: n });
       case 3:
-        return `Beaten up: pick ${n} is part of the cloth.`;
+        return msg("loom.beaten", { pick: n });
       case 4:
-        return "Shed closed: the griffe is coming down, every hook is back on the bottom board, and the cylinder is back at the needle points.";
-      default:
-        if (!next) return "Next card pressed? There is no next card: the empty cylinder face pushes no needle, so every hook would rise. The chain has run out.";
-        return `Next card pressed: card ${(cardIndexForPick(this.deck, pick + 1) ?? 0) + 1}'s blanks have pushed needles ${list([...Array(hooks).keys()].filter((k) => !next[k]).map((k) => k + 1))} back, and their hooks off the knives. Ready for pick ${n + 1}.`;
+        return msg("loom.closed");
+      default: {
+        if (!next) return msg("loom.next.none");
+        const pushed = [...Array(hooks).keys()].filter((k) => !next[k]).map((k) => k + 1);
+        const nextNo = (cardIndexForPick(this.deck, pick + 1) ?? 0) + 1;
+        if (pushed.length === 0) return msg("loom.next.full", { card: nextNo, pick: n + 1 });
+        return msg("loom.next", { card: nextNo, needles: pushed, pick: n + 1 }, pushed.length);
+      }
     }
   }
 }

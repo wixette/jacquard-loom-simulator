@@ -8,6 +8,7 @@
 // The loom's frame is estimated (research section 3): overall sizes from the Science
 // Museum's silk hand loom 1914-469, members and heights estimated.
 
+import { t } from "../l10n/l10n.js";
 import { FRAME, P, U } from "../sim/params.js";
 import { boxAround, LabelPlacer, screenFrame, segsOf } from "./labels.js";
 /** @import { Snapshot } from "../sim/loom.js" */
@@ -96,14 +97,14 @@ export class SideView {
     this.svg = /** @type {SVGSVGElement} */ (document.createElementNS(NS, "svg"));
     this.svg.setAttribute("class", "side");
     this.svg.setAttribute("role", "img");
-    this.svg.setAttribute("aria-label", "The loom from the side: treadle, lever, head, harness, shed, batten and cloth");
-    this.svg.setAttribute("preserveAspectRatio", "xMidYMid meet");
+        this.svg.setAttribute("preserveAspectRatio", "xMidYMid meet");
     this.svg.setAttribute("viewBox", `${VIEW.x} ${-(VIEW.y + VIEW.h)} ${VIEW.w} ${VIEW.h}`);
     host.appendChild(this.svg);
   }
 
   /** @param {SideLayout} L */
   render(L) {
+    this.svg.setAttribute("aria-label", t("side.name"));
     /** @param {Pt[]} p */
     const pts = (p) => p.map(([x, y]) => `${f(x)},${f(-y)}`).join(" ");
     /** @param {Pt} a @param {Pt} b @param {string} cls */
@@ -173,11 +174,11 @@ export class SideView {
     ];
     const labels = new LabelPlacer(screenFrame(VIEW, this.svg.clientWidth, this.svg.clientHeight), { boxes, segs });
     const s = labels.size;
-    out.push(labels.placeAt("head", [[L.head.x + L.head.w + s * 0.4, L.head.y + L.head.h / 2 - s * 0.35], [L.head.x - s * 0.4, L.head.y + L.head.h / 2 - s * 0.35, "end"]]));
-    out.push(labels.placeAt("lever", [[L.lever.pivot[0] - LEVER_ARM - 70, L.lever.pivot[1] - s * 0.35, "end"], [L.lever.pivot[0], L.lever.pivot[1] + 110, "middle"]]));
-    out.push(labels.placeAt("treadle", [[900, 400], [1300, 400], [900, 30]]));
-    out.push(labels.placeAt("batten", [[reedMax + 110, 1500], [reedMin - 30, 1500, "end"], [b.pivot[0], 2420, "middle"]]));
-    out.push(labels.placeAt("shed", [[1750, L.mails.rest[1] - s * 1.8], [1750, L.mails.rest[1] + lift + s * 1.2]]));
+    out.push(labels.placeAt(t("part.head"), [[L.head.x + L.head.w + s * 0.4, L.head.y + L.head.h / 2 - s * 0.35], [L.head.x - s * 0.4, L.head.y + L.head.h / 2 - s * 0.35, "end"]]));
+    out.push(labels.placeAt(t("part.lever"), [[L.lever.pivot[0] - LEVER_ARM - 70, L.lever.pivot[1] - s * 0.35, "end"], [L.lever.pivot[0], L.lever.pivot[1] + 110, "middle"]]));
+    out.push(labels.placeAt(t("part.treadle"), [[900, 400], [1300, 400], [900, 30]]));
+    out.push(labels.placeAt(t("part.batten"), [[reedMax + 110, 1500], [reedMin - 30, 1500, "end"], [b.pivot[0], 2420, "middle"]]));
+    out.push(labels.placeAt(t("part.shed"), [[1750, L.mails.rest[1] - s * 1.8], [1750, L.mails.rest[1] + lift + s * 1.2]]));
     this.svg.innerHTML = out.join("");
   }
 }

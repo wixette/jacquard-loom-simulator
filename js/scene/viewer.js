@@ -185,7 +185,8 @@ export class Viewer {
     this.controls.enableDamping = true;
 
     this.controls.addEventListener("change", () => this.invalidate(false));
-    new ResizeObserver(() => this.resize()).observe(host);
+    this.resized = new ResizeObserver(() => this.resize());
+    this.resized.observe(host);
     this.resize();
     this.timer.connect(document);
     this.renderer.setAnimationLoop((time) => this.tick(time));
@@ -431,5 +432,26 @@ export class Viewer {
       if (this.slowFrames.length === 60 && avg > 1000 / LITE_BELOW_FPS) this.setQuality("lite");
     }
     this.lastRender = time;
+  }
+
+  /**
+   * Stop drawing and give back what the view holds: the GPU's buffers, its canvas, its
+   * listeners. The view cannot be used again.
+   * @returns {void}
+   */
+  dispose() {
+    this.renderer.setAnimationLoop(null);
+    this.resized.disconnect();
+    this.timer.disconnect();
+    this.controls.dispose();
+    this.scene.traverse((o) => {
+      const m = /** @type {THREE.Mesh} */ (o);
+      if (!m.isMesh) return;
+      m.geometry.dispose();
+      for (const mt of /** @type {THREE.Material[]} */ ([]).concat(m.material)) mt.dispose();
+    });
+    this.scene.environment?.dispose();
+    this.renderer.dispose();
+    this.renderer.domElement.remove();
   }
 }

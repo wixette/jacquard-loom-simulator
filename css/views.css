@@ -6,6 +6,12 @@
 
 .canvas-host { background: var(--stage-bg); border-radius: var(--radius-s); }
 
+/* A view's host (js/app/components/views.js): the drawing fills it, on the stage. */
+.view { display: flex; min-width: 0; min-height: 0; background: var(--stage-bg); border-radius: var(--radius-s); }
+.view > svg { width: 100%; height: 100%; display: block; }
+.view > canvas { width: 100%; height: 100%; display: block; }
+.view-note { position: absolute; inset: 0; display: grid; place-items: center; margin: 0; color: var(--md-on-surface-variant); font-size: 13px; text-align: center; padding: 16px; }
+
 /* ---- the head in section ------------------------------------------------------------------- */
 svg.section .wood { fill: var(--wood); stroke: var(--wood-edge); stroke-width: 0.6; }
 svg.section .board-face { fill-opacity: 0.85; }

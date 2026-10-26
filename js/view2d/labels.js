@@ -19,6 +19,24 @@ export const NUMBER_PX = 11;
 /** An estimate of a character's width, as a share of the font size (system sans-serif). */
 const CHAR_WIDTH = 0.58;
 
+/** Wide characters: Chinese, Japanese and Korean script, and full-width forms (a full em). */
+const WIDE = /[\u1100-\u115f\u2e80-\ua4cf\uac00-\ud7a3\uf900-\ufaff\ufe30-\ufe4f\uff00-\uff60\uffe0-\uffe6]/u;
+
+/**
+ * An estimate of a text's width, in ems: a Latin letter is a share of one, a wide character
+ * a whole one.
+ * @param {string} text
+ * @returns {number}
+ */
+export const textEms = (text) => [...text].reduce((w, c) => w + (WIDE.test(c) ? 1 : CHAR_WIDTH), 0);
+
+/**
+ * Text as SVG markup: the characters markup gives a meaning to, escaped (a translation may
+ * hold them).
+ * @param {string} text
+ */
+const esc = (text) => text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
 /**
  * How a drawing in its own units (y up) lands on screen: px per unit, and the area of the
  * drawing actually visible (the view, widened to the pane's shape, as SVG's "meet" does).
@@ -197,7 +215,7 @@ export class LabelPlacer {
     const text = lines.join(" ");
     const v = this.frame.visible;
     const s = this.size;
-    const w = Math.max(...lines.map((l) => l.length)) * CHAR_WIDTH * s;
+    const w = Math.max(...lines.map(textEms)) * s;
     const extra = (lines.length - 1) * 1.15 * s; // the lines after the first
     /** @type {string[]} */
     const why = [];
@@ -224,10 +242,10 @@ export class LabelPlacer {
           continue;
         }
         this.placed.push(box);
-        if (lines.length === 1) return `<text class="${cls}" x="${f(x0)}" y="${f(-y0)}" font-size="${f(s)}">${text}</text>`;
+        if (lines.length === 1) return `<text class="${cls}" x="${f(x0)}" y="${f(-y0)}" font-size="${f(s)}">${esc(text)}</text>`;
         // (Each line keeps the spot's anchor within the label's width.)
         const tx = anchor === "start" ? x0 : anchor === "middle" ? x0 + w / 2 : x0 + w;
-        const spans = lines.map((l, i) => `<tspan x="${f(tx)}" dy="${i === 0 ? 0 : f(1.15 * s)}">${l}</tspan>`).join("");
+        const spans = lines.map((l, i) => `<tspan x="${f(tx)}" dy="${i === 0 ? 0 : f(1.15 * s)}">${esc(l)}</tspan>`).join("");
         return `<text class="${cls}" x="${f(tx)}" y="${f(-y0)}" font-size="${f(s)}" text-anchor="${anchor}">${spans}</text>`;
       }
     }
@@ -248,7 +266,7 @@ export class LabelPlacer {
   placeWithLeader(text, spots, target, cls = "lbl") {
     const v = this.frame.visible;
     const s = this.size;
-    const w = text.length * CHAR_WIDTH * s;
+    const w = textEms(text) * s;
     for (const [x, y, anchor = "start"] of spots) {
       const x0 = anchor === "start" ? x : anchor === "middle" ? x - w / 2 : x - w;
       const box = { x: x0, y: y - s * 0.25, w, h: s * 1.2 };
@@ -262,7 +280,7 @@ export class LabelPlacer {
       if (this.obstacles.boxes.some((o) => segMeetsBox(leader, o)) || this.placed.some((o) => segMeetsBox(leader, o))) continue;
       if (this.obstacles.segs.some((g) => segsCross(leader, g))) continue;
       this.placed.push(box);
-      return `<line class="leader" x1="${f(from[0])}" y1="${f(-from[1])}" x2="${f(end[0])}" y2="${f(-end[1])}"/><text class="${cls}" x="${f(x0)}" y="${f(-y)}" font-size="${f(s)}">${text}</text>`;
+      return `<line class="leader" x1="${f(from[0])}" y1="${f(-from[1])}" x2="${f(end[0])}" y2="${f(-end[1])}"/><text class="${cls}" x="${f(x0)}" y="${f(-y)}" font-size="${f(s)}">${esc(text)}</text>`;
     }
     this.left.push(`${text}: no clear spot for a leader either`);
     return "";

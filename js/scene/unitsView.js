@@ -60,6 +60,7 @@ export class UnitsView {
     /** @type {"machine" | UnitId} */
     this.mode = "machine";
     this.loaded = false;
+    this.disposed = false;
     this.tip = document.createElement("div");
     this.tip.className = "part-tip";
     this.tip.hidden = true;
@@ -81,6 +82,17 @@ export class UnitsView {
       down = null;
     });
     this.viewer.addFrameCallback(() => this.placeTags());
+  }
+
+  /**
+   * Stop and take the view away: the scene, its canvas, the part's tip and the bands' labels.
+   * @returns {void}
+   */
+  dispose() {
+    this.disposed = true;
+    this.viewer.dispose();
+    this.tip.remove();
+    for (const b of this.bands) b.tag.remove();
   }
 
   /**
@@ -107,6 +119,11 @@ export class UnitsView {
     });
     this.context = await this.viewer.load(...source(0));
     await Promise.all(loading);
+    // Taken away while it loaded: what arrived since is given back too.
+    if (this.disposed) {
+      this.viewer.dispose();
+      return;
+    }
     this.context.traverse((o) => {
       if (!o.userData.band) return;
       const tag = document.createElement("button");

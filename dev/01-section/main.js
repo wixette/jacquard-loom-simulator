@@ -4,13 +4,15 @@
 import { runM0Checks } from "../../js/accept/m0Checks.js";
 import { checkLabels } from "../../js/accept/labelCheck.js";
 import { selftestRequested, showSelftest } from "../../js/accept/selftestPanel.js";
+import { msg, say as words, t, tn } from "../../js/l10n/l10n.js";
 import { addCard, duplicateCard, invertCard, makeDeck, moveCard, PRESETS, removeCard, setLoop, toggleHole } from "../../js/sim/deck.js";
-import { Loom, STOP_NAMES, STOPS } from "../../js/sim/loom.js";
+import { Loom, STOP_KEYS, STOPS } from "../../js/sim/loom.js";
 import { hookOfEnd } from "../../js/sim/tieup.js";
 import { CardEditor } from "../../js/view2d/cardEditor.js";
 import { ClothGrid } from "../../js/view2d/clothGrid.js";
 import { sectionLayout } from "../../js/view2d/layout.js";
 import { SectionView } from "../../js/view2d/sectionView.js";
+/** @import { Msg } from "../../js/l10n/l10n.js" */
 /** @import { Deck } from "../../js/sim/deck.js" */
 /** @import { Tie } from "../../js/sim/tieup.js" */
 
@@ -37,9 +39,9 @@ let playing = false;
 let last = 0;
 
 const status = $("status");
-/** @param {string} text @param {boolean} [warn] */
+/** @param {string | Msg} text @param {boolean} [warn] */
 function say(text, warn = false) {
-  status.textContent = text;
+  status.textContent = typeof text === "string" ? text : words(text);
   status.classList.toggle("warn", warn);
 }
 
@@ -82,13 +84,13 @@ function setFollow(k) {
 
 // ---- controls ---------------------------------------------------------------------------
 const preset = /** @type {HTMLSelectElement} */ ($("preset"));
-for (const [key, p] of Object.entries(PRESETS)) preset.add(new Option(p.label, key, key === START, key === START));
+for (const [key, p] of Object.entries(PRESETS)) preset.add(new Option(tn("preset.option", p.rows.length, { name: t(p.name) }), key, key === START, key === START));
 $("load").addEventListener("click", () => {
   pause();
   loom.setDeck(presetDeck(preset.value));
   loom.reset();
   selected = 0;
-  say(`Loaded: ${PRESETS[preset.value].label}. The loom is back at the first card.`);
+  say(`Loaded: ${t(PRESETS[preset.value].name)}. The loom is back at the first card.`);
   invalidate();
 });
 
@@ -161,7 +163,7 @@ on("unfollow", () => setFollow(null));
 on("fwd", () => {
   pause();
   const r = loom.stepForward();
-  say(r.ok ? `Step: ${r.message}` : r.reason, !r.ok);
+  say(r.ok ? msg("status.step", { what: r.message }) : r.reason, !r.ok);
   invalidate();
 });
 on("back", () => {
@@ -191,7 +193,7 @@ on("play", () => {
   }
   const can = loom.phi === 0 ? loom.canStart() : { ok: true };
   if (!can.ok) {
-    say(/** @type {{ reason: string }} */ (can).reason, true);
+    say(/** @type {{ reason: Msg }} */ (can).reason, true);
     return;
   }
   playing = true;
@@ -201,7 +203,7 @@ on("play", () => {
 });
 
 // The stops of one pick, as a strip that shows where the loom is.
-$("stops").innerHTML = STOP_NAMES.map((n, i) => `<li data-stop="${i}">${n}</li>`).join("");
+$("stops").innerHTML = STOP_KEYS.map((k, i) => `<li data-stop="${i}">${t(k)}</li>`).join("");
 
 // ---- drawing: at once after every action; every frame only while playing ------------------
 function invalidate() {

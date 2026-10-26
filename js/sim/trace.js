@@ -3,8 +3,10 @@
 // tie(e) in it, the needle that reads that hole, the hook, its knife, its harness cords
 // and the warp ends they lift. Every panel highlights what this returns, so they agree.
 
+import { msg } from "../l10n/l10n.js";
 import { cardForPick, cardIndexForPick, holeOfHook } from "./deck.js";
 import { endsOfHook, hookOfEnd } from "./tieup.js";
+/** @import { Msg } from "../l10n/l10n.js" */
 /** @import { Snapshot } from "./loom.js" */
 
 /**
@@ -23,7 +25,7 @@ import { endsOfHook, hookOfEnd } from "./tieup.js";
  * @property {number | null} cardIndex the chain index of that pick's card
  * @property {boolean | null} hole whether that card has the hook's hole punched
  * @property {boolean | null} cell the cloth at (pick, end): true = warp over, null if not woven
- * @property {string} text the trace in words
+ * @property {Msg} text the trace, to be put into words
  */
 
 /**
@@ -52,17 +54,17 @@ export function traceOf(snap, f) {
   const card = cardForPick(deck, p);
   const hole = card ? card[f.hook] : null;
   const cell = pick !== null && f.end !== null && pick < snap.cloth.length ? snap.cloth[pick][f.end - 1] : null;
-  const n = f.hook + 1;
-  const where = `column ${column + 1}, row ${row + 1}`;
-  const endList = ends.length === 1 ? `${ends[0]}` : `${ends.slice(0, -1).join(", ")} and ${ends[ends.length - 1]}`;
-  const cords = ends.length === 1 ? `its harness cord lifts end ${ends[0]}` : `its ${ends.length} harness cords lift ends ${endList}`;
+  const at = { hook: f.hook + 1, column: column + 1, row: row + 1 };
+  const cords = msg("trace.cords", { ends }, ends.length);
+  /** @type {Msg} */
   let text;
   if (cardIndex === null || hole === null) {
-    text = `Hook ${n}: hole ${n} of each card (${where}); needle ${row + 1} of cross-row ${column + 1}; knife ${row + 1}; ${cords}.`;
-  } else if (hole) {
-    text = `${pick === null ? "This pick" : `Pick ${pick + 1}`}: card ${cardIndex + 1} has hole ${n} punched (${where}), so needle ${row + 1} of cross-row ${column + 1} goes into the cylinder, hook ${n} stays over knife ${row + 1} and is lifted, and ${cords}${f.end !== null ? `: end ${f.end} lies over the weft (1)` : ""}.`;
+    text = msg("trace.hook", { ...at, cords });
   } else {
-    text = `${pick === null ? "This pick" : `Pick ${pick + 1}`}: card ${cardIndex + 1} is blank at hole ${n} (${where}), so needle ${row + 1} of cross-row ${column + 1} is pushed back, hook ${n} is pushed off knife ${row + 1} and stays down, and ${ends.length === 1 ? `end ${ends[0]} stays` : `ends ${endList} stay`} down${f.end !== null ? `: the weft lies over end ${f.end} (0)` : ""}.`;
+    const when = pick === null ? msg("trace.thisPick") : msg("trace.pick", { pick: pick + 1 });
+    const common = { ...at, when, card: cardIndex + 1 };
+    if (hole) text = f.end !== null ? msg("trace.lifted.end", { ...common, cords, end: f.end }) : msg("trace.lifted", { ...common, cords });
+    else text = f.end !== null ? msg("trace.down.end", { ...common, ends, end: f.end }, ends.length) : msg("trace.down", { ...common, ends }, ends.length);
   }
   return { hook: f.hook, column, row, ends, end: f.end, pick, cardIndex, hole, cell, text };
 }
