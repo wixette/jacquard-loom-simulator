@@ -4,7 +4,7 @@ What changed in each release. Versions follow `package.json` and are tagged `vX.
 
 ## Unreleased
 
-Nothing yet.
+- The main app's design revised (2026-10-27): it replaces the prototype learner page at `index.html`; a six-part tutorial instead of lessons; the sibling Stepped Reckoner's dark theme, ten languages, components and sounds; the tutorial and the games on looms of their own; three releases, 0.1.0, 0.2.0 and 1.0.0 ([design/public-app.md](design/public-app.md), [design/ui-layout.md](design/ui-layout.md), [docs/ui-design.md](docs/ui-design.md)).
 
 ## 0.0.1
 
