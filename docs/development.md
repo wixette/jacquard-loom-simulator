@@ -23,7 +23,7 @@ Pages cannot be opened from `file://`, because browsers do not load modules from
 |---|---|---|
 | `?lesson=L3` | `dev/03-learner/` | Open a lesson (L1 to L10) |
 | `?view=3d` | `dev/03-learner/` | Open the mechanism pane on the parts in 3D |
-| `#…` (a copied link) | `dev/03-learner/`, `dev/02-loom/` | Open the loom with those cards, at that moment (`js/sim/link.js`; the main app's links are designed in M5 and frozen from 0.1.0) |
+| `#v=2&…` (a copied link) | `dev/03-learner/`, `dev/02-loom/` | Open the loom with those cards, at that moment, in the format the main app will use ([design/links.md](../design/links.md), a contract from 0.1.0) |
 | `?text=…&mode=damask` or `direct` | `dev/06-name-game/` | Open the name game with that text |
 | `?selftest` | every page | Run the page's acceptance checks and show the results |
 

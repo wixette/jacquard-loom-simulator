@@ -22,7 +22,7 @@ if (selftestRequested()) selftest();
 async function selftest() {
   const t0 = performance.now();
   /** @type {CheckResult[]} */
-  const results = [...runM0Checks(), ...runM1Checks(), ...runM2Checks(), ...runM2PageChecks(learner)];
+  const results = [...runM0Checks(), ...(await runM1Checks()), ...runM2Checks(), ...runM2PageChecks(learner)];
   const viewButtons = /** @type {HTMLElement[]} */ ([...document.querySelectorAll("[data-view]")]);
   const dockButtons = /** @type {HTMLElement[]} */ ([...document.querySelectorAll("[data-dock]")]);
   results.push(

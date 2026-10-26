@@ -172,8 +172,25 @@ export default {
   "status.unfollowed": "No thread followed.",
   "status.linkCopied": "Link copied: it opens the loom with these cards, at this moment.",
   "status.linkReady": "Link ready in the address bar: {n} characters.",
+  "status.linkLong": "Link copied ({n} characters): some email programs and chat apps cut links this long.",
   "status.linkOpened.one": "Opened from a link: {n} card on a {hooks}-hook head, {tie}.",
   "status.linkOpened.other": "Opened from a link: {n} cards on a {hooks}-hook head, {tie}.",
+
+  // ---- links (js/sim/link.js) ----------------------------------------------------------------
+  "link.cannot": "This link cannot be read: {why}.",
+  "link.noVersion": "it has no format version (v)",
+  "link.prototype": "it was made by the simulator's prototype, whose links are no longer read",
+  "link.version": "it is of format {v}, and this version of the simulator reads format {mine}",
+  "link.step": "\"{step}\" is not the name of a step",
+  "link.colour": "a colour should be 6 hex digits",
+  "link.value": "{field} cannot be \"{value}\"",
+  "link.headOnly": "it gives a head (h) but no cards (c)",
+  "link.hooks": "a head has 8, 16, … 64 hooks, not \"{h}\"",
+  "link.card": "card {card} should be {digits} hex digits for {hooks} hooks",
+  "link.deck": "its cards (c) cannot be read",
+  "link.tooMany": "it has {n} cards, and a chain holds at most {max}",
+  "link.range": "a number in it is out of range",
+  "link.follow": "the thread it follows does not hold together (f, fe and fp)",
 
   // ---- the loom in 3D ---------------------------------------------------------------------------
   "units.loading": "Loading the loom in 3D… {percent} %",

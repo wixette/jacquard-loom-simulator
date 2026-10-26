@@ -183,7 +183,7 @@ export class FacingCard {
     // pass for holes.
     const pr = U.pegDiameter / 2000;
     const peg = new THREE.CylinderGeometry(pr, pr, 0.003, 18).rotateZ(-Math.PI / 2);
-    this.pegs = new THREE.InstancedMesh(peg, new THREE.MeshStandardMaterial({ color: 0xc9922f, metalness: 1, roughness: 0.3 }), 2);
+    this.pegs = new THREE.InstancedMesh(peg, new THREE.MeshStandardMaterial({ color: 0xc9922f, metalness: 1, roughness: 0.3 }), 2); // not a theme colour: the models' brass (blender/scripts/lib/bl.py)
     this.pegs.userData.label_en = "the cylinder's pegs, through the card's peg holes: they keep every hole on its bore";
     this.ring = new THREE.Mesh(new THREE.TorusGeometry(r + 0.0009, 0.00045, 6, 24).rotateY(Math.PI / 2), new THREE.MeshStandardMaterial({ color: token("--md-primary", "#9ecaff"), roughness: 0.5 }));
     this.group.add(this.card, this.holes, this.blanks, this.pegs, this.ring);
@@ -261,7 +261,7 @@ export class CylinderPegs {
   /** @param {THREE.Object3D} prism the node "cylinder.prism" (its origin is the prism's centre) */
   constructor(prism) {
     const r = U.pegDiameter / 2000;
-    this.mesh = new THREE.InstancedMesh(new THREE.CylinderGeometry(r, r, 0.006, 16), new THREE.MeshStandardMaterial({ color: 0xc9922f, metalness: 1, roughness: 0.3 }), 8);
+    this.mesh = new THREE.InstancedMesh(new THREE.CylinderGeometry(r, r, 0.006, 16), new THREE.MeshStandardMaterial({ color: 0xc9922f, metalness: 1, roughness: 0.3 }), 8); // not a theme colour: the models' brass (blender/scripts/lib/bl.py)
     this.mesh.name = "cylinder-pegs";
     this.mesh.userData.label_en = "the cylinder's pegs: they pass through the card's peg holes, so every hole lands on its bore";
     prism.add(this.mesh);

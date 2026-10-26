@@ -5,7 +5,7 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { runM1Checks } from "../../js/accept/m1Checks.js";
 
-const results = runM1Checks();
+const results = await runM1Checks();
 const IDS = ["J1-1", "J1-2", "J1-3", "J1-4", "J1-5", "J1-6", "J1-7", "J1-8", "J1-9", "J1-10", "J1-11", "J1-12"];
 
 describe("M1 acceptance (the whole loom in 2D)", () => {

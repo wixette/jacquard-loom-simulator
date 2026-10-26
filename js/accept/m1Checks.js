@@ -21,7 +21,7 @@ import {
   setLoop,
   toggleHole,
 } from "../sim/deck.js";
-import { decodeLink, encodeLink } from "../sim/link.js";
+import { decodeLink, DEFAULT_LINK, encodeLink } from "../sim/link.js";
 import { Loom, POSITIONS, STOP_KEYS, STOPS } from "../sim/loom.js";
 import { P } from "../sim/params.js";
 import { endCount, hookOfEnd, rowOfCard } from "../sim/tieup.js";
@@ -34,7 +34,7 @@ import { sideLayout } from "../view2d/sideView.js";
 import { fmt, insideConvex, result } from "./harness.js";
 /** @import { CheckResult } from "./harness.js" */
 /** @import { Deck } from "../sim/deck.js" */
-/** @import { LinkState } from "../sim/link.js" */
+/** @import { AppLink } from "../sim/link.js" */
 /** @import { Tie } from "../sim/tieup.js" */
 
 /** Positions in the drawings must match the simulation to within this (mm or drawing units). */
@@ -252,8 +252,13 @@ function trace() {
   return result("J1-6", "Every cloth cell traces to its card, hole, cross-row, hook and ends, and the hole's bit is the cell's", bad.length === 0, bad.slice(0, 3).join("; ") || `${n} cells over 5 ties`);
 }
 
-/** @returns {CheckResult} */
-function links() {
+/**
+ * J1-7, with the main app's link format since M5 (design/links.md): a loom round-trips through
+ * a link, the format's example reads as documented, and a broken link is refused with a
+ * reason. (The prototype's own format, v=1, is gone; tests/sim/link.test.js pins the new one.)
+ * @returns {Promise<CheckResult>}
+ */
+async function links() {
   /** @type {string[]} */
   const bad = [];
   const rand = rng(41);
@@ -261,35 +266,35 @@ function links() {
   for (let i = 0; i < 60; i++) {
     const hooks = HOOK_COUNTS[Math.floor(rand() * HOOK_COUNTS.length)];
     const hex = () => `#${Math.floor(rand() * 0xffffff).toString(16).padStart(6, "0")}`;
-    /** @type {LinkState} */
-    const s = {
-      hooks,
+    /** @type {AppLink} */
+    const l = {
+      ...DEFAULT_LINK,
+      deck: { hooks, cards: randomDeck(rand, hooks, Math.floor(rand() * 12), true).cards, loop: rand() < 0.5 },
       tie: TIES[Math.floor(rand() * TIES.length)],
-      loop: rand() < 0.5,
       warp: hex(),
       weft: hex(),
-      cards: randomDeck(rand, hooks, Math.floor(rand() * 12), true).cards,
       pick: Math.floor(rand() * 50),
       stop: Math.floor(rand() * POSITIONS.length),
-      crossRow: Math.floor(rand() * (hooks / 8)),
-      follow: rand() < 0.5 ? null : Math.floor(rand() * hooks),
+      // a cross-row other than the followed hook's (always in the first), or none
+      crossRow: hooks > 8 && rand() < 0.5 ? 1 + Math.floor(rand() * (hooks / 8 - 1)) : null,
+      follow: rand() < 0.5 ? null : { hook: Math.floor(rand() * 8), end: null, pick: null },
       face: rand() < 0.5 ? "front" : "back",
     };
-    const back = decodeLink(encodeLink(s));
+    const back = await decodeLink(await encodeLink(l));
     n++;
-    if (!back.ok) bad.push(`round trip ${i + 1}: ${back.reason}`);
-    else if (JSON.stringify(back.state) !== JSON.stringify(s)) bad.push(`round trip ${i + 1} differs`);
+    if (!back.ok) bad.push(`round trip ${i + 1}: ${say(back.reason, "en")}`);
+    else if (JSON.stringify(back.link) !== JSON.stringify(l)) bad.push(`round trip ${i + 1} differs`);
   }
-  // The documented example (js/sim/link.js) is part of the contract.
-  const ex = decodeLink("#v=1&h=16&t=s1&l=1&wc=5b3f8c&fc=efe3c2&d=a5a5-5a5a&p=3&s=2&x=1&f=5&face=front");
-  const want = { hooks: 16, tie: { kind: "straight", repeats: 1 }, loop: true, warp: "#5b3f8c", weft: "#efe3c2", cards: [bitsOf("1010010110100101"), bitsOf("0101101001011010")], pick: 3, stop: 2, crossRow: 0, follow: 4, face: "front" };
-  if (!ex.ok || JSON.stringify(ex.state) !== JSON.stringify(want)) bad.push(`the documented example reads as ${JSON.stringify(ex)}`);
-  const broken = ["", "#v=2&h=8&d=", "#v=1&h=12&d=", "#v=1&h=8&d=zz", "#v=1&h=8&d=ff&t=q", "#v=1&h=8&d=ff&wc=red", "#v=1&h=8&d=ff&p=-1", "#v=1&h=8&d=ff&x=2", "#v=1&h=8&d=ff&face=side", "#v=1&h=8"];
+  // The format's example (design/links.md) is part of the contract.
+  const ex = await decodeLink("#v=2&w=weave&h=16&c=x.a5a5-5a5a&p=3&s=2&f=5");
+  const want = { ...DEFAULT_LINK, deck: { hooks: 16, cards: [bitsOf("1010010110100101"), bitsOf("0101101001011010")], loop: true }, pick: 3, stop: 2, follow: { hook: 4, end: null, pick: null } };
+  if (!ex.ok || JSON.stringify(ex.link) !== JSON.stringify(want)) bad.push(`the documented example reads as ${JSON.stringify(ex)}`);
+  const broken = ["", "#v=1&h=8&d=ff", "#v=2&h=12&c=x.", "#v=2&h=8&c=x.zz", "#v=2&h=8&c=x.ff&t=q", "#v=2&h=8&c=x.ff&wc=red", "#v=2&h=8&c=x.ff&p=-1", "#v=2&h=8&c=x.ff&x=2", "#v=2&h=8&c=x.ff&face=side", "#v=2&h=8"];
   for (const b of broken) {
     try {
-      const r = decodeLink(b);
+      const r = await decodeLink(b);
       if (r.ok) bad.push(`"${b}" was accepted`);
-      else if (!r.reason.startsWith("This link cannot be read")) bad.push(`"${b}": ${r.reason}`);
+      else if (!say(r.reason, "en").startsWith("This link cannot be read")) bad.push(`"${b}": ${say(r.reason, "en")}`);
     } catch (e) {
       bad.push(`"${b}" threw ${e}`);
     }
@@ -609,9 +614,9 @@ function chainContinuity() {
 }
 
 /**
- * Every M1 check.
- * @returns {CheckResult[]}
+ * Every M1 check (asynchronous since links are: design/links.md).
+ * @returns {Promise<CheckResult[]>}
  */
-export function runM1Checks() {
-  return [cardAddressing(), everyCrossRow(), tiesInFront(), editsKeepCloth(), wovenCloth(), trace(), links(), frontShed(), sideShed(), bigHeadSteps(), cylinderFaces(), chainContinuity()];
+export async function runM1Checks() {
+  return [cardAddressing(), everyCrossRow(), tiesInFront(), editsKeepCloth(), wovenCloth(), trace(), await links(), frontShed(), sideShed(), bigHeadSteps(), cylinderFaces(), chainContinuity()];
 }

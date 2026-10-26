@@ -44,7 +44,7 @@ export function clothCells(snap, face) {
 function shade(hex, k) {
   const n = parseInt(hex.slice(1), 16);
   const ch = [(n >> 16) & 255, (n >> 8) & 255, n & 255].map((c) => Math.round(k >= 0 ? c + (255 - c) * k : c * (1 + k)));
-  return `rgb(${ch[0]},${ch[1]},${ch[2]})`;
+  return `rgb(${ch[0]},${ch[1]},${ch[2]})`; // not a theme colour: a shade of the learner's own colour
 }
 
 /** At most this many rows are drawn, the newest. */
@@ -162,7 +162,7 @@ export class ClothView {
         g.fillRect(x, y, cell - (cell > 5 ? 1 : 0), cell - (cell > 5 ? 1 : 0));
         if (o.bits && cell >= 12) {
           g.globalAlpha = 1;
-          g.fillStyle = c.warpOver ? "rgba(255,255,255,0.85)" : "rgba(60,40,10,0.7)";
+          g.fillStyle = c.warpOver ? "rgba(255,255,255,0.85)" : "rgba(60,40,10,0.7)"; // not a theme colour: the bits are read on the learner's own colours
           g.font = `${Math.round(cell * 0.6)}px ui-monospace, Menlo, monospace`;
           g.textAlign = "center";
           g.textBaseline = "middle";

@@ -1,0 +1,127 @@
+// The store and the looms (design/m5-notes.md): F-1, a watcher is told of a change only when
+// what it watches has changed, once per action, and an action that changes nothing tells no
+// one; F-2, the looms are apart.
+
+import assert from "node:assert/strict";
+import { describe, it } from "node:test";
+import * as act from "../../js/app/looms.js";
+import { appState, LOOM_IDS } from "../../js/app/looms.js";
+import { Store } from "../../js/app/store.js";
+/** @import { AppState, LoomId } from "../../js/app/looms.js" */
+
+/** A store at the app's start, and a count of what each watcher heard. */
+function setup() {
+  const store = new Store(appState());
+  /** @type {Record<string, number>} */
+  const heard = {};
+  /**
+   * @param {string} name
+   * @param {(s: AppState) => readonly unknown[]} select
+   */
+  const listen = (name, select) => {
+    heard[name] = 0;
+    return store.watch(select, () => heard[name]++);
+  };
+  return { store, heard, listen };
+}
+
+/** @param {AppState} s @param {LoomId} id */
+const loomParts = (s, id) => [s.looms[id].loom, s.looms[id].rev, s.looms[id].follow, s.looms[id].selected];
+
+describe("the store tells a watcher only of what it watches (F-1)", () => {
+  it("one action, one telling, to the watchers whose part changed", () => {
+    const { store, heard, listen } = setup();
+    listen("mine", (s) => loomParts(s, "mine"));
+    listen("status", (s) => [s.looms.mine.status]);
+    listen("tutorial", (s) => loomParts(s, "tutorial"));
+    listen("view", (s) => [s.sectionView]);
+    act.step(store);
+    assert.deepEqual(heard, { mine: 1, status: 1, tutorial: 0, view: 0 });
+    act.setSectionView(store, "needles");
+    assert.deepEqual(heard, { mine: 1, status: 1, tutorial: 0, view: 1 });
+    act.say(store, { text: "hello" });
+    assert.deepEqual(heard, { mine: 1, status: 2, tutorial: 0, view: 1 }, "saying something is not a change of the loom");
+  });
+
+  it("an action that changes nothing tells no one", () => {
+    const { store, heard, listen } = setup();
+    listen("all", (s) => [s.looms, s.current, s.sectionView, s.locale]);
+    const changes = store.changes;
+    act.select(store, 0); // already selected
+    act.move(store, -1); // the first card cannot move earlier
+    act.setSpeed(store, store.state.looms.mine.speed);
+    act.setSectionView(store, "whole");
+    act.setFace(store, "front");
+    act.setBits(store, false);
+    act.lace(store, store.state.looms.mine.loom.deck.loop);
+    act.setColours(store, { warp: store.state.looms.mine.warp });
+    act.pause(store); // not playing
+    act.setTie(store, store.state.looms.mine.loom.tie);
+    act.setHooks(store, store.state.looms.mine.loom.deck.hooks);
+    assert.equal(heard.all, 0);
+    assert.equal(store.changes, changes);
+  });
+
+  it("a refused step changes the status line, not the loom", () => {
+    const { store, heard, listen } = setup();
+    act.stepBack(store); // at the start: refused
+    listen("loom", (s) => [s.looms.mine.rev]);
+    const before = store.state.looms.mine.rev;
+    act.stepBack(store);
+    assert.equal(store.state.looms.mine.rev, before);
+    assert.equal(store.state.looms.mine.status.warn, true);
+    assert.equal(heard.loom, 0);
+  });
+
+  it("an unwatched watcher hears nothing more", () => {
+    const { store, heard, listen } = setup();
+    const stop = listen("mine", (s) => loomParts(s, "mine"));
+    act.step(store);
+    stop();
+    act.step(store);
+    assert.equal(heard.mine, 1);
+  });
+});
+
+describe("the looms are apart (F-2)", () => {
+  for (const id of LOOM_IDS) {
+    it(`what is done to the ${id} loom leaves the others as they were`, () => {
+      const { store } = setup();
+      const others = LOOM_IDS.filter((o) => o !== id);
+      const before = Object.fromEntries(others.map((o) => [o, store.state.looms[o]]));
+      const decks = Object.fromEntries(others.map((o) => [o, JSON.stringify(store.state.looms[o].loom.deck)]));
+      act.loadPreset(store, "twill", id);
+      act.add(store, id);
+      act.punch(store, 0, 3, id);
+      for (let i = 0; i < 9; i++) act.step(store, id);
+      act.stepBack(store, id);
+      act.followHook(store, 2, id);
+      act.setHooks(store, 24, id);
+      act.setFace(store, "back", id);
+      act.say(store, { text: "only here" }, false, id);
+      for (const o of others) {
+        assert.equal(store.state.looms[o], before[o], `${o} was replaced`);
+        assert.equal(JSON.stringify(store.state.looms[o].loom.deck), decks[o], `${o}'s cards changed`);
+        assert.equal(store.state.looms[o].loom.pick, 0);
+      }
+      assert.equal(store.state.looms[id].loom.deck.hooks, 24);
+    });
+  }
+
+  it("the actions act on the current loom unless told which", () => {
+    const { store } = setup();
+    act.setCurrent(store, "tutorial");
+    act.step(store);
+    assert.ok(store.state.looms.tutorial.loom.phi > 0);
+    assert.equal(store.state.looms.mine.loom.phi, 0);
+  });
+
+  it("playing runs only the looms that play", () => {
+    const { store } = setup();
+    act.play(store, "game");
+    act.tick(store, 1);
+    assert.ok(store.state.looms.game.loom.phi > 0 || store.state.looms.game.loom.pick > 0);
+    assert.equal(store.state.looms.mine.loom.phi, 0);
+    assert.equal(store.state.looms.tutorial.loom.phi, 0);
+  });
+});

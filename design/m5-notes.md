@@ -15,7 +15,7 @@
 | The store | `js/app/store.js`, `js/app/looms.js` | One state for the whole app: the looms (the learner's, the tutorial's, a game's), each with its cards, its moment, the card selected, the thread followed, its colours and its status line; the language; the section's view. Every change goes through an action, and every component hears of the changes it shows |
 | The components of the app | `js/app/components/` | Each view and panel as `mount(host)`, `update(state, before)`, `unmount()`, drawing to its host's size: the section, the side and front views, the 3D loom and units, the cloth, the chain, the bench card, the transport, the status line and the trace |
 | The prototypes on the new code | `js/app/loomPage.js` | The prototype pages that share the loom (`dev/02-loom/`, `dev/03-learner/`) run on the store and the components, and their checks still pass |
-| The links | `js/sim/link.js`, `design/links.md` | Every link type the app will publish, designed now and frozen from 0.1.0 (after review) |
+| The links |  `js/sim/link.js`, [links.md](links.md) | Every link type the app will publish, designed now and frozen from 0.1.0 (after review) |
 
 ## Decisions
 

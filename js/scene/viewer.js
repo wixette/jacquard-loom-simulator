@@ -23,7 +23,7 @@ function studioEnvironment() {
   for (let i = 0; i < pos.count; i++) {
     const h = pos.getY(i) / 10; // -1 (floor) .. 1 (top)
     const v = h >= 0 ? 0.38 + 0.32 * h : 0.38 - 0.16 * h * h; // a mid-grey table below, not a black floor
-    c.setRGB(v * 1.04, v, v * 0.92);
+    c.setRGB(v * 1.04, v, v * 0.92); // not a theme colour: the studio's light, reflected by the metals
     colours.push(c.r, c.g, c.b);
   }
   dome.setAttribute("color", new THREE.Float32BufferAttribute(colours, 3));
@@ -36,7 +36,7 @@ function studioEnvironment() {
    */
   const box = (w, h, intensity, p) => {
     const m = new THREE.MeshBasicMaterial({ side: THREE.DoubleSide });
-    m.color.setScalar(intensity);
+    m.color.setScalar(intensity); // not a theme colour: a softbox's brightness
     const b = new THREE.Mesh(new THREE.PlaneGeometry(w, h), m);
     b.position.set(...p);
     b.lookAt(0, 0, 0);
@@ -51,7 +51,7 @@ function studioEnvironment() {
 }
 
 /** The overlays' materials (by their name in the glTF) and the theme tokens they take. */
-const OVERLAYS = /** @type {Record<string, [string, string]>} */ ({ ghost: ["--ghost-3d", "#8a96a6"], band: ["--band-3d", "#7fa6d6"] });
+const OVERLAYS = /** @type {Record<string, [string, string]>} */ ({ ghost: ["--ghost-3d", "#8a96a6"], band: ["--band-3d", "#7fa6d6"] }); // not a theme colour: fallbacks, for a page without the theme
 
 /** The lights that keep dark parts visible on the dark stage: rim, fill and sky (intensities). */
 const RIM = 2.2;
@@ -154,7 +154,7 @@ export class Viewer {
     });
     this.scene.background = null;
 
-    const key = new THREE.DirectionalLight(0xfff4e6, 1.2);
+    const key = new THREE.DirectionalLight(0xfff4e6, 1.2); // not a theme colour: the lights' colour temperature
     key.position.set(0.25, 0.45, 0.3);
     key.castShadow = true;
     key.shadow.mapSize.set(2048, 2048);
@@ -171,15 +171,15 @@ export class Viewer {
     // the camera wherever it is turned: a cool rim from behind the parts, which draws their
     // outlines, and a soft fill from the viewer's side, which lifts the iron's dark faces.
     this.scene.add(this.camera);
-    const rim = new THREE.DirectionalLight(0xd6e6ff, RIM);
+    const rim = new THREE.DirectionalLight(0xd6e6ff, RIM); // not a theme colour: the lights' colour temperature
     rim.position.set(0.35, 0.6, -1);
     rim.target = this.camera;
     this.camera.add(rim);
-    const fill = new THREE.DirectionalLight(0xffffff, FILL);
+    const fill = new THREE.DirectionalLight(0xffffff, FILL); // not a theme colour: the lights' colour temperature
     fill.position.set(-0.3, 0.2, 1);
     fill.target = this.camera;
     this.camera.add(fill);
-    this.scene.add(new THREE.HemisphereLight(0xc8d8ec, 0x2a2018, HEMI));
+    this.scene.add(new THREE.HemisphereLight(0xc8d8ec, 0x2a2018, HEMI)); // not a theme colour: the sky's and the floor's light
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
     this.controls.target.set(0, 0.09, 0.2);
     this.controls.enableDamping = true;

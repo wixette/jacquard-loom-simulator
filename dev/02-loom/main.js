@@ -12,7 +12,7 @@ createLoomPage();
 
 if (selftestRequested()) {
   const t0 = performance.now();
-  const results = [...runM0Checks(), ...runM1Checks()];
+  const results = [...runM0Checks(), ...(await runM1Checks())];
   // The labels as shown, in each view of the section (then back to the view the page had).
   const viewButtons = /** @type {HTMLElement[]} */ ([...document.querySelectorAll("[data-view]")]);
   const was = viewButtons.find((b) => b.classList.contains("on")) ?? viewButtons[0];

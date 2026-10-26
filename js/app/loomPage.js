@@ -7,7 +7,7 @@
 
 import { say as words, t, tn } from "../l10n/l10n.js";
 import { HOOK_COUNTS, PRESETS } from "../sim/deck.js";
-import { decodeLink, encodeLink } from "../sim/link.js";
+import { decodeLink, encodeLink, LONG_LINK } from "../sim/link.js";
 import { Loom, POSITIONS, STOP_KEYS, STOPS } from "../sim/loom.js";
 import { endCount, tieLabel } from "../sim/tieup.js";
 import { traceOf } from "../sim/trace.js";
@@ -152,8 +152,8 @@ export function createLoomPage(options = {}) {
   }
   store.watch((s) => [s.looms.mine, s.sectionView], sync);
 
-  // ---- links --------------------------------------------------------------------------------
-  on("share", () => {
+  // ---- links (design/links.md) ---------------------------------------------------------------
+  on("share", async () => {
     act.pause(store);
     const ls = mine();
     const { loom } = ls;
@@ -164,30 +164,46 @@ export function createLoomPage(options = {}) {
       s = POSITIONS.indexOf(before[before.length - 1]);
       act.moveTo(store, loom.pick, POSITIONS[s]);
     }
-    const fragment = encodeLink({ hooks: loom.deck.hooks, tie: loom.tie, loop: loom.deck.loop, warp: ls.warp, weft: ls.weft, cards: loom.deck.cards, pick: loom.pick, stop: s, crossRow: ls.crossRow, follow: ls.follow ? ls.follow.hook : null, face: ls.face });
+    const fragment = await encodeLink({
+      deck: loom.deck,
+      tie: loom.tie,
+      pick: loom.pick,
+      stop: s,
+      follow: ls.follow,
+      crossRow: ls.crossRow,
+      warp: ls.warp,
+      weft: ls.weft,
+      face: ls.face,
+      bits: ls.bits,
+      sectionView: store.state.sectionView,
+    });
     history.replaceState(null, "", `#${fragment}`);
     const url = location.href;
+    const copied = url.length > LONG_LINK ? { key: "status.linkLong", params: { n: url.length } } : { key: "status.linkCopied" };
     navigator.clipboard?.writeText(url).then(
-      () => act.say(store, { key: "status.linkCopied" }),
+      () => act.say(store, copied),
       () => act.say(store, { key: "status.linkReady", params: { n: url.length } }),
     );
   });
 
-  function openLink() {
+  async function openLink() {
     if (!location.hash || location.hash === "#") return;
-    const r = decodeLink(location.hash);
+    const r = await decodeLink(location.hash);
     if (!r.ok) {
-      act.say(store, { text: r.reason }, true);
+      act.say(store, r.reason, true);
       return;
     }
-    const s = r.state;
-    const deck = { hooks: s.hooks, cards: s.cards, loop: s.loop };
-    act.open(store, { deck, tie: s.tie, follow: s.follow === null ? null : { hook: s.follow, end: null, pick: null } });
-    if ((s.pick > 0 || s.stop > 0) && s.cards.length > 0 && (s.loop || s.pick < s.cards.length)) act.moveTo(store, s.pick, POSITIONS[s.stop]);
-    act.setColours(store, { warp: s.warp, weft: s.weft });
-    act.setCrossRow(store, s.crossRow);
-    act.setFace(store, s.face);
-    act.say(store, { key: "status.linkOpened", n: s.cards.length, params: { hooks: s.hooks, tie: tieLabel(s.tie) } });
+    const l = r.link;
+    if (l.deck) {
+      act.open(store, { deck: l.deck, tie: l.tie, follow: l.follow });
+      if ((l.pick > 0 || l.stop > 0) && l.deck.cards.length > 0 && (l.deck.loop || l.pick < l.deck.cards.length)) act.moveTo(store, l.pick, POSITIONS[l.stop]);
+      if (l.crossRow !== null) act.setCrossRow(store, l.crossRow);
+    }
+    act.setColours(store, { warp: l.warp, weft: l.weft });
+    act.setFace(store, l.face);
+    act.setBits(store, l.bits);
+    act.setSectionView(store, l.sectionView);
+    if (l.deck) act.say(store, { key: "status.linkOpened", n: l.deck.cards.length, params: { hooks: l.deck.hooks, tie: tieLabel(l.tie) } });
   }
   openLink();
   window.addEventListener("hashchange", openLink);
