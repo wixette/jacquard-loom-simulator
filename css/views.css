@@ -1,0 +1,134 @@
+/* The drawings: the head in section, the loom from the side and the front, the card on the bench,
+   the chain, the cloth's box, and the 3D views' overlays, in the theme's materials
+   (css/theme.css). Shared by the main app and the developer pages. A part's state is shown in
+   its own material, brighter where it acts; the followed thread is the instrument's blue. */
+
+.canvas-host { background: var(--stage-bg); border-radius: var(--radius-s); }
+
+/* ---- the head in section ------------------------------------------------------------------- */
+svg.section .wood { fill: var(--wood); stroke: var(--wood-edge); stroke-width: 0.6; }
+svg.section .board-face { fill-opacity: 0.85; }
+svg.section .griffe-frame { fill: var(--ghost-fill); stroke: var(--ghost-line); stroke-width: 0.6; stroke-dasharray: 3 2; }
+svg.section .knife { fill: var(--iron); }
+svg.section .knife.follow { fill: var(--md-primary); }
+svg.section .hook { fill: none; stroke: var(--steel); stroke-linejoin: round; stroke-linecap: round; cursor: pointer; }
+svg.section .hook.selected { stroke: color-mix(in srgb, var(--steel-act) 55%, var(--steel)); }
+svg.section .hook.caught { stroke: var(--steel-act); }
+svg.section .hook.follow { stroke: var(--md-primary); }
+svg.section .hook.rester { opacity: 0.6; }
+svg.section .needle { stroke: color-mix(in srgb, var(--steel-act) 70%, var(--steel)); stroke-width: 1.7; stroke-linecap: round; cursor: pointer; }
+svg.section .needle.pushed { stroke: var(--steel); }
+svg.section .needle.follow { stroke: var(--md-primary); }
+svg.section .eye { fill: none; stroke: color-mix(in srgb, var(--steel-act) 70%, var(--steel)); stroke-width: 0.9; cursor: pointer; }
+svg.section .eye.follow { stroke: var(--md-primary); }
+svg.section .spring { fill: none; stroke: var(--brass); stroke-width: 0.7; }
+svg.section .spring.follow { stroke: var(--md-primary); }
+svg.section .cylinder { fill: var(--wood); stroke: var(--wood-edge); stroke-width: 0.8; }
+svg.section .axle { fill: var(--wood-dark); }
+svg.section .bore { fill: var(--hole); }
+svg.section .card { stroke: var(--paste-dim); stroke-width: 1.6; }
+svg.section .card.facing { stroke: var(--paste-act); }
+svg.section .card-strip { fill: var(--paste-dim); stroke: var(--paste-edge); stroke-width: 0.6; }
+svg.section .card-strip.facing { fill: var(--paste-act); stroke: var(--paste-edge); stroke-width: 0.8; }
+svg.section .card-mark { fill: var(--blank); stroke: var(--paste-edge); stroke-width: 0.6; }
+svg.section .card-mark.punched { fill: var(--hole); stroke: var(--hole); }
+svg.section .face-num { fill: var(--paste); font-weight: 700; font-family: var(--font); }
+svg.section .face-num.facing { fill: var(--paste-act); }
+svg.section .face-num.none { fill: var(--paste-dim); font-weight: 500; }
+svg.section .face-bare { stroke: var(--paste-dim); stroke-width: 0.9; stroke-dasharray: 2.5 1.8; }
+svg.section .face-num.outside { fill: var(--label); font-weight: 600; }
+svg.section .lace { fill: var(--wood-dark); }
+svg.section .chain-more { fill: none; stroke: var(--paste-dim); stroke-width: 1.4; stroke-dasharray: 3 3; stroke-linecap: round; }
+svg.section .turn-arrow { fill: none; stroke: var(--label); stroke-width: 1.4; stroke-linecap: round; }
+svg.section .turn-head { fill: var(--label); }
+svg.section .hole { fill: var(--hole); }
+svg.section .cord { stroke: var(--cord); stroke-width: 0.8; cursor: pointer; }
+svg.section .cord.follow { stroke: var(--md-primary); stroke-width: 1.4; }
+svg.section .mail { fill: var(--brass); stroke: color-mix(in srgb, var(--brass) 60%, black); stroke-width: 0.8; cursor: pointer; }
+svg.section .mail.up { fill: var(--brass-act); stroke: var(--brass); }
+svg.section .mail.follow { stroke: var(--md-primary); stroke-width: 1.6; }
+svg.section .warp { fill: var(--thread); }
+svg.section .lingo { fill: var(--lead); cursor: pointer; }
+svg.section .lingo.follow { fill: var(--md-primary); }
+svg.section .break { fill: none; stroke: var(--guide); stroke-width: 0.8; }
+svg.section .shed { stroke: var(--guide); stroke-width: 0.6; stroke-dasharray: 4 3; }
+svg.section .lbl, svg.front .lbl, svg.side .lbl { fill: var(--label); font-family: var(--font); }
+svg.section .leader { stroke: var(--leader); stroke-width: 0.5; }
+
+/* ---- the loom from the front: harness, shed and shuttle -------------------------------------- */
+svg.front .head-box { fill: var(--ghost-fill); stroke: var(--ghost-line); stroke-dasharray: 4 3; }
+svg.front .cord { stroke: var(--cord); stroke-width: 0.6; cursor: pointer; }
+svg.front .cord.follow { stroke: var(--md-primary); stroke-width: 1.6; }
+svg.front .lingo { stroke: var(--lead); stroke-width: 2; }
+svg.front .lingo.follow { stroke: var(--md-primary); }
+svg.front .wood { fill: var(--wood); stroke: var(--wood-edge); stroke-width: 0.6; }
+svg.front .shed { stroke: var(--guide); stroke-width: 0.8; stroke-dasharray: 5 4; }
+svg.front .end { fill: var(--thread); cursor: pointer; }
+svg.front .end.up { fill: var(--thread-act); }
+svg.front .end.follow { fill: var(--md-primary); }
+svg.front .end.traced { stroke: var(--md-primary); stroke-width: 2.5; }
+svg.front .hookmark { fill: var(--steel); cursor: pointer; }
+svg.front .hookmark.up { fill: var(--steel-act); }
+svg.front .hookmark.follow { fill: var(--md-primary); }
+svg.front .shuttle { fill: var(--wood-light); stroke: var(--wood-edge); stroke-width: 1; }
+svg.front .weft { stroke: var(--weft-thread); stroke-width: 3; }
+
+/* ---- the loom from the side ------------------------------------------------------------------ */
+svg.side .floor { stroke: var(--guide); stroke-width: 8; }
+svg.side .frame { fill: var(--wood); stroke: var(--wood-edge); stroke-width: 6; }
+svg.side .head { fill: var(--wood-light); stroke: var(--wood-edge); stroke-width: 6; }
+svg.side .griffe-side { fill: var(--iron); }
+svg.side .rod, svg.side .cord, svg.side .harness { stroke: var(--cord); stroke-width: 8; }
+svg.side .lever { stroke: var(--wood-dark); stroke-width: 24; stroke-linecap: round; }
+svg.side .treadle { stroke: var(--wood-dark); stroke-width: 30; stroke-linecap: round; }
+svg.side .pivot { fill: var(--iron); }
+svg.side .lingo { stroke: var(--lead); stroke-width: 14; }
+svg.side .warp-line { fill: none; stroke: var(--thread); stroke-width: 10; opacity: 0.8; }
+svg.side .warp-line.up { stroke: var(--thread-act); }
+svg.side .cloth-line { fill: none; stroke: color-mix(in srgb, var(--thread) 50%, var(--weft-thread)); stroke-width: 18; }
+svg.side .beam { fill: var(--wood-light); stroke: var(--wood-edge); stroke-width: 6; }
+svg.side .wood { fill: var(--wood); stroke: var(--wood-edge); stroke-width: 6; }
+svg.side .sword { stroke: var(--wood-dark); stroke-width: 26; }
+svg.side .reed { stroke: var(--iron); stroke-width: 22; }
+svg.side .race { fill: var(--wood-dark); }
+svg.side .shuttle { fill: var(--wood-light); }
+
+/* ---- the card on the bench ------------------------------------------------------------------- */
+#bench { background: var(--stage-bg); border-radius: var(--radius-s); padding: 10px; }
+svg.bench-card { width: 100%; height: auto; max-height: 150px; display: block; }
+svg.bench-card .paste { fill: var(--paste); stroke: var(--paste-edge); stroke-width: 0.5; }
+svg.bench-card .peg { fill: var(--stage); stroke: var(--paste-edge); stroke-width: 0.5; }
+svg.bench-card .lace { fill: var(--stage); stroke: var(--paste-edge); stroke-width: 0.3; }
+svg.bench-card .hole { fill: var(--blank); stroke: var(--paste-edge); stroke-width: 0.35; cursor: pointer; }
+svg.bench-card .hole.punched { fill: var(--hole); stroke: var(--hole); }
+svg.bench-card .hole.follow { stroke: var(--md-primary); stroke-width: 0.9; }
+svg.bench-card .hole:hover { stroke: var(--md-primary); }
+svg.bench-card .collbl { fill: var(--label); font-family: var(--font); }
+
+/* ---- the chain, one line of holes a card ----------------------------------------------------- */
+.chain { margin-top: 8px; overflow-x: auto; display: flex; flex-direction: column; gap: 2px; }
+.strip-head, .card-line { display: grid; grid-template-columns: 26px max-content 1fr; align-items: center; gap: 6px; }
+.strip { display: grid; grid-template-columns: repeat(var(--hooks), var(--cell)); gap: 1px; }
+.strip-head .hn { font-size: 9px; color: var(--md-on-surface-variant); text-align: center; cursor: pointer; overflow: visible; white-space: nowrap; }
+.strip-head .hn.follow { color: var(--md-primary); font-weight: 700; }
+.card-line { padding: 3px 4px; border-radius: 4px; background: var(--paste-dim); border: 1px solid var(--paste-edge); cursor: pointer; }
+.card-line.selected { outline: 2px solid var(--md-primary); outline-offset: 1px; }
+.card-line.current { background: var(--paste-act); }
+.card-line.traced { box-shadow: inset 0 0 0 2px var(--md-primary); }
+.card-line .num { font-size: 12px; font-weight: 650; text-align: center; color: var(--paste-ink); font-variant-numeric: tabular-nums; }
+.card-line .tag { font-size: 11px; color: var(--paste-ink); white-space: nowrap; }
+.chain .hole { width: var(--cell); height: var(--cell); border-radius: 50%; padding: 0; margin: 0; border: 1px solid var(--paste-edge); background: var(--blank); }
+.chain .hole.punched { background: var(--hole); border-color: var(--hole); }
+.chain .hole.follow { box-shadow: 0 0 0 2px var(--md-primary); }
+.chain .hole.col-end { margin-right: 2px; }
+.chain .hole:hover { border-color: var(--md-primary); }
+
+/* ---- the cloth ------------------------------------------------------------------------------- */
+canvas.cloth-canvas { display: block; cursor: pointer; }
+
+/* ---- 3D views: a part named under the pointer, the repeat bands' labels ---------------------- */
+.part-tip { position: absolute; pointer-events: none; max-width: 250px; background: var(--md-surface-highest); color: var(--md-on-surface); font-size: 12px; line-height: 1.35; padding: 5px 8px; border-radius: 6px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4); z-index: 2; }
+.part-tip[hidden] { display: none; }
+.band-tag { position: absolute; transform: translate(-50%, -100%); font-size: 11px; padding: 2px 8px; border-radius: var(--radius-full); background: color-mix(in srgb, var(--md-surface-high) 88%, transparent); border: 1px solid var(--md-outline); color: var(--md-on-surface); white-space: nowrap; cursor: pointer; z-index: 1; }
+.band-tag:hover { border-color: var(--md-primary); }
+.band-tag[hidden] { display: none; }

@@ -8,6 +8,7 @@ import * as THREE from "three";
 import { P, U } from "../sim/params.js";
 import { COLUMN_PITCH, realCard } from "../view2d/cardLayout.js";
 import { sectionLayout } from "../view2d/layout.js";
+import { token } from "../ui/theme.js";
 import { sectionToThree } from "./frame.js";
 /** @import { Snapshot } from "../sim/loom.js" */
 /** @import { ChainCard } from "../view2d/layout.js" */
@@ -88,13 +89,13 @@ export class CardChain3D {
     /** @type {{ mesh: THREE.Mesh, mat: THREE.MeshStandardMaterial, holes: THREE.InstancedMesh, holeMat: THREE.MeshStandardMaterial, blanks: THREE.InstancedMesh, blankMat: THREE.MeshStandardMaterial }[]} */
     this.pool = [];
     for (let i = 0; i < POOL; i++) {
-      const mat = new THREE.MeshStandardMaterial({ color: 0xd9b77e, roughness: 0.75 });
+      const mat = new THREE.MeshStandardMaterial({ color: PASTE(), roughness: 0.75 });
       const mesh = new THREE.Mesh(box, mat);
       mesh.castShadow = true;
       mesh.receiveShadow = true;
-      const holeMat = new THREE.MeshStandardMaterial({ color: 0x1a120a, roughness: 0.9 });
+      const holeMat = new THREE.MeshStandardMaterial({ color: HOLE(), roughness: 0.9 });
       const holes = new THREE.InstancedMesh(disc, holeMat, 64);
-      const blankMat = new THREE.MeshStandardMaterial({ color: BLANK_COLOUR, roughness: 0.9 });
+      const blankMat = new THREE.MeshStandardMaterial({ color: BLANK_COLOUR(), roughness: 0.9 });
       const blanks = new THREE.InstancedMesh(ring, blankMat, 64);
       mesh.visible = holes.visible = blanks.visible = false;
       this.group.add(mesh, holes, blanks);
@@ -128,7 +129,7 @@ export class CardChain3D {
         mat.opacity = p.opacity;
         mat.depthWrite = !fade;
       }
-      slot.mat.color.set(p.facing ? 0xf0c060 : 0xd9b77e);
+      slot.mat.color.set(p.facing ? PASTE_ACT() : PASTE());
       const qd = new THREE.Quaternion().setFromUnitVectors(up, p.out);
       p.holes.forEach((h, k) => {
         m.compose(h.at.clone().addScaledVector(p.out, 0.00015), qd, s.set(1, 1, 1));
@@ -151,13 +152,18 @@ export class CardChain3D {
 /** A blank position's printed ring: a little inside a hole's size, faint (in the XY plane, facing +Z). */
 const blankRing = () => new THREE.RingGeometry(P.holeDiameter / 2000 - 0.0006, P.holeDiameter / 2000, 18);
 /** The blank positions' colour: a little darker than the pasteboard. */
-const BLANK_COLOUR = 0xa98849;
+const BLANK_COLOUR = () => token("--paste-edge", "#8f7444");
+/** The pasteboard, and the card pressed against the needles (brighter: it acts). */
+const PASTE = () => token("--paste", "#d6c296");
+const PASTE_ACT = () => token("--paste-act", "#f6e5b8");
+/** A hole shows the dark behind the card. */
+const HOLE = () => token("--hole", "#0d1116");
 
 /**
  * The card facing the needles in unit U1, laid on the cylinder's face slice (the node
  * "cylinder.column", whose origin is the card's first column at the middle row, on the needle
  * board's side). At true size, with every punched hole dark, every blank position a faint
- * ring, the followed hook's position ringed in blue, and the cylinder's two brass pegs through
+ * ring, the followed hook's position ringed in the instrument's blue, and the cylinder's two brass pegs through
  * the card's peg holes; the page slides the face so that hook's column is at the needles.
  */
 export class FacingCard {
@@ -166,20 +172,20 @@ export class FacingCard {
     this.group = new THREE.Group();
     this.group.name = "facing-card";
     parent.add(this.group);
-    this.mat = new THREE.MeshStandardMaterial({ color: 0xf0c060, roughness: 0.75 });
+    this.mat = new THREE.MeshStandardMaterial({ color: PASTE_ACT(), roughness: 0.75 });
     this.card = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), this.mat);
     this.card.castShadow = this.card.receiveShadow = true;
     const r = P.holeDiameter / 2000;
     const disc = new THREE.CylinderGeometry(r, r, 0.0003, 14).rotateZ(-Math.PI / 2);
-    this.holes = new THREE.InstancedMesh(disc, new THREE.MeshStandardMaterial({ color: 0x1a120a, roughness: 0.9 }), 64);
-    this.blanks = new THREE.InstancedMesh(blankRing().rotateY(Math.PI / 2), new THREE.MeshStandardMaterial({ color: BLANK_COLOUR, roughness: 0.9 }), 64);
+    this.holes = new THREE.InstancedMesh(disc, new THREE.MeshStandardMaterial({ color: HOLE(), roughness: 0.9 }), 64);
+    this.blanks = new THREE.InstancedMesh(blankRing().rotateY(Math.PI / 2), new THREE.MeshStandardMaterial({ color: BLANK_COLOUR(), roughness: 0.9 }), 64);
     // The cylinder's pegs, standing a little out of the card's peg holes: brass, so they cannot
     // pass for holes.
     const pr = U.pegDiameter / 2000;
     const peg = new THREE.CylinderGeometry(pr, pr, 0.003, 18).rotateZ(-Math.PI / 2);
     this.pegs = new THREE.InstancedMesh(peg, new THREE.MeshStandardMaterial({ color: 0xc9922f, metalness: 1, roughness: 0.3 }), 2);
     this.pegs.userData.label_en = "the cylinder's pegs, through the card's peg holes: they keep every hole on its bore";
-    this.ring = new THREE.Mesh(new THREE.TorusGeometry(r + 0.0009, 0.00045, 6, 24).rotateY(Math.PI / 2), new THREE.MeshStandardMaterial({ color: 0x2e6fb0, roughness: 0.5 }));
+    this.ring = new THREE.Mesh(new THREE.TorusGeometry(r + 0.0009, 0.00045, 6, 24).rotateY(Math.PI / 2), new THREE.MeshStandardMaterial({ color: token("--md-primary", "#9ecaff"), roughness: 0.5 }));
     this.group.add(this.card, this.holes, this.blanks, this.pegs, this.ring);
     this.key = "";
   }

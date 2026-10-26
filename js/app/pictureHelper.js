@@ -6,6 +6,7 @@
 
 import { HOOK_COUNTS } from "../sim/deck.js";
 import { FLOAT_LIMIT, findFloats, pictureFromPixels, pictureFromStrings, PICTURES, readDamask, readDirect } from "../sim/design.js";
+import { token } from "../ui/theme.js";
 /** @import { Deck } from "../sim/deck.js" */
 /** @import { Picture, ReadResult } from "../sim/design.js" */
 
@@ -256,11 +257,13 @@ export class PictureHelper {
     const g = /** @type {CanvasRenderingContext2D} */ (this.grid.getContext("2d"));
     const n = this.picture.length;
     const c = this.grid.width / n;
-    g.fillStyle = "#fbf7ee";
+    // Point paper, as the designers who drew for the cards used: light squares, dark ink.
+    g.fillStyle = token("--blank", "#efe4c8");
     g.fillRect(0, 0, this.grid.width, this.grid.height);
-    g.fillStyle = "#2b1f0c";
+    g.fillStyle = token("--paste-ink", "#3b2b12");
     this.picture.forEach((row, y) => row.forEach((d, x) => d && g.fillRect(x * c, y * c, c, c)));
-    g.strokeStyle = "rgba(120, 100, 70, 0.35)";
+    g.strokeStyle = token("--paste-edge", "#8f7444");
+    g.globalAlpha = 0.45;
     g.lineWidth = 1;
     g.beginPath();
     for (let i = 0; i <= n; i++) {
@@ -271,6 +274,7 @@ export class PictureHelper {
       g.lineTo(this.grid.width, p);
     }
     g.stroke();
+    g.globalAlpha = 1;
   }
 
   drawPreview() {
@@ -299,13 +303,15 @@ export class PictureHelper {
     this.preview.width = width * cell;
     this.preview.height = cloth.length * cell;
     const H = cloth.length;
+    const warp = token("--warp", "#5b3f8c");
+    const weft = token("--weft", "#efe3c2");
     cloth.forEach((row, pk) =>
       row.forEach((up, e) => {
-        g.fillStyle = up ? "#5b3f8c" : "#efe3c2";
+        g.fillStyle = up ? warp : weft;
         g.fillRect(e * cell, (H - 1 - pk) * cell, cell, cell);
       }),
     );
-    g.strokeStyle = "#d62d20";
+    g.strokeStyle = token("--fault", "#ff5449");
     g.lineWidth = Math.max(1.5, cell * 0.35);
     g.lineCap = "round";
     g.beginPath();

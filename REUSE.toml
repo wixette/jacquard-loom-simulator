@@ -26,12 +26,24 @@ SPDX-License-Identifier = "CC-BY-SA-4.0"
 
 # ---- Third-party material ----------------------------------------------------
 
-# Vendored library, copied unchanged from npm (pnpm vendor); it keeps its LICENSE.
+# Vendored libraries, copied unchanged from npm (pnpm vendor); each keeps its LICENSE.
 [[annotations]]
 path = "vendor/three/**"
 precedence = "override"
 SPDX-FileCopyrightText = "2010-2026 three.js authors"
 SPDX-License-Identifier = "MIT"
+
+[[annotations]]
+path = "vendor/roboto-flex/**"
+precedence = "override"
+SPDX-FileCopyrightText = "2017 The Roboto Flex Project Authors"
+SPDX-License-Identifier = "OFL-1.1"
+
+[[annotations]]
+path = "vendor/material-symbols/**"
+precedence = "override"
+SPDX-FileCopyrightText = "Google LLC"
+SPDX-License-Identifier = "Apache-2.0"
 
 # The name game's font: the ASCII glyphs of Unscii 8 x 16 (Viznut, http://viznut.fi/unscii/),
 # public domain.

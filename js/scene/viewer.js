@@ -4,6 +4,7 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+import { token } from "../ui/theme.js";
 
 /**
  * Studio environment for the metals: a warm grey dome (light above, a lighter table below) with
@@ -48,6 +49,9 @@ function studioEnvironment() {
   box(8, 1, 3, [0, 3, -6]); // rim, behind
   return env;
 }
+
+/** The overlays' materials (by their name in the glTF) and the theme tokens they take. */
+const OVERLAYS = /** @type {Record<string, [string, string]>} */ ({ ghost: ["--ghost-3d", "#8a96a6"], band: ["--band-3d", "#7fa6d6"] });
 
 /** Parts smaller than this (bounding-sphere radius, m) do not cast shadows: LEDs, leads, pins. */
 const SHADOW_MIN_RADIUS = 0.004;
@@ -121,13 +125,11 @@ export class Viewer {
   host;
 
   /**
-   * @param {HTMLElement} host
-   * @param {{ transparent?: boolean }} [options] transparent: no background of its own, so the
-   *   page's shows through (the main page's dark stage); the developer pages keep the light grey.
+   * @param {HTMLElement} host its background (the theme's dark stage) shows through the scene
    */
-  constructor(host, options = {}) {
+  constructor(host) {
     this.host = host;
-    this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: !!options.transparent });
+    this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     // Neutral keeps the hue of brass (ACES pushes yellows towards olive)
     this.renderer.toneMapping = THREE.NeutralToneMapping;
@@ -145,7 +147,7 @@ export class Viewer {
       m.geometry.dispose();
       /** @type {THREE.Material} */ (m.material).dispose();
     });
-    this.scene.background = options.transparent ? null : new THREE.Color(0xe9e7e2);
+    this.scene.background = null;
 
     const key = new THREE.DirectionalLight(0xfff4e6, 1.2);
     key.position.set(0.25, 0.45, 0.3);
@@ -199,6 +201,12 @@ export class Viewer {
       m.geometry.computeBoundingSphere();
       m.castShadow = (m.geometry.boundingSphere?.radius ?? 1) >= SHADOW_MIN_RADIUS;
       m.receiveShadow = true;
+      // The overlays that are not the machine (the ghosted machine, the repeat bands) take the
+      // theme's colours (docs/ui-design.md, Theme); the machine keeps its materials.
+      for (const mt of /** @type {THREE.MeshStandardMaterial[]} */ ([]).concat(/** @type {THREE.MeshStandardMaterial} */ (m.material))) {
+        const tint = OVERLAYS[mt.name];
+        if (tint) mt.color.set(token(...tint));
+      }
       // Parts marked translucent by the build (the warp sheets) let the parts behind show.
       let p = /** @type {THREE.Object3D | null} */ (m);
       while (p && !p.userData.translucent) p = p.parent;

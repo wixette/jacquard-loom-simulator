@@ -42,7 +42,8 @@ Pages cannot be opened from `file://`, because browsers do not load modules from
 | `pnpm typecheck` | The JSDoc types, checked strictly; nothing is compiled |
 | `pnpm check:refs` | No private references, local paths or broken links (`tools/check-refs.mjs`) |
 | `pnpm build:model` | Rebuilds the five units and the ghosted machine into `assets/` with Blender, headless |
-| `pnpm vendor` | Copies three.js from `node_modules` into `vendor/` |
+| `pnpm vendor` | Copies three.js and the font from `node_modules` into `vendor/`, and writes the icons the pages use into one module |
+| `pnpm shots` | Screenshots of every view, from headless Chrome, into `shots/` (`--out`, `--only`): for reviewing a change of the theme or the layout side by side |
 | `pnpm stamp` | Writes the version into every file name the pages load |
 | `reuse lint` | Every file's licence is declared (REUSE; CI runs it) |
 

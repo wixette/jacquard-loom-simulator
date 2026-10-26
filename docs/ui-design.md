@@ -31,11 +31,12 @@ The sibling's dark Material 3 scheme (its U5), with the same tokens: the views r
 | Blue-grey (secondary) | The machine's controls | The tonal buttons: the transport, the card tools |
 | Amber (attention) | Your turn | The control a tutorial step asks for (its glow), the task line, and the parts a step points at, in 2D and 3D |
 | Green (success) | Done | A finished task, step or part; a game won |
-| Red (error) | Something was refused | A refused control's reason in the status line; the chain run out |
+| Red (error) | Something was refused, or a fault | A refused control's reason in the status line; the chain run out; a loose thread marked on the cloth |
 | The machine's own colours | What the machine is made of | Wood, iron, steel, brass and card, in the drawings and the models; the warp and the weft in the colours the learner sets |
 
 - **A part's state is shown in its own material:** brighter when it acts (a hook caught on the knife, a lifted warp end, the card pressed), dimmer at rest. No hue is spent on it, so the meanings above stay free; the prototype's red for a lifted hook goes.
-- **The 2D drawings sit on the same dark stage as the 3D view,** with no paper sheet behind them: their lines and fills are retuned for dark, the cards the lightest material.
+- **The 2D drawings sit on the same dark stage as the 3D view,** with no paper sheet behind them: their lines and fills are retuned for dark, the cards the lightest material. The one exception is the picture tool's grid, which is point paper (light squares, dark ink), as the designers who drew for the cards used.
+- **The 3D overlays are the instrument's:** the ghosted machine is a light grey and the bands where the machine repeats a unit a pale blue; the machine's own materials (oak, iron, steel, brass, card) come from the models.
 - **Every colour of every view is a token** (CSS custom properties for the page and the SVG drawings; the canvas views and three.js read the same tokens), so the theme lives in one place.
 - **Contrast:** text, the drawings' labels included, reaches 7:1 on its background (WCAG AAA); the drawings' lines and the controls' outlines at least 3:1.
 - **Type** is Roboto Flex with tabular figures for every number; CJK falls back to the system's fonts. **Icons** are Material Symbols as inline SVG. Both are vendored (`pnpm vendor`): the page needs no network but its own site.

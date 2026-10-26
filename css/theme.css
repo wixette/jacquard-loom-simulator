@@ -1,0 +1,104 @@
+/* The theme (docs/ui-design.md, Theme): the Stepped Reckoner's dark Material 3 scheme, and the
+   materials the drawings and the 3D views are made of. Every colour of every page and view is
+   one of these tokens: the SVG drawings through css/views.css, the canvas views and three.js
+   through js/view2d/theme.js. Each colour has one meaning: blue the instrument (and the
+   followed thread), blue-grey the machine's controls, amber "your turn", green done, red
+   refused or a fault; the machine keeps its own materials, brighter where a part acts. */
+
+:root {
+  color-scheme: dark;
+  /* blue: the instrument itself: navigation, selection, where you are, links, focus, and the
+     followed thread in every view */
+  --md-primary: #9ecaff;
+  --md-on-primary: #00325a;
+  --md-primary-container: #12497c;
+  --md-on-primary-container: #d3e4ff;
+  /* blue-grey: the machine's controls (tonal buttons) */
+  --md-secondary-container: #364657;
+  --md-on-secondary-container: #d5e4f7;
+  /* cool neutrals, a touch of blue */
+  --md-surface: #0f1317;
+  --md-surface-low: #171b20;
+  --md-surface-mid: #1b2026;
+  --md-surface-high: #252a31;
+  --md-surface-highest: #30353d;
+  --md-on-surface: #e0e3e9;
+  --md-on-surface-variant: #c1c7d0;
+  --md-outline: #8b919a;
+  --md-outline-variant: #3f464f;
+  --card-edge: #343a43;
+  --md-scrim: rgba(0, 0, 0, 0.55);
+  /* amber, one meaning only: your turn */
+  --attention: #ffb74d;
+  --attention-container: #573c00;
+  --on-attention-container: #ffdfb0;
+  /* green: done */
+  --success: #9bd88e;
+  --success-container: #1f4a24;
+  --on-success-container: #c3f2b8;
+  /* red: something was refused, or a fault in the cloth (a loose thread) */
+  --md-error: #ffb4ab;
+  --error-container: #5c1d18;
+  /* the same red as a mark drawn on the cloth, where the light one would not show */
+  --fault: #ff5449;
+  /* state layers: how much a control lightens under the pointer and when pressed */
+  --state-hover: 0.14;
+  --state-press: 0.22;
+  --font: "Roboto Flex", system-ui, -apple-system, "Segoe UI", "Noto Sans", "PingFang SC", "Hiragino Sans", "Microsoft YaHei", "Malgun Gothic", sans-serif;
+  --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --radius-s: 8px;
+  --radius-m: 12px;
+  --radius-l: 16px;
+  --radius-full: 999px;
+  --ease: cubic-bezier(0.2, 0, 0, 1);
+
+  /* ---- the stage: the 2D drawings and the 3D views sit on it, with no sheet of their own ---- */
+  --stage: #18212c;
+  --stage-bg: radial-gradient(120% 90% at 50% 38%, #2a3747 0%, #18212c 55%, #0d1116 100%);
+
+  /* ---- the machine's materials. A part's state is shown in its own material: brighter when it
+     acts (a hook caught, a lifted end, the card pressed), dimmer at rest. No hue is spent on
+     it. The cards are the lightest material; the cloth's threads are the learner's colours. ---- */
+  /* oak and beech: boards, frame, cylinder, levers */
+  --wood: #84633f;
+  --wood-edge: #c49b66;
+  --wood-dark: #a57a4a;
+  --wood-light: #a98256;
+  /* iron: the knives, the griffe, the reed */
+  --iron: #9aa3ae;
+  /* steel wire: hooks and needles at rest, and acting */
+  --steel: #85909c;
+  --steel-act: #e8eef5;
+  /* brass: springs, pegs, mails */
+  --brass: #b8933f;
+  --brass-act: #f2d68a;
+  /* pasteboard: the cards; a hole shows the dark behind it */
+  --paste: #d6c296;
+  --paste-act: #f6e5b8;
+  --paste-dim: #c2ae84;
+  --paste-edge: #8f7444;
+  --paste-ink: #241805;
+  --blank: #efe4c8;
+  --hole: #0d1116;
+  /* linen cords and lead lingoes */
+  --cord: #79838e;
+  --cord-act: #d7dee6;
+  --lead: #7c8691;
+  /* the warp ends as drawn (not the cloth's colours, which the learner sets) */
+  --thread: #9483bf;
+  --thread-act: #dccfff;
+  --weft-thread: #d9b45e;
+  /* what is not the machine: guides, the shed's lines, the outlines of a box drawn round a
+     part that is not shown, the drawings' labels and their leaders */
+  --guide: #7a8592;
+  --ghost-fill: rgba(255, 255, 255, 0.04);
+  --ghost-line: #7d8895;
+  --label: #c9d0d9;
+  --leader: #808b98;
+  /* the 3D view's overlays: the ghosted machine, and the bands where it repeats a unit */
+  --ghost-3d: #8a96a6;
+  --band-3d: #7fa6d6;
+  /* the cloth's default colours: a violet warp and a silk weft */
+  --warp: #5b3f8c;
+  --weft: #efe3c2;
+}

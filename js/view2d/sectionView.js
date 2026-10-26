@@ -114,7 +114,7 @@ export class SectionView {
     // The card cylinder and the chain near it, under the needles, so a needle going into a
     // hole can be seen inside the cylinder. Each card is a pasteboard strip with all eight
     // hole positions marked as in the card editor: a filled dot is punched, a hollow circle
-    // blank; the card at the needles is gold. A face with no card has a dashed edge and its
+    // blank; the card at the needles is the brightest. A face with no card has a dashed edge and its
     // bored holes, faint and small. Cards hanging from the cylinder fade out along the
     // strands; the rest of the chain is dashed.
     const c = L.cylinder;

@@ -7,6 +7,7 @@
 // clothCells() is pure (it says what each cell shows); ClothView draws it on a canvas.
 
 import { hookOfEnd } from "../sim/tieup.js";
+import { token } from "../ui/theme.js";
 /** @import { Snapshot } from "../sim/loom.js" */
 /** @import { Trace } from "../sim/trace.js" */
 
@@ -169,8 +170,8 @@ export class ClothView {
       });
       g.globalAlpha = 1;
       if (cell >= 8 && (cells.length <= 40 || (r + 1) % 5 === 0)) {
-        g.fillStyle = "#8a8275";
-        g.font = "10px system-ui, sans-serif";
+        g.fillStyle = token("--label", "#c9d0d9");
+        g.font = `10px ${token("--font", "system-ui, sans-serif")}`;
         g.textAlign = "right";
         g.textBaseline = "middle";
         g.fillText(String(r + 1 + skipped), this.left - 5, y + cell / 2);
@@ -178,14 +179,15 @@ export class ClothView {
     });
     const pendingRow = cells.findIndex((row) => row[0]?.pending);
     if (pendingRow >= 0) {
-      g.strokeStyle = "#c2412d";
+      // The row in the shed: a dashed frame in the text's colour, while its weft is not yet beaten.
+      g.strokeStyle = token("--md-on-surface", "#e0e3e9");
       g.setLineDash([3, 2]);
       g.lineWidth = 1.5;
       g.strokeRect(this.left - 1, this.top + (rows - 1 - pendingRow) * cell - 1, ends * cell + 1, cell + 1);
       g.setLineDash([]);
     }
     if (tr) {
-      g.strokeStyle = "#2e6fb0";
+      g.strokeStyle = token("--md-primary", "#9ecaff");
       g.lineWidth = 1.5;
       (cells[0] ?? []).forEach((c, j) => {
         if (followEnd(c.end)) g.strokeRect(this.left + j * cell - 0.5, this.top - 2, cell, rows * cell + 3);
@@ -194,13 +196,13 @@ export class ClothView {
       if (tr.end !== null && tp >= 0 && tp < cells.length) {
         const j = cells[tp].findIndex((c) => c.end === tr.end);
         g.lineWidth = 2.5;
-        g.strokeStyle = "#e0a020";
+        g.strokeStyle = token("--md-primary", "#9ecaff");
         g.strokeRect(this.left + j * cell - 1, this.top + (rows - 1 - tp) * cell - 1, cell + 1, cell + 1);
       }
     }
     if (cells.length === 0) {
-      g.fillStyle = "#8a8275";
-      g.font = "12px system-ui, sans-serif";
+      g.fillStyle = token("--label", "#c9d0d9");
+      g.font = `12px ${token("--font", "system-ui, sans-serif")}`;
       g.textAlign = "left";
       g.fillText("No cloth yet.", this.left, this.top + 12);
     }

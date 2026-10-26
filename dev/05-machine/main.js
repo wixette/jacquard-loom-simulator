@@ -31,7 +31,7 @@ const view = new UnitsView($("units3d"), { onChange: (mode) => mark(mode) });
 /** For inspecting the scene from the browser's console. */
 /** @type {Window & { unitsView?: UnitsView }} */ (window).unitsView = view;
 
-const MACHINE_IDEA = "The whole loom, ghosted, with one of each core unit where it stands. The orange bands mark where the real machine repeats a unit, with how many: 416 hooks and needles in the 400 head, 1,600 harness cords and warp ends with a 4-repeat tie. Click a unit, or a band's label, to open it alone.";
+const MACHINE_IDEA = "The whole loom, ghosted, with one of each core unit where it stands. The blue bands mark where the real machine repeats a unit, with how many: 416 hooks and needles in the 400 head, 1,600 harness cords and warp ends with a 4-repeat tie. Click a unit, or a band's label, to open it alone.";
 const section = new SectionView($("section"));
 const preset = /** @type {HTMLSelectElement} */ ($("preset"));
 const hooksSelect = /** @type {HTMLSelectElement} */ ($("hooks"));
