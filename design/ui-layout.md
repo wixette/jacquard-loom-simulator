@@ -60,30 +60,36 @@ The app opens on **Weave**, already weaving a pretty pattern, with a small banne
 
 ```
 ┌────────────────────────────────────────────────────────────────────────────────────────┐
-│ ◎ Jacquard loom [Learn][Weave][Create][Play] Following hook 13 × ⚙ Loom ⤴ Share  文A ⓘ │  top bar, 56 px
+│ ◎ Jacquard loom  [Learn][Weave]                                    ⤴ Share   文A   ⓘ    │
 ├──────────────┬───────────────────────────────────────────────────────┬─────────────────┤
-│ PROGRAM      │ [Section▾][Side][Front][3D▾]   ▣ single ◫ two ⊞ four   │ OUTPUT          │
-│              │                                                       │ [Cloth][Inspect]│
-│ the card on  │                                                       │                 │
-│ the bench    │                  THE STAGE                            │  the woven      │
-│ (selected)   │          (the machine view(s): 2D or 3D)              │  cloth          │
-│ ──────────   │                                                       │                 │
-│ the chain    │                                                       │  front/back 0/1 │
-│ card 1 ●○●○  │                                                       │                 │
-│ card 2 ○●○●  │                                                       │                 │
-│ …  (scrolls) │                                                       │                 │
-│ + ⧉ ✕ ↑ ↓ ⇄ │                                                       │                 │
-├──────────────┴───────────────────────────────────────────────────────┴─────────────────┤
-│ ◂  ▶  ▸   speed ─○──   ● hooks taken ● shed open ○ shuttle ○ beaten ○ closed ○ next 🔊 │  transport, 56 px
-│ [card 1][card 2][card 3]▌[card 4] … the chain as a timeline, the playhead on the card │  timeline, 40 px
-│ Step: shed open — hooks 4 and 5 have lifted their warp ends.                           │  status line
-└────────────────────────────────────────────────────────────────────────────────────────┘
+│ CARDS ▤+⧉✕↑↓◑│ [Section▾] Whole Needles Crooks [Cross-row▾]   ▣ ◫ ⊞  │ CLOTH Front|Back│
+│ ⚙ 16 hooks · │                                                       │ 0/1  ◍ colours  │
+│   straight ▾ │                                                       │                 │
+│ the card on  │                                                       │  the woven      │
+│ the bench    │                    THE STAGE                          │  cloth          │
+│ ──────────   │       (one, two or four views: 2D or 3D)              │                 │
+│ the chain    │                                                       │                 │
+│ card 1 ●○●○  │                                                       │ ───────────     │
+│ card 2 ○●○●  │                                                       │ the thread      │
+│ …  (scrolls) │ [Following hook 13 ×]                                 │ followed,       │
+│              │───────────────────────────────────────────────────────│ in words        │
+│              │ Step: shed open — hooks 4 and 5 have lifted their     │                 │
+│              │ warp ends.                                 caption    │                 │
+│              │───────────────────────────────────────────────────────│                 │
+│              │ ●━━━━◉────○────○────○────○        moments (stepper)   │                 │
+│              │ Pick 5 (card 5)   ↺ |◂ (▶) ▸|   speed ─○──  ♪         │                 │
+└──────────────┴───────────────────────────────────────────────────────┴─────────────────┘
 ```
 
 - **Sizes.** Left 300–360 px, right 320–400 px, both resizable by dragging their edge or by the keyboard (the edge is a focusable window splitter, as the sibling's U17), and collapsible to a thin rail (a click brings them back, and dragging well past the smallest size collapses it); the stage takes the rest. Sizes are remembered per device (browser storage), and every view redraws to its new size.
-- **The stage.** One view by default. The toolbar above it switches the view (`Section ▾` holds Whole, Needles, Crooks and the cross-row; `3D ▾` holds the whole loom and U1–U5) and the arrangement: single, two side by side (any two: the section with the 3D selector is the classic pair), or four (CAD's quad view: section, front, side, 3D). A double-click on any view makes it fill the stage; again to go back.
-- **The bottom band** holds time. The transport (step back, play, step, speed) sits at the left, large; the six moments of a pick are its timeline; the machine's sound switch ends it. Below, the chain runs as a strip of cards with a playhead (a step sequencer): click a card to go to it, drag the playhead to scrub through a pick. In the first version the strip mirrors the chain on the left rather than replacing it. The status line explains every step and holds the warnings ("The chain has run out…"). The band, not a toolbar floating on the stage (the sibling's U18), because the loom's time has a timeline the width of the window, and the stage may hold up to four views.
-- **The top bar** holds the logo and title, the workspaces (Learn carrying the tutorial's step while it is on), the followed thread (a chip, × to stop following), the loom's setup (a popover: head size, tie-up, colours), Share (copy link, save picture, print cards), the language menu (文A) and About (ⓘ, the app's one dialog: version, credits, licences, the source). What acts on the machine is on the left, what acts on the app on the right.
+- **The stage.** One view, or two side by side where the stage is at least 1040 px wide (section and 3D, from about 1700 px of window). Each view names itself with a menu chip in its own top-left corner (`Section ▾`, `Loom in 3D ▾`), its own tools beside it (the section's zoom and cross-row); the arrangement, single, two side by side (any two: the section with the 3D selector is the classic pair) or four (CAD's quad view: section, front, side, 3D), floats at the stage's top right. The followed thread is a chip at the stage's bottom left (× to stop following), next to what it highlights. A double-click on any view makes it fill the stage; again to go back.
+- **Time sits under the stage,** not along the window's bottom, so the controls are centred under what they move and the panels run the full height. From the top:
+  - the **caption**, the status line: what the loom just did, or why it refused, in two lines at most (the full text in its tooltip), right under the drawing it explains;
+  - the **six moments of a pick as a stepper**, a state and not buttons: dots on a track, the moments passed filled, the one reached ringed and named in bold, no fill or border on the names (`aria-current="step"`);
+  - the **controls**, centred: reset, step back, play (the largest, 56 px, filled), step; where the loom is (pick, card, rows) at the left; the speed (6 to 60 picks a minute, 12 to start) and the sound switch at the right.
+  - No chain-as-timeline strip: the chain on the left and the stepper already show where the loom is. (Earlier drafts had a full-width band along the bottom, with the strip; it put the core controls in the window's corner, far from the machine, and its moments looked like buttons.)
+- **The top bar** holds what belongs to the app, not to the machine: the logo and title, the workspaces (Learn carrying the tutorial's step while it is on), Share (copy link, save picture, print cards), the language menu (文A) and About (ⓘ, the app's one dialog: version, credits, licences, the source).
+- **The machine's settings sit with what they change.** The head and its tie-up are a chip over the cards that shows their values (`⚙ 16 hooks (2 cross-rows) · Straight tie ▾`, a popover to change them), since a card has a hole for each hook; the warp and weft colours are a palette button in the Cloth panel's header (a popover, with Reset), next to Front/Back and 0/1.
 - **Medium screens (1024–1279 px):** the left panel starts collapsed to its rail when the stage would fall under 560 px wide; the inspector shares the right panel by tab, as above.
 
 ## 5. Phone and tablet layout
@@ -94,7 +100,7 @@ The bar is lower, as agreed: everything must be operable, not everything at once
 
 ```
 ┌───────────────────────────┐
-│ ☰  Weave ▾        ⤴  ⚙   │  app bar: menu, workspace, share, setup
+│ ☰  Weave ▾        ⤴      │  app bar: menu, workspace, share
 ├───────────────────────────┤
 │ [Section][Front][Side][3D]│  view chips (scroll sideways)
 │                           │
@@ -102,8 +108,9 @@ The bar is lower, as agreed: everything must be operable, not everything at once
 │   (one view at a time)    │  tap a part to follow it
 │                           │
 ├───────────────────────────┤
-│  ◂    ▶    ▸    ● ● ○ ○ ○ │  transport, sticky: always under the stage
-│ Shed open: hooks 4 and 5… │  status line: one line, tap to read all
+│ Shed open: hooks 4 and 5… │  caption: two lines, tap to read all
+│ ●━━◉──○──○──○──○          │  the moments, dots only (the caption names it)
+│ ↺ |◂ (▶) ▸|   Pick 5 …   │  controls, sticky: always under the stage
 ├═══════════════════════════┤
 │ ─── (drag)                │  bottom sheet: peek / half / full
 │ [Cards][Cloth][Guide]     │  tabs: the program, the output, the workspace's own
@@ -112,16 +119,16 @@ The bar is lower, as agreed: everything must be operable, not everything at once
 └───────────────────────────┘
 ```
 
-- **The app bar** keeps the logo (in ☰), the workspace (with the tutorial's step while it is on), Share and setup; the menu ☰ holds the language and About.
+- **The app bar** keeps the logo (in ☰), the workspace (with the tutorial's step while it is on), and Share; the menu ☰ holds the language and About. The head and tie-up chip sits over the cards in the Cards tab, the colours in the Cloth tab's header, as on the desktop.
 - **The stage on top, one view at a time,** switched by chips. 3D starts at its lighter quality, one unit at a time; the whole loom is offered but not the default.
-- **The transport is sticky,** directly under the stage, with 48 px targets: the learner's thumb drives the machine while watching it.
+- **Time is sticky,** directly under the stage (caption, moments, controls, the play button 50 px and the others 42 px): the learner's thumb drives the machine while watching it.
 - **The bottom sheet** holds the rest, by tab: **Cards** (the chain, with the bench card), **Cloth**, and the workspace's own (**Guide** in Learn, **Picture** in Create, **Game** in Play). It rests half open; dragging it up gives the panel the screen, dragging it down gives the stage the screen.
 - **Editing cards on a phone** happens on the bench card, zoomed to finger size, not on the chain's small strips (at 64 hooks a hole in the chain is a few pixels wide). The chain is for choosing a card and seeing the order.
 - **Tutorial pointers** stay small and point at things on screen; the step's text lives in the Guide tab, half open by default in Learn.
 
 ### Phone, landscape, and small tablets
 
-The stage takes the left 60 %, the sheet becomes a side panel on the right with the same tabs, and the transport runs along the stage's bottom edge.
+The stage takes the left 60 %, the sheet becomes a side panel on the right with the same tabs, and the moments and the controls run along the stage's bottom edge (no caption: the sheet's tabs show the trace).
 
 ### Tablet, portrait
 
@@ -141,7 +148,7 @@ The developer pages wire their elements by id (`createLoomPage`); the public app
 
 ## 7. Open questions for the detailed design
 
-- Whether the chain-as-timeline (§4, bottom band) should later replace the chain list on the left. The first version mirrors it.
+- Whether a chain-as-timeline strip with a playhead (dropped from 0.1.0, §4) earns its height later, for scrubbing through long decks.
 - Whether the four-view arrangement is worth it below 1440 px wide.
 - How the tutorial points at things inside a view (a hook in the section, a part in 3D): the views would need to expose where their parts are on screen (the label placer knows already, for 2D; the sibling's callouts name 3D nodes). Settled in M7.
 - How much of the 3D view the Play workspace needs: Draw boy against Jacquard probably wants the harness in 3D; the others do not.

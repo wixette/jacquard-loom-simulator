@@ -132,8 +132,9 @@ export function benchPanel(store, o = {}) {
 }
 
 /**
- * Turning the loom: step back, play or pause, step, reset; the speed; the six moments of a
- * pick, the one reached marked; and where the loom is.
+ * Turning the loom: reset, step back, play or pause, step, the play button the largest; the
+ * speed; the six moments of a pick as a stepper (a state, not buttons), the one reached marked;
+ * and where the loom is.
  * @param {AppStore} store
  * @param {PanelOptions} [o]
  * @returns {Component}
@@ -154,10 +155,11 @@ export function transportPanel(store, o = {}) {
   /**
    * @param {string} id
    * @param {import("../../ui/components.js").IconName} name
+   * @param {string} cls
    * @param {() => void} run
    */
-  const button = (id, name, run) => {
-    b[id] = el("button", { type: "button", class: "btn tonal icon-only" }, [icon(name)]);
+  const button = (id, name, cls, run) => {
+    b[id] = el("button", { type: "button", class: `btn icon-only ${cls}`, "data-act": id }, [icon(name)]);
     b[id].addEventListener("click", run);
     return b[id];
   };
@@ -168,23 +170,24 @@ export function transportPanel(store, o = {}) {
       speed.addEventListener("input", () => setSpeed(store, Number(speed.value), o.loom));
       speedOut = el("span", { class: "speed-out" });
       moments = el("ol", { class: "moments" });
-      moments.append(...STOP_KEYS.map((_, i) => el("li", { "data-stop": String(i) })));
+      moments.append(...STOP_KEYS.map((_, i) => el("li", { "data-stop": String(i) }, [el("span", { class: "dot" }), el("span", { class: "name" })])));
       where = el("p", { class: "where" });
-      const playButton = button("play", "play_arrow", () => play(store, o.loom));
-      playButton.classList.replace("tonal", "filled");
       box = el("div", { class: "transport", role: "group" }, [
+        moments,
         el("div", { class: "transport-row" }, [
-          el("div", { class: "joined" }, [button("back", "skip_previous", () => stepBack(store, o.loom)), playButton, button("fwd", "skip_next", () => step(store, o.loom))]),
-          button("reset", "restart_alt", () => {
-            pause(store, o.loom);
-            reset(store, o.loom);
-          }),
+          where,
+          el("div", { class: "controls" }, [
+            button("reset", "restart_alt", "", () => {
+              pause(store, o.loom);
+              reset(store, o.loom);
+            }),
+            button("back", "skip_previous", "tonal", () => stepBack(store, o.loom)),
+            button("play", "play_arrow", "filled play", () => play(store, o.loom)),
+            button("fwd", "skip_next", "tonal", () => step(store, o.loom)),
+          ]),
           el("label", { class: "speed" }, [speedOut, speed]),
         ]),
-        moments,
-        where,
       ]);
-      b.reset.classList.remove("tonal");
       h.appendChild(box);
     },
     watch(s) {
@@ -205,11 +208,13 @@ export function transportPanel(store, o = {}) {
       moments.setAttribute("aria-label", t("transport.moments"));
       const at = STOPS.findIndex((x) => Math.abs(x - snap.phi) < 1e-9);
       const here = snap.phi === 0 ? STOPS.length - 1 : at;
-      for (const li of moments.children) {
-        const i = Number(/** @type {HTMLElement} */ (li).dataset.stop);
-        li.textContent = t(STOP_KEYS[i]);
+      for (const li of /** @type {HTMLCollectionOf<HTMLElement>} */ (moments.children)) {
+        const i = Number(li.dataset.stop);
+        /** @type {HTMLElement} */ (li.lastElementChild).textContent = t(STOP_KEYS[i]);
         li.classList.toggle("done", snap.phi > 0 && STOPS[i] <= snap.phi + 1e-9);
         li.classList.toggle("here", i === here);
+        if (i === here) li.setAttribute("aria-current", "step");
+        else li.removeAttribute("aria-current");
       }
       const card = snap.cardIndex === null ? t("where.noCard") : t("where.card", { card: snap.cardIndex + 1 });
       where.textContent = tn("where", snap.cloth.length, { pick: snap.pick + 1, card, percent: Math.round(snap.phi * 100), ends: endCount(snap.tie, snap.deck.hooks) });
@@ -241,6 +246,7 @@ export function statusPanel(_store, o = {}) {
     update(s) {
       const { status } = loomOf(s, o.loom);
       line.textContent = say(status.msg);
+      line.title = line.textContent;
       line.classList.toggle("warn", status.warn);
     },
     unmount() {

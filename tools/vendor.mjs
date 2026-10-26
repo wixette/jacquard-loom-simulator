@@ -71,6 +71,7 @@ export const ICONS = [
   "menu",
   "menu_book",
   "open_in_new",
+  "palette",
   "pause",
   "play_arrow",
   "print",

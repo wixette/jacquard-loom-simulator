@@ -183,42 +183,70 @@ export function createShell(store, root) {
     act.say(store, w ? { key: "share.printed", n: deck.cards.length } : { key: "share.blocked" }, !w);
   }
 
-  /** @param {HTMLElement} anchor */
-  function setupPopover(anchor) {
+  /**
+   * A small dialog under its anchor, shut by pressing the anchor again, pressing elsewhere, or Esc.
+   * @param {HTMLElement} anchor
+   * @param {string} id
+   * @param {string} name
+   * @param {HTMLElement[]} rows
+   */
+  function popover(anchor, id, name, rows) {
     const old = /** @type {HTMLElement | null} */ (document.querySelector(".popover"));
     old?.remove();
-    if (old?.dataset.for === "setup") return;
-    const s = ls();
-    const hooks = el("select");
-    for (const n of HOOK_COUNTS) hooks.add(new Option(tn("hooks.option", n / 8, { hooks: n }), String(n)));
-    hooks.value = String(s.loom.deck.hooks);
-    hooks.addEventListener("change", () => act.setHooks(store, Number(hooks.value)));
-    const tie = el("select");
-    for (const [key, ti] of Object.entries(TIES)) tie.add(new Option(words(tieLabel(ti)), key));
-    tie.value = tieKey(s.loom.tie);
-    tie.addEventListener("change", () => act.setTie(store, TIES[tie.value]));
-    const warp = el("input", { type: "color", value: s.warp });
-    warp.addEventListener("input", () => act.setColours(store, { warp: warp.value }));
-    const weft = el("input", { type: "color", value: s.weft });
-    weft.addEventListener("input", () => act.setColours(store, { weft: weft.value }));
-    const pop = el("div", { class: "popover", role: "dialog", "aria-label": t("bar.setup.tip") }, [
-      el("label", { text: t("setup.hooks") }), hooks,
-      el("label", { text: t("setup.tie") }), tie,
-      el("label", { text: t("setup.warp") }), warp,
-      el("label", { text: t("setup.weft") }), weft,
-    ]);
-    pop.dataset.for = "setup";
+    if (old?.dataset.for === id) return;
+    const pop = el("div", { class: "popover", role: "dialog", "aria-label": name }, rows);
+    pop.dataset.for = id;
     document.body.appendChild(pop);
     const r = anchor.getBoundingClientRect();
     const b = pop.getBoundingClientRect();
     pop.style.top = `${r.bottom + 6}px`;
-    pop.style.left = `${Math.max(8, Math.min(window.innerWidth - b.width - 8, r.right - b.width))}px`;
-    const away = (/** @type {PointerEvent} */ e) => {
-      if (pop.contains(/** @type {Node} */ (e.target)) || anchor.contains(/** @type {Node} */ (e.target))) return;
+    pop.style.left = `${Math.max(8, Math.min(window.innerWidth - b.width - 8, r.left))}px`;
+    const shut = () => {
       pop.remove();
       document.removeEventListener("pointerdown", away);
+      document.removeEventListener("keydown", esc);
+    };
+    const away = (/** @type {PointerEvent} */ e) => {
+      if (!pop.contains(/** @type {Node} */ (e.target)) && !anchor.contains(/** @type {Node} */ (e.target))) shut();
+    };
+    const esc = (/** @type {KeyboardEvent} */ e) => {
+      if (e.key !== "Escape") return;
+      shut();
+      anchor.focus();
     };
     document.addEventListener("pointerdown", away);
+    document.addEventListener("keydown", esc);
+    /** @type {HTMLElement | null} */ (pop.querySelector("select, input, button"))?.focus();
+  }
+
+  /** The head and its tie-up, from the chip over the cards. @param {HTMLElement} anchor */
+  function setupPopover(anchor) {
+    const s = ls();
+    const hooks = el("select", { id: "setup-hooks" });
+    for (const n of HOOK_COUNTS) hooks.add(new Option(tn("hooks.option", n / 8, { hooks: n }), String(n)));
+    hooks.value = String(s.loom.deck.hooks);
+    hooks.addEventListener("change", () => act.setHooks(store, Number(hooks.value)));
+    const tie = el("select", { id: "setup-tie" });
+    for (const [key, ti] of Object.entries(TIES)) tie.add(new Option(words(tieLabel(ti)), key));
+    tie.value = tieKey(s.loom.tie);
+    tie.addEventListener("change", () => act.setTie(store, TIES[tie.value]));
+    popover(anchor, "setup", t("setup.tip"), [el("label", { for: "setup-hooks", text: t("setup.hooks") }), hooks, el("label", { for: "setup-tie", text: t("setup.tie") }), tie]);
+  }
+
+  /** The cloth's colours, from the palette over the cloth. @param {HTMLElement} anchor */
+  function coloursPopover(anchor) {
+    const s = ls();
+    const warp = el("input", { type: "color", id: "colour-warp", value: s.warp });
+    warp.addEventListener("input", () => act.setColours(store, { warp: warp.value }));
+    const weft = el("input", { type: "color", id: "colour-weft", value: s.weft });
+    weft.addEventListener("input", () => act.setColours(store, { weft: weft.value }));
+    const again = el("button", { type: "button", class: "btn", text: t("colours.reset") });
+    again.addEventListener("click", () => {
+      act.setColours(store, { warp: act.WARP, weft: act.WEFT });
+      warp.value = act.WARP;
+      weft.value = act.WEFT;
+    });
+    popover(anchor, "colours", t("colours.tip"), [el("label", { for: "colour-warp", text: t("setup.warp") }), warp, el("label", { for: "colour-weft", text: t("setup.weft") }), weft, el("span"), again]);
   }
 
   function aboutDialog() {
@@ -242,10 +270,6 @@ export function createShell(store, root) {
     }
     tabs(list, (id) => act.setWorkspace(store, /** @type {Workspace} */ (id.slice(3))));
     for (const tab of list.children) tab.setAttribute("aria-selected", String(tab.id === `ws-${store.state.workspace}`));
-    const setup = el("button", { type: "button", class: "btn has-icon", "aria-haspopup": "dialog" }, [icon("tune"), label("span", "bar.setup")]);
-    setup.dataset.l10nTip = "bar.setup.tip";
-    setup.setAttribute("data-tip-describes", "");
-    setup.addEventListener("click", () => setupPopover(setup));
     const share = el("button", { type: "button", class: "btn has-icon", "aria-haspopup": "menu" }, [icon("share"), label("span", "bar.share")]);
     share.dataset.l10nTip = "bar.share.tip";
     share.setAttribute("data-tip-describes", "");
@@ -254,7 +278,7 @@ export function createShell(store, root) {
     lang.dataset.l10nTip = "bar.language";
     lang.addEventListener("click", () => languageMenu(lang));
     follow((s) => [s.locale], () => lang.replaceChildren(icon("translate"), el("span", { text: LOCALE_SHORT[store.state.locale] })));
-    return el("header", { class: "topbar" }, [brand(), list, el("span", { class: "spacer" }), setup, share, lang, iconButton("info", "bar.about", aboutDialog)]);
+    return el("header", { class: "topbar" }, [brand(), list, el("span", { class: "spacer" }), share, lang, iconButton("info", "bar.about", aboutDialog)]);
   }
 
   function appbar() {
@@ -269,8 +293,7 @@ export function createShell(store, root) {
       ]),
     );
     const share = iconButton("share", "bar.share.tip", () => shareMenu(share));
-    const setup = iconButton("tune", "bar.setup.tip", () => setupPopover(setup));
-    return el("header", { class: "appbar" }, [brand(), ws, el("span", { class: "spacer" }), share, setup, menu]);
+    return el("header", { class: "appbar" }, [brand(), ws, el("span", { class: "spacer" }), share, menu]);
   }
 
   /** The card tools, over the chain. */
@@ -295,7 +318,7 @@ export function createShell(store, root) {
     ];
   }
 
-  /** The cloth's tools: its face and the 0/1 overlay. */
+  /** The cloth's tools: its face, the 0/1 overlay and its colours. */
   function clothTools() {
     const front = label("button", "cloth.faceFront", { type: "button" });
     const back = label("button", "cloth.faceBack", { type: "button" });
@@ -310,7 +333,23 @@ export function createShell(store, root) {
       back.setAttribute("aria-pressed", String(ls().face === "back"));
       bits.setAttribute("aria-pressed", String(ls().bits));
     });
-    return [el("div", { class: "seg", role: "group" }, [front, back]), bits];
+    const colours = iconButton("palette", "colours.tip", () => coloursPopover(colours));
+    colours.setAttribute("aria-haspopup", "dialog");
+    return [el("div", { class: "seg", role: "group" }, [front, back]), bits, colours];
+  }
+
+  /** The head and its tie-up, shown as they are, over the cards; pressed, they can be changed. */
+  function setupRow() {
+    const text = el("span");
+    const chip = el("button", { type: "button", class: "chip setup-chip", "aria-haspopup": "dialog" }, [icon("tune"), text, icon("keyboard_arrow_down")]);
+    chip.dataset.l10nTip = "setup.tip";
+    chip.setAttribute("data-tip-describes", "");
+    chip.addEventListener("click", () => setupPopover(chip));
+    follow((s) => [s.looms[s.current].rev, s.locale], () => {
+      const { deck, tie } = ls().loom;
+      text.textContent = t("setup.chip", { head: tn("hooks.option", deck.hooks / 8, { hooks: deck.hooks }), tie: words(tieLabel(tie)) });
+    });
+    return el("div", { class: "setup-row" }, [chip]);
   }
 
   /** The program: the card on the bench above the chain (and, in Learn, the guide above both). */
@@ -318,7 +357,7 @@ export function createShell(store, root) {
     const bench = el("div", { class: "bench-slot" });
     const chain = el("div", { class: "chain-slot" });
     const head = el("div", { class: "panel-head" }, [label("h2", "cards.title"), ...cardTools()]);
-    const panel = el("aside", { class: "panel left" }, [...(store.state.workspace === "learn" ? [guide()] : []), head, bench, chain]);
+    const panel = el("aside", { class: "panel left" }, [...(store.state.workspace === "learn" ? [guide()] : []), head, setupRow(), bench, chain]);
     put(benchPanel(store), bench);
     put(chainPanel(store), chain);
     return panel;
@@ -461,13 +500,13 @@ export function createShell(store, root) {
     return st;
   }
 
-  /** Time: the transport and the status line. */
-  function band() {
-    const transport = el("div", { class: "transport-slot" });
-    const status = el("div", { class: "status-slot" });
-    put(transportPanel(store), transport);
-    put(statusPanel(store), status);
-    return [transport, status];
+  /** Time, under the stage: what the loom just did, then the moments and the loom's controls. */
+  function time() {
+    const caption = el("div", { class: "caption" });
+    const player = el("div", { class: "player" });
+    put(statusPanel(store), caption);
+    put(transportPanel(store), player);
+    return [caption, player];
   }
 
   /** A phone's sheet: the program, the output and (in Learn) the guide, by tab. */
@@ -489,7 +528,7 @@ export function createShell(store, root) {
       if (id === "cards") {
         const bench = el("div", { class: "bench-slot" });
         const chain = el("div", { class: "chain-slot" });
-        body.append(el("div", { class: "panel-head" }, [label("h2", "cards.title"), ...cardTools()]), bench, chain);
+        body.append(el("div", { class: "panel-head" }, [label("h2", "cards.title"), ...cardTools()]), setupRow(), bench, chain);
         put(benchPanel(store), bench);
         put(chainPanel(store), chain);
       }
@@ -520,11 +559,10 @@ export function createShell(store, root) {
     root.className = `app ${mode}`;
     root.replaceChildren();
     if (mode === "desktop") {
-      const [transport, status] = band();
-      root.append(topbar(), el("div", { class: "work" }, [programPanel(), el("div", { class: "edge" }), stage(), el("div", { class: "edge" }), outputPanel()]), el("footer", { class: "band" }, [transport, status]));
+      const centre = el("div", { class: "centre" }, [stage(), ...time()]);
+      root.append(topbar(), el("div", { class: "work" }, [programPanel(), el("div", { class: "edge" }), centre, el("div", { class: "edge" }), outputPanel()]));
     } else {
-      const [transport, status] = band();
-      const under = el("div", { class: "under-stage" }, [transport, status]);
+      const under = el("div", { class: "under-stage" }, time());
       if (mode === "phone") root.append(appbar(), smallStage(), under, sheet());
       else root.append(appbar(), el("div", { class: "land" }, [el("div", { class: "land-stage" }, [smallStage(), under]), sheet()]));
     }

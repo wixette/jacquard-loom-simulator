@@ -9,16 +9,29 @@
 .bench-box svg.bench-card { flex: 1 1 auto; min-height: 60px; max-height: none; }
 .bench-box .bench-label { margin: 0; font-size: 11px; color: var(--md-on-surface-variant); }
 
-/* the transport: the loom's buttons, the speed, the six moments, where it is */
-.transport { display: flex; flex-direction: column; gap: 8px; padding: 8px 10px; }
-.transport-row { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
-.transport .speed { display: flex; align-items: center; gap: 8px; flex: 1 1 160px; font-size: 12px; color: var(--md-on-surface-variant); }
-.transport .speed input { flex: 1; min-width: 80px; accent-color: var(--md-primary); }
-.moments { list-style: none; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 3px; margin: 0; padding: 0; font-size: 11px; }
-.moments li { padding: 4px 4px; border-radius: 6px; background: var(--md-surface-mid); color: var(--md-on-surface-variant); text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.moments li.done { background: var(--md-secondary-container); color: var(--md-on-secondary-container); }
-.moments li.here { background: var(--md-primary); color: var(--md-on-primary); font-weight: 600; }
+/* the transport: the six moments of a pick as a stepper (a state, so no button's fill or border:
+   dots on a track, the moment reached ringed), then where the loom is, the controls with play
+   the largest, and the speed */
+.transport { display: flex; flex-direction: column; gap: 10px; padding: 8px 10px; }
+.moments { list-style: none; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); margin: 0; padding: 0; font-size: 11.5px; line-height: 1.3; cursor: default; }
+.moments li { position: relative; display: flex; flex-direction: column; align-items: center; gap: 5px; min-width: 0; padding: 0 2px; text-align: center; color: var(--md-on-surface-variant); }
+.moments li::before { content: ""; position: absolute; top: 6px; right: 50%; width: 100%; height: 2px; background: var(--md-outline-variant); }
+.moments li:first-child::before { display: none; }
+.moments li.done::before { background: var(--md-primary); }
+.moments .dot { position: relative; z-index: 1; box-sizing: border-box; width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--md-outline); background: var(--md-surface-low); }
+.moments li.done .dot { border-color: var(--md-primary); background: var(--md-primary); }
+.moments li.here .dot { border-color: var(--md-primary); background: var(--md-primary); box-shadow: 0 0 0 4px color-mix(in srgb, var(--md-primary) 30%, transparent); }
+.moments li.here { color: var(--md-on-surface); font-weight: 650; }
+.transport-row { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 16px; }
+.controls { display: flex; align-items: center; gap: 10px; }
+.controls .btn.icon-only { width: 44px; height: 44px; }
+.controls .btn.play { width: 56px; height: 56px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35); }
+.controls .btn.play .icon { width: 32px; height: 32px; }
+.controls [data-act="reset"] { width: 40px; height: 40px; margin-right: 4px; }
 .where { margin: 0; font-size: 12px; color: var(--md-on-surface-variant); font-variant-numeric: tabular-nums; }
+.transport .speed { justify-self: end; display: flex; flex-direction: column; align-items: stretch; gap: 2px; width: min(100%, 220px); font-size: 12px; color: var(--md-on-surface-variant); }
+.transport .speed input { width: 100%; margin: 0; accent-color: var(--md-primary); }
+.transport .speed-out { white-space: nowrap; }
 
 /* the status line, and the thread followed */
 .status-line { margin: 0; padding: 8px 12px; font-size: 13px; line-height: 1.45; user-select: text; -webkit-user-select: text; }
