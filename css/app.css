@@ -1,0 +1,148 @@
+/* The main app's frame (design/ui-layout.md): a top bar, the program on the left, the stage in
+   the middle, the output on the right, time along the bottom; on a phone, the stage on top, the
+   transport under it, and a bottom sheet with the rest. The page itself never scrolls; each
+   panel scrolls inside itself. Colours from css/theme.css, components from css/ui.css and
+   css/components.css, drawings from css/views.css. */
+
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; overflow: hidden; }
+body {
+  font-family: var(--font);
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--md-on-surface);
+  background: var(--md-surface);
+  font-variant-numeric: tabular-nums;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+button, input, select { font: inherit; color: inherit; }
+select { padding: 4px 8px; border-radius: var(--radius-s); border: 1px solid var(--md-outline-variant); background: var(--md-surface-high); }
+[hidden] { display: none !important; }
+
+/* ---- the frame: desktop ------------------------------------------------------------------- */
+.app { display: grid; grid-template-rows: 56px minmax(0, 1fr) auto; height: 100dvh; }
+.work {
+  display: grid;
+  grid-template-columns: var(--left, 320px) 1px minmax(0, 1fr) 1px var(--right, 340px);
+  min-height: 0;
+}
+.work.left-closed { grid-template-columns: 0 0 minmax(0, 1fr) 1px var(--right, 340px); }
+.work.right-closed { grid-template-columns: var(--left, 320px) 1px minmax(0, 1fr) 0 0; }
+.work.left-closed.right-closed { grid-template-columns: 0 0 minmax(0, 1fr) 0 0; }
+.edge { background: var(--md-outline-variant); }
+
+/* ---- the top bar ---------------------------------------------------------------------------- */
+.topbar { display: flex; align-items: center; gap: 4px; padding: 0 8px 0 12px; background: var(--md-surface-low); border-bottom: 1px solid var(--md-outline-variant); min-width: 0; }
+.brand { display: flex; align-items: center; gap: 10px; min-width: 0; color: var(--md-on-surface); text-decoration: none; font-size: 16px; font-weight: 620; margin-right: 12px; }
+.brand img { width: 40px; height: 32px; flex: none; }
+.brand span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.topbar .spacer { flex: 1; }
+.workspaces { display: flex; align-self: stretch; }
+.workspaces .tab { flex: none; padding: 0 16px; font-size: 14px; }
+.topbar .btn.has-icon { color: var(--md-on-surface-variant); }
+.lang-btn { gap: 6px; padding: 0 10px; font-weight: 600; }
+
+/* ---- the panels beside the stage -------------------------------------------------------------- */
+.panel { display: flex; flex-direction: column; min-width: 0; min-height: 0; overflow: hidden; background: var(--md-surface-low); }
+.panel-head { display: flex; align-items: center; gap: 4px; min-height: 44px; padding: 4px 6px 4px 14px; border-bottom: 1px solid var(--md-outline-variant); background: var(--md-surface-mid); }
+.panel-head h2 { flex: 1; margin: 0; font-size: 12px; font-weight: 650; letter-spacing: 0.08em; text-transform: uppercase; color: var(--md-on-surface-variant); white-space: nowrap; }
+.panel-head .btn.icon-only { width: 34px; height: 34px; }
+.panel-head .icon { width: 18px; height: 18px; }
+.bench-slot { flex: 0 0 auto; height: clamp(150px, 26%, 230px); padding: 8px 10px 0; }
+.chain-slot { flex: 1 1 auto; min-height: 0; }
+.cloth-slot { flex: 1 1 auto; min-height: 0; }
+.trace-slot { flex: 0 0 auto; max-height: 40%; overflow: auto; border-top: 1px solid var(--md-outline-variant); }
+.seg { display: inline-flex; border: 1px solid var(--md-outline-variant); border-radius: var(--radius-full); overflow: hidden; }
+.seg button { border: 0; background: transparent; padding: 4px 12px; font-size: 12px; font-weight: 560; color: var(--md-on-surface-variant); cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--md-secondary-container); color: var(--md-on-secondary-container); }
+.seg button + button { border-left: 1px solid var(--md-outline-variant); }
+
+/* ---- the stage: one, two or four panes, each one view ------------------------------------------- */
+.stage { position: relative; display: grid; gap: 1px; min-width: 0; min-height: 0; background: var(--md-outline-variant); }
+.stage[data-n="1"] { grid-template: minmax(0, 1fr) / minmax(0, 1fr); }
+.stage[data-n="2"] { grid-template: minmax(0, 1fr) / repeat(2, minmax(0, 1fr)); }
+.stage[data-n="4"] { grid-template: repeat(2, minmax(0, 1fr)) / repeat(2, minmax(0, 1fr)); }
+.pane { position: relative; display: flex; min-width: 0; min-height: 0; background: var(--stage-bg); }
+.pane-host { flex: 1; min-width: 0; min-height: 0; display: flex; }
+/* a 2D drawing keeps clear of the tools floating over its top edge (the 3D view goes under them) */
+.pane-host.view:has(> svg) { padding-top: 52px; }
+.app:not(.desktop) .pane-host.view:has(> svg) { padding-top: 46px; }
+.pane-host.view { border-radius: 0; }
+.pane-tools, .stage-tools, .stage-foot { position: absolute; display: flex; align-items: center; gap: 6px; pointer-events: none; z-index: 3; }
+.pane-tools > *, .stage-tools > *, .stage-foot > * { pointer-events: auto; }
+.pane-tools { top: 10px; left: 10px; right: 10px; flex-wrap: wrap; }
+.stage-tools { top: 10px; right: 10px; }
+.stage-foot { left: 10px; bottom: 10px; }
+.chip.view-chip { padding-right: 6px; color: var(--md-on-surface); font-weight: 600; }
+.chip .chev { width: 18px; height: 18px; }
+.chip-row { display: inline-flex; }
+.chip-row .chip { border-radius: 0; padding: 0 8px; }
+.chip-row .chip:first-child { border-radius: var(--radius-s) 0 0 var(--radius-s); }
+.chip-row .chip:last-child { border-radius: 0 var(--radius-s) var(--radius-s) 0; }
+.chip-row .chip + .chip { margin-left: -1px; }
+.chip select { border: 0; background: transparent; padding: 0; color: inherit; }
+.follow-chip { border-color: transparent; background: var(--md-primary-container); color: var(--md-on-primary-container); }
+
+/* ---- time, along the bottom ------------------------------------------------------------------- */
+.band { display: grid; grid-template-columns: minmax(520px, auto) minmax(0, 1fr); align-items: stretch; border-top: 1px solid var(--md-outline-variant); background: var(--md-surface-low); }
+.band > .transport-slot { border-right: 1px solid var(--md-outline-variant); }
+.band .transport { flex-direction: row; flex-wrap: wrap; align-items: center; gap: 6px 14px; padding: 6px 12px; }
+.band .transport .moments { flex: 1 1 360px; }
+.band .transport .speed { flex: 0 1 220px; }
+.band .transport .where { flex: 1 0 100%; }
+.band .status-slot { display: flex; align-items: center; min-width: 0; }
+@media (max-width: 1599px) {
+  .band { grid-template-columns: minmax(0, 1fr); }
+  .band > .transport-slot { border-right: 0; border-bottom: 1px solid var(--md-outline-variant); }
+  .band .transport .where { flex: 0 1 auto; }
+}
+@media (max-width: 1279px) {
+  .work { --left: 280px; --right: 300px; }
+}
+
+/* ---- phones and small tablets: the same components, other slots --------------------------------- */
+.appbar { display: flex; align-items: center; gap: 2px; padding: 0 4px 0 8px; height: 52px; background: var(--md-surface-low); border-bottom: 1px solid var(--md-outline-variant); }
+.appbar .brand { margin-right: 4px; }
+.appbar .brand span { display: none; }
+.appbar select.ws { font-weight: 620; padding: 6px 8px; }
+.app.phone { grid-template-rows: 52px minmax(0, 46fr) auto minmax(0, 54fr); }
+.app.phone .stage { grid-template: auto minmax(0, 1fr) / minmax(0, 1fr); gap: 0; background: var(--stage-bg); }
+.view-chips { display: flex; gap: 6px; padding: 8px 10px 0; overflow-x: auto; scrollbar-width: none; }
+.view-chips .chip { flex: none; }
+.app:not(.desktop) .pane-tools { top: 6px; left: 8px; right: 8px; flex-wrap: nowrap; }
+.app:not(.desktop) .pane-tools .chip { height: 30px; font-size: 12px; }
+.app:not(.desktop) .pane-tools label.chip { min-width: 0; flex: 0 1 auto; overflow: hidden; }
+.band .transport .speed-out, .under-stage .transport .speed-out { white-space: nowrap; }
+.under-stage { border-top: 1px solid var(--md-outline-variant); border-bottom: 1px solid var(--md-outline-variant); background: var(--md-surface-low); }
+.under-stage .transport { flex-direction: row; flex-wrap: wrap; align-items: center; padding: 6px 10px; gap: 6px 10px; }
+.under-stage .transport .btn.icon-only { width: 48px; height: 48px; }
+.under-stage .transport .moments, .under-stage .transport .speed { display: none; }
+.under-stage .transport .where { flex: 1; text-align: right; }
+.under-stage .status-line { padding: 2px 12px 8px; font-size: 12.5px; display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.sheet { display: flex; flex-direction: column; min-height: 0; background: var(--md-surface-low); }
+.sheet .grab { align-self: center; width: 36px; height: 4px; margin: 8px 0 2px; border-radius: 2px; background: var(--md-outline); }
+.sheet .tabs { background: transparent; }
+.sheet-body { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.app.landscape { grid-template-rows: 44px minmax(0, 1fr); }
+.app.landscape .appbar { height: 44px; }
+.app.landscape .land { display: grid; grid-template-columns: minmax(0, 60fr) minmax(0, 40fr); min-height: 0; }
+.app.landscape .land-stage { display: grid; grid-template-rows: minmax(0, 1fr) auto; min-height: 0; }
+.app.landscape .land-stage .stage { grid-template: auto minmax(0, 1fr) / minmax(0, 1fr); gap: 0; background: var(--stage-bg); }
+.app.landscape .sheet { border-left: 1px solid var(--md-outline-variant); }
+.app.landscape .under-stage .status-line { display: none; }
+
+/* ---- the setup popover and the about dialog ---------------------------------------------------- */
+.popover { position: fixed; z-index: 25; display: grid; grid-template-columns: auto 1fr; gap: 10px 14px; align-items: center; padding: 14px 16px; border-radius: var(--radius-m); background: var(--md-surface-highest); box-shadow: 0 8px 28px rgba(0, 0, 0, 0.5); }
+.popover label { font-size: 12px; color: var(--md-on-surface-variant); }
+.popover input[type="color"] { width: 44px; height: 28px; padding: 0; border: 1px solid var(--md-outline-variant); border-radius: 6px; background: none; }
+
+/* ---- the guide (Learn): the tutorial's step card above the panel it needs ---------------------- */
+.guide { padding: 12px 14px; border-bottom: 1px solid var(--md-outline-variant); background: var(--md-surface-mid); }
+.step-card { padding: 14px; border: 1px solid var(--card-edge); border-radius: var(--radius-l); background: var(--md-surface-high); }
+.step-kicker { margin: 0 0 4px; font-size: 11px; font-weight: 650; letter-spacing: 0.08em; text-transform: uppercase; color: var(--md-primary); }
+.step-card h3 { margin: 0 0 6px; font-size: 17px; }
+.step-card p { margin: 0 0 10px; user-select: text; -webkit-user-select: text; }
+.taskline { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: var(--radius-s); background: var(--attention-container); color: var(--on-attention-container); font-size: 13px; }
+.step-nav { display: flex; justify-content: space-between; margin-top: 10px; }

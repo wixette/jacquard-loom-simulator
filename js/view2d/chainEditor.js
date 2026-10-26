@@ -146,6 +146,7 @@ export class BenchCard {
     }
     this.svg.innerHTML = out.join("");
     this.svg.setAttribute("aria-label", t("bench.name", { card: selected + 1 }));
-    this.label.textContent = tn("bench.caption", columns, { card: selected + 1 });
+    this.label.textContent = tn("bench.short", columns, { card: selected + 1 });
+    this.label.title = tn("bench.caption", columns, { card: selected + 1 });
   }
 }
