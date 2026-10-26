@@ -1,0 +1,21 @@
+{
+  "name": "jacquard-loom-simulator",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "description": "Interactive simulator of the Jacquard loom: punch the cards, turn the loom, and watch the head choose every thread. Mechanism in 2D and 3D, lessons and games.",
+  "license": "Apache-2.0",
+  "homepage": "https://wixette.github.io/jacquard-loom-simulator/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wixette/jacquard-loom-simulator.git"
+  },
+  "packageManager": "pnpm@10.33.0",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "check:refs": "node tools/check-refs.mjs",
+    "test": "node --test \"tools/*.test.mjs\""
+  }
+}
