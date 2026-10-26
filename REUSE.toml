@@ -25,3 +25,35 @@ SPDX-FileCopyrightText = "2026 jacquard-loom-simulator contributors"
 SPDX-License-Identifier = "CC-BY-SA-4.0"
 
 # ---- Third-party material ----------------------------------------------------
+
+# Vendored library, copied unchanged from npm (pnpm vendor); it keeps its LICENSE.
+[[annotations]]
+path = "vendor/three/**"
+precedence = "override"
+SPDX-FileCopyrightText = "2010-2026 three.js authors"
+SPDX-License-Identifier = "MIT"
+
+# The name game's font: the ASCII glyphs of Unscii 8 x 16 (Viznut, http://viznut.fi/unscii/),
+# public domain.
+[[annotations]]
+path = "js/game/unscii16.js"
+precedence = "override"
+SPDX-FileCopyrightText = "Viznut (Unscii font)"
+SPDX-License-Identifier = "LicenseRef-PublicDomain"
+
+# Wikimedia Commons and Flickr photos, Wellcome, Rijksmuseum, Met and Cooper Hewitt images:
+# mixed licences. The authoritative per-file licence, author and source URL are in
+# research/data/photo_catalog.json (and research/images/ATTRIBUTION.md).
+[[annotations]]
+path = "research/images/commons/**"
+precedence = "override"
+SPDX-FileCopyrightText = "Wikimedia Commons and Flickr contributors (see research/data/photo_catalog.json)"
+SPDX-License-Identifier = "CC0-1.0 OR LicenseRef-PublicDomain OR CC-BY-2.0 OR CC-BY-3.0 OR CC-BY-4.0 OR CC-BY-SA-2.0 OR CC-BY-SA-3.0 OR CC-BY-SA-4.0 OR GFDL-1.2-or-later"
+
+# Plates from Posselt (1887), Barlow (1878) and Ure (1839), scanned by the Internet Archive:
+# public domain.
+[[annotations]]
+path = "research/images/pd-scans/**"
+precedence = "override"
+SPDX-FileCopyrightText = "E. A. Posselt (1887); A. Barlow (1878); A. Ure (1839) - public domain"
+SPDX-License-Identifier = "LicenseRef-PublicDomain"

@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>M0 · One cross-row of a Jacquard head</title>
+    <meta name="description" content="Punch the cards of an eight-hook Jacquard head and watch, in a side section drawn to scale, how each hole lifts a warp thread." />
+    <link rel="icon" href="../../images/favicon.svg?v=0.0.1" type="image/svg+xml" />
+    <link rel="stylesheet" href="./style.css?v=0.0.1" />
+    <!-- Every file name here carries the version (?v=), and so does each module the
+         scripts import, through this map, so no cache can serve an old file to a new
+         page. pnpm version writes them, or pnpm stamp (tools/stamp.mjs); do not edit them
+         by hand. -->
+    <script type="importmap">
+    {
+      "imports": {
+        "three": "../../vendor/three/build/three.module.js?v=0.0.1",
+        "three/addons/controls/OrbitControls.js": "../../vendor/three/examples/jsm/controls/OrbitControls.js?v=0.0.1",
+        "three/addons/loaders/GLTFLoader.js": "../../vendor/three/examples/jsm/loaders/GLTFLoader.js?v=0.0.1",
+        "three/addons/utils/BufferGeometryUtils.js": "../../vendor/three/examples/jsm/utils/BufferGeometryUtils.js?v=0.0.1",
+        "three/addons/utils/SkeletonUtils.js": "../../vendor/three/examples/jsm/utils/SkeletonUtils.js?v=0.0.1",
+        "../../js/accept/clothCheck.js": "../../js/accept/clothCheck.js?v=0.0.1",
+        "../../js/accept/gameChecks.js": "../../js/accept/gameChecks.js?v=0.0.1",
+        "../../js/accept/harness.js": "../../js/accept/harness.js?v=0.0.1",
+        "../../js/accept/labelCheck.js": "../../js/accept/labelCheck.js?v=0.0.1",
+        "../../js/accept/m0Checks.js": "../../js/accept/m0Checks.js?v=0.0.1",
+        "../../js/accept/m1Checks.js": "../../js/accept/m1Checks.js?v=0.0.1",
+        "../../js/accept/m2Checks.js": "../../js/accept/m2Checks.js?v=0.0.1",
+        "../../js/accept/m3Checks.js": "../../js/accept/m3Checks.js?v=0.0.1",
+        "../../js/accept/m4Checks.js": "../../js/accept/m4Checks.js?v=0.0.1",
+        "../../js/accept/selftestPanel.js": "../../js/accept/selftestPanel.js?v=0.0.1",
+        "../../js/app/learnerPage.js": "../../js/app/learnerPage.js?v=0.0.1",
+        "../../js/app/lessonDock.js": "../../js/app/lessonDock.js?v=0.0.1",
+        "../../js/app/loomPage.js": "../../js/app/loomPage.js?v=0.0.1",
+        "../../js/app/parts3d.js": "../../js/app/parts3d.js?v=0.0.1",
+        "../../js/app/pictureHelper.js": "../../js/app/pictureHelper.js?v=0.0.1",
+        "../../js/game/nameGame.js": "../../js/game/nameGame.js?v=0.0.1",
+        "../../js/game/unscii16.js": "../../js/game/unscii16.js?v=0.0.1",
+        "../../js/main.js": "../../js/main.js?v=0.0.1",
+        "../../js/scene/cards3d.js": "../../js/scene/cards3d.js?v=0.0.1",
+        "../../js/scene/frame.js": "../../js/scene/frame.js?v=0.0.1",
+        "../../js/scene/rig.js": "../../js/scene/rig.js?v=0.0.1",
+        "../../js/scene/units.js": "../../js/scene/units.js?v=0.0.1",
+        "../../js/scene/unitsView.js": "../../js/scene/unitsView.js?v=0.0.1",
+        "../../js/scene/viewer.js": "../../js/scene/viewer.js?v=0.0.1",
+        "../../js/sim/cycle.js": "../../js/sim/cycle.js?v=0.0.1",
+        "../../js/sim/deck.js": "../../js/sim/deck.js?v=0.0.1",
+        "../../js/sim/design.js": "../../js/sim/design.js?v=0.0.1",
+        "../../js/sim/head.js": "../../js/sim/head.js?v=0.0.1",
+        "../../js/sim/link.js": "../../js/sim/link.js?v=0.0.1",
+        "../../js/sim/loom.js": "../../js/sim/loom.js?v=0.0.1",
+        "../../js/sim/params.js": "../../js/sim/params.js?v=0.0.1",
+        "../../js/sim/tieup.js": "../../js/sim/tieup.js?v=0.0.1",
+        "../../js/sim/trace.js": "../../js/sim/trace.js?v=0.0.1",
+        "../../js/teach/lessons.js": "../../js/teach/lessons.js?v=0.0.1",
+        "../../js/teach/printCards.js": "../../js/teach/printCards.js?v=0.0.1",
+        "../../js/view2d/cardEditor.js": "../../js/view2d/cardEditor.js?v=0.0.1",
+        "../../js/view2d/cardLayout.js": "../../js/view2d/cardLayout.js?v=0.0.1",
+        "../../js/view2d/chainEditor.js": "../../js/view2d/chainEditor.js?v=0.0.1",
+        "../../js/view2d/clothGrid.js": "../../js/view2d/clothGrid.js?v=0.0.1",
+        "../../js/view2d/clothView.js": "../../js/view2d/clothView.js?v=0.0.1",
+        "../../js/view2d/frontView.js": "../../js/view2d/frontView.js?v=0.0.1",
+        "../../js/view2d/labels.js": "../../js/view2d/labels.js?v=0.0.1",
+        "../../js/view2d/layout.js": "../../js/view2d/layout.js?v=0.0.1",
+        "../../js/view2d/sectionView.js": "../../js/view2d/sectionView.js?v=0.0.1",
+        "../../js/view2d/sideView.js": "../../js/view2d/sideView.js?v=0.0.1",
+        "../../package.json": "../../package.json?v=0.0.1",
+        "../../params/machine.json": "../../params/machine.json?v=0.0.1",
+        "../../vendor/three/build/three.core.js": "../../vendor/three/build/three.core.js?v=0.0.1",
+        "../../vendor/three/build/three.module.js": "../../vendor/three/build/three.module.js?v=0.0.1",
+        "../../vendor/three/examples/jsm/controls/OrbitControls.js": "../../vendor/three/examples/jsm/controls/OrbitControls.js?v=0.0.1",
+        "../../vendor/three/examples/jsm/loaders/GLTFLoader.js": "../../vendor/three/examples/jsm/loaders/GLTFLoader.js?v=0.0.1",
+        "../../vendor/three/examples/jsm/utils/BufferGeometryUtils.js": "../../vendor/three/examples/jsm/utils/BufferGeometryUtils.js?v=0.0.1",
+        "../../vendor/three/examples/jsm/utils/SkeletonUtils.js": "../../vendor/three/examples/jsm/utils/SkeletonUtils.js?v=0.0.1"
+      }
+    }
+    </script>
+  </head>
+  <body>
+    <header class="top">
+      <div>
+        <h1>One cross-row of a Jacquard head</h1>
+        <p class="sub">M0 prototype · a single-lift head of the 1810s–1900, eight hooks shown in section, to scale from Posselt (1887)</p>
+      </div>
+      <p class="rule"><strong>hole = 1 = warp end lifted</strong> · blank = 0 = warp stays down</p>
+    </header>
+
+    <aside id="cards-panel" class="panel">
+      <h2>The cards</h2>
+      <div class="row">
+        <select id="preset" aria-label="Ready-made decks"></select>
+        <button id="load" type="button">Load</button>
+      </div>
+      <div class="row tools">
+        <button id="add" type="button" title="Add a blank card after the selected one">+ Card</button>
+        <button id="dup" type="button" title="Duplicate the selected card">Duplicate</button>
+        <button id="del" type="button" title="Delete the selected card">Delete</button>
+        <button id="up" type="button" title="Move the selected card earlier" aria-label="Move card earlier">↑</button>
+        <button id="down" type="button" title="Move the selected card later" aria-label="Move card later">↓</button>
+        <button id="inv" type="button" title="Punch the blanks and fill the holes of the selected card">Invert</button>
+      </div>
+      <label class="check"><input id="loop" type="checkbox" /> Lace the chain into a loop</label>
+      <p class="hint">Click a hole to punch it. Click a card's number to select it. Each card is shown turned on its side: hole 1, at the left, is read by the top needle and lifts hook 1.</p>
+      <div id="cards"></div>
+    </aside>
+
+    <main id="stage" class="panel">
+      <div class="stage-bar">
+        <div class="seg" role="group" aria-label="View">
+          <button type="button" data-view="whole" class="on">Whole head</button>
+          <button type="button" data-view="needles">Needles and card</button>
+          <button type="button" data-view="crooks">Knives and crooks</button>
+        </div>
+        <label class="check"><input id="labels" type="checkbox" checked /> Labels</label>
+      </div>
+      <div id="section"></div>
+      <p id="status" role="status" aria-live="polite">Card 1 is pressed against the needles. Press Step ▸ to turn the loom to the next moment, or Play.</p>
+    </main>
+
+    <aside id="side" class="panel">
+      <section>
+        <h2>Turn the loom</h2>
+        <div class="row transport">
+          <button id="back" type="button" title="Back to the previous moment">◂ Step</button>
+          <button id="play" type="button" title="Play or pause">▶ Play</button>
+          <button id="fwd" type="button" title="On to the next moment">Step ▸</button>
+        </div>
+        <label class="slider">Speed: <span id="speed-out">8</span> picks a minute <input id="speed" type="range" min="2" max="40" value="8" /></label>
+        <ol id="stops" class="stops" aria-label="The moments of one pick"></ol>
+        <p id="where" class="where"></p>
+        <button id="reset" class="reset" type="button" title="Back to card 1, no cloth">↺ Reset machine</button>
+      </section>
+      <section>
+        <h2>Follow a hook</h2>
+        <p id="follow-text" class="hint">Click any needle, hook, knife or mail in the section, or a column of the cloth, to follow that hook everywhere.</p>
+        <button id="unfollow" type="button" hidden>Stop following</button>
+      </section>
+      <section>
+        <h2>The cloth</h2>
+        <label class="slider">Tie-up
+          <select id="tie">
+            <option value="s1">Straight tie: hook n lifts end n (8 ends)</option>
+            <option value="s3">Straight tie × 3: each hook lifts 3 ends (24 ends)</option>
+            <option value="p">Point tie: 1…8…1, mirrored (15 ends)</option>
+          </select>
+        </label>
+        <div id="cloth"></div>
+        <p class="hint">First pick at the bottom. 1 = the warp end lies over the weft; 0 = the weft lies over it. A row joins the cloth when the batten beats it up.</p>
+      </section>
+      <footer>
+        <p>Simplifications: the cards' timing within a pick is estimated (the order of events is documented); a pushed hook is drawn moving sideways above the grate (the real wire flexes); the cylinder's swing is drawn as a slide; the harness is shortened and hangs straight down; stepping back unweaves exactly.</p>
+      </footer>
+    </aside>
+    <script type="module" src="./main.js?v=0.0.1"></script>
+  </body>
+</html>

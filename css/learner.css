@@ -1,0 +1,82 @@
+/* The learner page (index.html), on top of loom.css: the right-hand panel holds the
+   transport, one dock (lessons, picture helper, about) and the cloth. */
+
+body.learner { grid-template-columns: 340px minmax(0, 1fr) 390px; }
+body.learner #side-panel { gap: 10px; overflow: hidden; }
+body.learner #side-panel > section { flex: 0 0 auto; }
+body.learner #side-panel > section.dock { flex: 1 1 auto; min-height: 180px; display: flex; flex-direction: column; }
+body.learner #side-panel > .selftest { flex: 0 1 auto; overflow-y: auto; max-height: 40vh; }
+body.learner .turn .stops { margin: 6px 0 2px; }
+body.learner .turn .slider { margin: 4px 0; }
+body.learner .trace { min-height: 0; margin-top: 4px; }
+body.learner #cloth { max-height: 24vh; }
+body.learner .cloth-sec .row.colours { margin-bottom: 4px; }
+
+.dock-tabs { display: flex; gap: 0; margin-bottom: 8px; }
+.dock-tabs button { flex: 1; border-radius: 0; margin-left: -1px; padding: 6px 4px; }
+.dock-tabs button:first-child { border-radius: 6px 0 0 6px; margin-left: 0; }
+.dock-tabs button:last-child { border-radius: 0 6px 6px 0; }
+.dock-panel { flex: 1 1 auto; min-height: 0; overflow-y: auto; font-size: 13px; line-height: 1.45; padding-right: 4px; }
+.dock-panel[hidden] { display: none; }
+.dock-panel h3 { font-size: 14px; margin: 10px 0 4px; }
+.dock-panel p { margin: 4px 0 8px; }
+.dock-intro { color: var(--muted); font-size: 12px; }
+button.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); width: 100%; margin: 6px 0; }
+button.primary:disabled { opacity: 0.45; cursor: not-allowed; }
+
+/* ---- the parts in 3D, in the mechanism pane ------------------------------------------------ */
+.parts3d { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 6px; }
+.parts3d[hidden], #section[hidden], .section-only[hidden] { display: none; }
+.parts-bar { display: flex; flex-wrap: wrap; gap: 4px; }
+.parts-bar button { font-size: 12px; padding: 4px 8px; }
+.parts3d-view { flex: 1; min-height: 0; position: relative; background: #e9e7e2; border-radius: 6px; overflow: hidden; }
+.parts3d-view > canvas { width: 100%; height: 100%; display: block; }
+.parts3d-view .loading { position: absolute; inset: 0; display: grid; place-items: center; margin: 0; color: var(--muted); font-size: 13px; }
+.parts-idea { margin: 0; font-size: 12px; color: var(--muted); line-height: 1.4; }
+
+@media (min-width: 761px) {
+  body.learner #stage.three { grid-template-areas: "section section" "front front" "status status"; grid-template-rows: minmax(0, 1.6fr) minmax(0, 1fr) auto; }
+}
+body.learner #stage.three #side-pane { display: none; }
+
+/* ---- lessons -------------------------------------------------------------------------- */
+.lesson-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 5px; }
+.lesson-list button { width: 100%; text-align: left; display: flex; gap: 10px; align-items: flex-start; padding: 7px 9px; }
+.lesson-list small { color: var(--muted); font-size: 12px; }
+.lid { font-weight: 700; color: var(--accent); min-width: 1.8em; }
+.lesson-bar { display: flex; justify-content: space-between; align-items: center; }
+.lesson-bar .lid { font-size: 12px; }
+.goal { color: var(--muted); }
+.steps { padding-left: 1.3em; margin: 6px 0; }
+.steps li { margin: 3px 0; }
+.notice { background: #eef3f9; border-radius: 6px; padding: 7px 9px; }
+.question { background: #fdf3dc; border-radius: 6px; padding: 7px 9px; }
+
+/* ---- the picture helper ------------------------------------------------------------------ */
+.pic-grid { width: 100%; max-width: 320px; aspect-ratio: 1; display: block; margin: 4px auto 8px; border: 1px solid var(--line); border-radius: 4px; cursor: crosshair; touch-action: none; }
+.pic-preview { display: block; margin: 6px auto; max-width: 100%; image-rendering: pixelated; border: 1px solid var(--line); }
+.pic-report { background: #f3efe6; border-radius: 6px; padding: 7px 9px; font-size: 12px; }
+.pic-report.warn { background: #fdebd8; }
+.float-key { color: #d62d20; font-weight: 600; }
+.row.opts { align-items: flex-end; margin-top: 6px; }
+.row.opts > * { flex: 0 1 auto; }
+.file-btn { font-size: 13px; padding: 6px 9px; border-radius: 6px; border: 1px solid var(--line); background: #fbfaf7; cursor: pointer; position: relative; overflow: hidden; }
+.file-btn:hover { border-color: var(--accent); }
+.file-btn input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+.dock-panel .seg { margin: 4px 0; }
+
+/* ---- about ------------------------------------------------------------------------------- */
+.about ul { padding-left: 1.2em; margin: 4px 0 8px; }
+.about li { margin: 3px 0; }
+.version { color: var(--muted); font-size: 12px; }
+
+@media (max-width: 1250px) {
+  body.learner { grid-template-columns: 340px minmax(0, 1fr); }
+  body.learner #side-panel { overflow: visible; }
+  body.learner #side-panel > section.dock { min-height: 0; }
+  .dock-panel { overflow: visible; }
+  body.learner #cloth { max-height: 46vh; }
+}
+@media (max-width: 760px) {
+  body.learner { grid-template-columns: 1fr; }
+}

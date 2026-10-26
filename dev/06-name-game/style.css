@@ -1,0 +1,23 @@
+/* The name game prototype, on top of css/loom.css. */
+
+body.game-page { grid-template-columns: 340px minmax(0, 1fr); grid-template-areas: "top top" "panel stage"; }
+#game-panel { grid-area: panel; border-right: 1px solid var(--line); display: flex; flex-direction: column; gap: 14px; }
+#game-panel section + section { border-top: 1px solid var(--line); padding-top: 12px; }
+#game-stage { grid-area: stage; min-height: 0; padding: 12px 14px; display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) auto auto; gap: 10px; }
+#game-stage #status { grid-area: auto; }
+#text { width: 100%; font: 18px ui-monospace, "SF Mono", Menlo, monospace; letter-spacing: 0.08em; padding: 8px 10px; border: 1px solid var(--line); border-radius: 6px; resize: vertical; text-transform: none; }
+#game-stage #cloth.game-cloth { max-height: none; }
+.game-cloth { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 10px; overflow: auto; min-height: 0; max-height: none; margin: 0; }
+.plan { font-size: 13px; background: #f3efe6; border-radius: 6px; padding: 7px 9px; margin: 0 0 8px; }
+.plan.warn { background: #fdebd8; }
+.readback { margin: 0; font-size: 15px; padding: 8px 10px; border-radius: 6px; background: #eef3f9; min-height: 1.4em; }
+.readback:empty { display: none; }
+.readback strong { font-family: ui-monospace, "SF Mono", Menlo, monospace; letter-spacing: 0.06em; }
+.seg.mode { margin-bottom: 4px; }
+button.primary-btn { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+button:disabled { opacity: 0.45; cursor: not-allowed; }
+
+@media (max-width: 900px) {
+  body.game-page { grid-template-columns: 1fr; grid-template-areas: "top" "stage" "panel"; grid-template-rows: auto 70vh auto; height: auto; }
+  #game-panel { border-right: none; border-top: 1px solid var(--line); }
+}

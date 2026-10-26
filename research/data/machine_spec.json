@@ -1,0 +1,1616 @@
+{
+ "_about": "Best current values for a part-level 3D/2D model of a single-lift, single-cylinder Jacquard head on a treadle hand loom, compiled from ../sources/notes-mechanism.md. Values are given in inches (the unit of the 1878-1912 sources) and millimetres (in x 25.4, rounded to 0.1 mm). basis: doc = stated as a number in a document or museum record; drawing = scaled from a dimensioned or to-scale drawing; photo = scaled from a photo; derived = computed from doc values (the computation is in 'note'); est = estimate. confidence: high = documented and corroborated; medium = one good source or a consistent derivation; low = estimate or a source for a different machine. Source keys are defined in the Sources list at the end of ../sources/notes-mechanism.md. Posselt's dimensioned machine (Figs I-XI, pp. 11-17, drawn 1/4 full size) is a 200-hook (208-needle) cast-iron single-lift machine; it is used as the reference head because it is the only fully dimensioned one found.",
+ "compiled": "2026-10-25",
+ "machine": {
+  "value": "Single-lift single-cylinder Jacquard head, 200-hook class (208 needles and hooks = 26 x 8, 8 knives), closed (bottom-closed) shed, swing-batten card cylinder driven from the griffe by an S-iron / swan neck, griffe lifted by a treadle and cord through a head lever; on a four-post treadle hand loom with throw or fly shuttle and hand-wound take-up.",
+  "source": [
+   "POSSELT1888",
+   "BRADBURY1912",
+   "BARLOW1878",
+   "NELSON1909"
+  ],
+  "confidence": "high",
+  "note": "Bradbury p. 68: the single lift is 'the only type of machine adopted for figure weaving in the hand ... looms'. Posselt p. 12 describes a hand-loom lift from above (strap on a wooden drum); Bradbury Fig. 65 and Barlow p. 157 a head lever with a cord to the treadle. Model the head lever version (one rotating lever, one cord).",
+  "alternatives": [
+   "400-hook head (8 x 50 + 2 reserve rows = 416 needles: NELSON1909; 408 = 8 x 51: BRADBURY1912) - same parts, longer knives and cylinder",
+   "Double-lift single-cylinder (two griffes, two hooks per needle, semi-open shed: POSSELT1888 pp. 67-69) - not for a first model",
+   "Double-lift double-cylinder (two complete selecting sets: POSSELT1888 p. 69; NELSON1909) - not for a first model"
+  ]
+ },
+ "hook_layouts": {
+  "_note": "N-hook machine = N needles = N hooks; rows = hooks per cross-row = knives = needles per vertical tier.",
+  "sizes_in_common_use": {
+   "value": [
+    100,
+    200,
+    400,
+    600,
+    900,
+    1200
+   ],
+   "source": [
+    "POSSELT1888"
+   ],
+   "basis": "doc",
+   "confidence": "high",
+   "note": "Posselt p. 9; size excludes the (generally two) reserve rows"
+  },
+  "range": {
+   "value": "100 to 2600 hooks",
+   "source": [
+    "NELSON1909"
+   ],
+   "basis": "doc",
+   "confidence": "medium"
+  },
+  "actual_uprights": {
+   "value": [
+    208,
+    304,
+    408,
+    608,
+    612
+   ],
+   "source": [
+    "BRADBURY1912"
+   ],
+   "basis": "doc",
+   "confidence": "high",
+   "note": "Bradbury p. 83: 'designated ... 200, 300, 400 or 600 machines'"
+  },
+  "h200": {
+   "value": {
+    "rows": 8,
+    "cross_rows": 26,
+    "total": 208,
+    "used": 200,
+    "reserve": 8
+   },
+   "source": [
+    "POSSELT1888"
+   ],
+   "basis": "doc",
+   "confidence": "high",
+   "alternatives": [
+    "28 cross-rows x 8 = 224 of which 25 cross-rows (200) used, first and last two reserved (BRADBURY1912 p. 70, Fig. 65)"
+   ],
+   "note": "Posselt Fig. XIV card: 26 x 8 = 208 holes; Fig. VII: 208 needles; Fig. 22 (appendix): 26th row is the reserve row"
+  },
+  "h400": {
+   "value": {
+    "rows": 8,
+    "cross_rows": 50,
+    "total": 400,
+    "with_reserve": 416
+   },
+   "source": [
+    "NELSON1909",
+    "POSSELT1888"
+   ],
+   "basis": "doc",
+   "confidence": "high",
+   "alternatives": [
+    "408 = 8 x 51 (BRADBURY1912 p. 83)"
+   ],
+   "note": "Nelson: needle board for a 400 machine has 416 holes in 52 rows of 8, split by a lacing groove into 26 + 26 rows; so '26 x 16' is two halves of 26 x 8, not a 16-row machine. Posselt Fig. XXIX: neck cords 1-8 in the first row, 393-400 in the 50th."
+  },
+  "h600": {
+   "value": {
+    "rows": 12,
+    "cross_rows": 50,
+    "total": 600
+   },
+   "source": [
+    "POSSELT1888",
+    "CHC-48028"
+   ],
+   "basis": "doc",
+   "confidence": "high",
+   "alternatives": [
+    "608 / 612 uprights (BRADBURY1912 p. 83); 612 = 12 x 51"
+   ]
+  },
+  "h900_h1200_french_index": {
+   "value": {
+    "rack_pins_900": 88,
+    "rack_pins_1200": 114
+   },
+   "source": [
+    "POSSELT1888"
+   ],
+   "basis": "doc",
+   "confidence": "medium",
+   "note": "Posselt p. 88: piano-machine rack pins (one per card row position). Row count (12 or 16) not stated; 12-row is an inference."
+  },
+  "french_fine_16_row": {
+   "value": {
+    "rows": 16,
+    "holes_half_card": 440,
+    "holes_full_card": 880
+   },
+   "source": [
+    "BELL1895"
+   ],
+   "basis": "doc",
+   "confidence": "medium",
+   "note": "Bell (1895) Fig. 31: French machines with 16 rows 'much closer set'; McMurdo's 1296-hook machine also 16-row (1296 = 16 x 81)"
+  },
+  "verdol_896": {
+   "value": {
+    "zones": 2,
+    "per_zone": "56 rows x 8 holes = 448",
+    "total": 896
+   },
+   "source": [
+    "BRADBURY1912",
+    "US4438787"
+   ],
+   "basis": "doc",
+   "confidence": "medium",
+   "note": "Each 8-hole row is two staggered lines (patent: lines 3a/3b offset), cf. Bell: 'two rows of 8 making one row of 16 hooks'. 1344 = 3 x 448 is an inference, not found stated."
+  }
+ },
+ "head": {
+  "frame": {
+   "material": {
+    "value": "cast iron (US); wood for European hand-loom machines",
+    "source": [
+     "POSSELT1888"
+    ],
+    "basis": "doc",
+    "confidence": "high"
+   },
+   "main_width": {
+    "in": 9.5,
+    "mm": 241.3,
+    "source": [
+     "POSSELT1888"
+    ],
+    "basis": "doc",
+    "confidence": "high",
+    "note": "Fig. I, 6 to 7; front-to-back size of the 200 machine frame side"
+   },
+   "casting_width": {
+    "in": 1.125,
+    "mm": 28.6,
+    "source": [
+     "POSSELT1888"
+    ],
+    "basis": "doc",
+    "confidence": "high",
+    "note": "at 8 and 9 in Fig. I"
+   },
+   "height_total": {
+    "in": 16.25,
+    "mm": 412.8,
+    "source": [
+     "POSSELT1888"
+    ],
+    "basis": "doc",
+    "confidence": "high",
+    "note": "2 + 6 + 1 1/2 + 5 + 1 3/4 in (Fig. I parts 1-5)"
+   },
+   "height_parts": {
+    "in": [
+     2.0,
+     6.0,
+     1.5,
+     5.0,
+     1.75
+    ],
+    "mm": [
+     50.8,
+     152.4,
+     38.1,
+     127.0,
+     44.4
+    ],
+    "source": [
+     "POSSELT1888"
+    ],
+    "basis": "doc",
+    "confidence": "high",
+    "note": "bottom casting, lower opening, middle casting, upper opening, top casting"
+   },
+   "plunger_diameter": {
+    "in": 0.75,
+    "mm": 19.0,
+    "source": [
+     "POSSELT1888"
+    ],
+    "basis": "doc",
+    "confidence": "high",
+    "note": "griffe guide rod; slides in 3 shouldered bearings (frame heights 2 3/4, 2, 2 in at k, l, m)"
+   }
+  },
+  "bottom_board": {
+   "size": {
+    "in": [
+     12.0,
+     8.0,
+     0.75
+    ],
+    "mm": [
+     304.8,
+     203.2,
+     19.0
+    ],
+    "source": [
+     "POSSELT1888"
+    ],
+    "basis": "doc",
+    "confidence": "high",
+    "note": "length x width x thickness; one hole per hook; screwed to the frame"
+   },
+   "hole_pitch_along_knife": {
+    "in": 0.27,
+    "mm": 6.9,
+    "source": [
+     "POSSELT1888"
+    ],
+    "basis": "doc",
+    "confidence": "high",
+    "note": "'a, in length of board' - i.e. between cross-rows (26 per board)"
+   },
+   "hole_pitch_across_knives": {
+    "in": 0.875,
+    "mm": 22.2,
+    "source": [
+     "POSSELT1888"
+    ],
+    "basis": "doc",
+    "confidence": "high",
+    "note": "'b, in width' - equals the griffe-bar pitch"
+   },
+   "first_row_from_frame_front": {
+    "in": 2.75,
+    "mm": 69.8,
+    "source": [
+     "POSSELT1888"
+    ],
+    "basis": "doc",
+    "confidence": "high"
+   },
+   "first_row_from_frame_rear": {
+    "in": 2.5,
+    "mm": 63.5,
+    "source": [
+     "POSSELT1888"
+    ],
+    "basis": "doc",
+    "confidence": "high"
+   }
+  },
+  "griffe": {
+   "length": {
+    "in": 9.75,
+    "mm": 247.6,
+    "source": [
+     "POSSELT1888"
+    ],
+    "basis": "doc",
+    "confidence": "high",
+    "note": "Fig. III, a to b"
+   },
+   "depth": {
+    "in": 6.625,
+    "mm": 168.3,
+    "source": [
+     "POSSELT1888"
+    ],
+    "basis": "doc",
+    "confidence": "high",
+    "note": "a to c"
+   },
+   "end_extension_each_side": {
+    "in": 1.5,
+    "mm": 38.1,
+    "source": [
+     "POSSELT1888"
+    ],
+    "basis": "doc",
+    "confidence": "high"
+   },
+   "knife_count": {
+    "value": 8,
+    "source": [
+     "POSSELT1888",
+     "NELSON1909"
+    ],
+    "basis": "doc",
+    "confidence": "high",
+    "note": "one knife per hook row; 12 for a 12-row machine"
+   },
+   "knife_pitch": {
+    "in": 0.875,
+    "mm": 22.2,
+    "source": [
+     "POSSELT1888"
+    ],
+    "basis": "doc",
+    "confidence": "high",
+    "note": "'distance of griffe-bars, s to s'"
+   },
+   "knife_length": {
+    "in": 9.25,
+    "mm": 234.9,
+    "source": [
+     "POSSELT1888"
+    ],
+    "basis": "doc",
+    "confidence": "high"
+   },
+   "knife_height": {
+    "in": 0.875,
+    "mm": 22.2,
+    "source": [
+     "POSSELT1888"
+    ],
+    "basis": "doc",
+    "confidence": "high",
+    "note": "Fig. IV section"
+   },
+   "knife_section": {
+    "value": "strong hoop iron with feather (bevelled) edges, set inclined",
+    "source": [
+     "BARLOW1878",
+     "POSSELT1888"
+    ],
+    "basis": "doc",
+    "confidence": "medium",
+    "note": "Barlow p. 150, p. 157: the inclined face of a descending bar strikes the face of an unpushed hook and forces it back until the bar is below the crook"
+   },
+   "lift_stroke": {
+    "in": 3.33,
+    "mm": 84.6,
+    "source": [
+     "NELSON1909"
+    ],
+    "basis": "derived",
+    "confidence": "medium",
+    "alternatives": [
+     "about 4 in (cradle lever 28:10, NELSON1909; BRADBURY1912 problems pp. 301-302)",
+     "3 1/2 in harness draw in Bell's example (BELL1895)",
+     "'If the griffe is raised two inches' (BELL1895, a rise-and-fall machine)"
+    ],
+    "note": "Nelson: overhead lever 10 1/2 in : 25 in, 8 in crank stroke -> 10.5 x 8 / 25 = 3 1/3 in, 'about a three-inch shed'. Use 3 1/2 in (88.9 mm) as default."
+   }
+  },
+  "hooks": {
+   "count": {
+    "value": 208,
+    "source": [
+     "POSSELT1888"
+    ],
+    "basis": "doc",
+    "confidence": "high"
+   },
+   "wire": {
+    "value": "No. 13 1/4 bright spring wire",
+    "source": [
+     "POSSELT1888"
+    ],
+    "basis": "doc",
+    "confidence": "high",
+    "alternatives": [
+     "No. 14 and 15 B.W.G. (BARLOW1878 p. 157)"
+    ]
+   },
+   "height": {
+    "in": 16.625,
+    "mm": 422.3,
+    "source": [
+     "POSSELT1888"
+    ],
+    "basis": "doc",
+    "confidence": "high",
+    "note": "Fig. V, a to c"
+   },
+   "rester_height": {
+    "in": 6.625,
+    "mm": 168.3,
+    "source": [
+     "POSSELT1888"
+    ],
+    "basis": "doc",
+    "confidence": "high",
+    "note": "turned-up lower leg, b to c"
+   },
+   "crook": {
+    "value": "top bent over toward the knife (towards the needle board in double-lift machines)",
+    "source": [
+     "NELSON1909",
+     "POSSELT1888"
+    ],
+    "basis": "doc",
+    "confidence": "medium"
+   },
+   "bottom": {
+    "value": "doubled wire turned up about 1/3 of its length through a fixed grate; double loop rests in the tug (bottom) board",
+    "source": [
+     "BRADBURY1912"
+    ],
+    "basis": "doc",
+    "confidence": "high",
+    "alternatives": [
+     "lower bend fits a wooden grate suspended from the griffe that rises with it (BARLOW1878 p. 152)",
+     "V-shaped bottom on double-lift hooks (NELSON1909)"
+    ]
+   },
+   "pitch_across_knives": {
+    "in": 0.875,
+    "mm": 22.2,
+    "source": [
+     "POSSELT1888"
+    ],
+    "basis": "derived",
+    "confidence": "high",
+    "note": "= knife pitch"
+   },
+   "pitch_along_knife": {
+    "in": 0.27,
+    "mm": 6.9,
+    "source": [
+     "POSSELT1888"
+    ],
+    "basis": "derived",
+    "confidence": "high",
+    "note": "= bottom-board hole pitch"
+   }
+  },
+  "needles": {
+   "count": {
+    "value": 208,
+    "source": [
+     "POSSELT1888"
+    ],
+    "basis": "doc",
+    "confidence": "high"
+   },
+   "wire": {
+    "value": "No. 15 1/2 bright spring wire",
+    "source": [
+     "POSSELT1888"
+    ],
+    "basis": "doc",
+    "confidence": "high",
+    "alternatives": [
+     "No. 15 or 16 B.W.G. (BARLOW1878 p. 157)"
+    ]
+   },
+   "length_total": {
+    "in": 10.75,
+    "mm": 273.1,
+    "source": [
+     "POSSELT1888"
+    ],
+    "basis": "doc",
+    "confidence": "high",
+    "note": "Fig. VI"
+   },
+   "head_to_loop": {
+    "in": 9.125,
+    "mm": 231.8,
+    "source": [
+     "POSSELT1888"
+    ],
+    "basis": "doc",
+    "confidence": "high"
+   },
+   "loop_length": {
+    "in": 1.625,
+    "mm": 41.3,
+    "source": [
+     "POSSELT1888"
+    ],
+    "basis": "doc",
+    "confidence": "high",
+    "note": "rear loop; spring sits on it; pin through it limits forward travel"
+   },
+   "head_to_eye_example": {
+    "in": 7.0,
+    "mm": 177.8,
+    "source": [
+     "POSSELT1888"
+    ],
+    "basis": "doc",
+    "confidence": "high",
+    "note": "varies by row: 8 positions in an 8-row machine; top needle's eye nearest the needle board (NELSON1909)"
+   },
+   "eye_length": {
+    "in": 0.375,
+    "mm": 9.5,
+    "source": [
+     "POSSELT1888"
+    ],
+    "basis": "doc",
+    "confidence": "high"
+   },
+   "eye_positions": {
+    "value": 8,
+    "source": [
+     "POSSELT1888",
+     "NELSON1909"
+    ],
+    "basis": "doc",
+    "confidence": "high"
+   },
+   "eye_position_rule": {
+    "value": "eye_n at the hook of row n: needle 1 (top) serves the hook nearest the needle board, needle 8 (bottom) the hook nearest the spring box",
+    "source": [
+     "NELSON1909"
+    ],
+    "basis": "doc",
+    "confidence": "high"
+   },
+   "protrusion_from_board": {
+    "in": 0.5,
+    "mm": 12.7,
+    "source": [
+     "POSSELT1888"
+    ],
+    "basis": "doc",
+    "confidence": "high",
+    "alternatives": [
+     "about 1/4 in (BARLOW1878 p. 150, checked on page image)",
+     "3/8 to 1/2 in (NELSON1909)"
+    ],
+    "note": "this is also the needle stroke when a blank presses it flush"
+   },
+   "vertical_pitch": {
+    "in": 0.25,
+    "mm": 6.3,
+    "source": [
+     "BARLOW1878"
+    ],
+    "basis": "doc",
+    "confidence": "medium",
+    "note": "'The needles are placed at about 1/4 in. apart' (p. 157, checked on page image)"
+   },
+   "horizontal_pitch": {
+    "in": 0.27,
+    "mm": 6.9,
+    "source": [
+     "POSSELT1888"
+    ],
+    "basis": "derived",
+    "confidence": "medium",
+    "note": "assumed = cross-row pitch of the hooks (needles run straight back to their hooks)"
+   }
+  },
+  "springs": {
+   "count": {
+    "value": 208,
+    "source": [
+     "POSSELT1888"
+    ],
+    "basis": "doc",
+    "confidence": "high"
+   },
+   "material": {
+    "value": "thin brass wire spiral springs",
+    "source": [
+     "POSSELT1888",
+     "BARLOW1878",
+     "NELSON1909"
+    ],
+    "basis": "doc",
+    "confidence": "high"
+   },
+   "housing": {
+    "value": "spring box (wood, one hole per needle, one pin per vertical needle row) or spring on the needle loop held by a pin through the loop",
+    "source": [
+     "BARLOW1878",
+     "NELSON1909",
+     "POSSELT1888"
+    ],
+    "basis": "doc",
+    "confidence": "high"
+   },
+   "size": {
+    "basis": "est",
+    "confidence": "low",
+    "note": "not found; model 4-5 mm OD x 25 mm"
+   }
+  },
+  "needle_board": {
+   "size": {
+    "in": [
+     9.5,
+     2.375
+    ],
+    "mm": [
+     241.3,
+     60.3
+    ],
+    "source": [
+     "POSSELT1888"
+    ],
+    "basis": "doc",
+    "confidence": "high",
+    "note": "Fig. XI, a to c and a to b (front view)"
+   },
+   "peg_holes": {
+    "value": 2,
+    "source": [
+     "POSSELT1888"
+    ],
+    "basis": "doc",
+    "confidence": "high",
+    "note": "receive the cylinder pegs (about 1/2 in long)"
+   },
+   "material": {
+    "value": "wood preferred (wears needles less) or metal; lace grooves at ends and centre (400 machine)",
+    "source": [
+     "NELSON1909"
+    ],
+    "basis": "doc",
+    "confidence": "high"
+   }
+  },
+  "cylinder": {
+   "shape": {
+    "value": "square prism, hard well-seasoned wood with iron ends, holes bored in each face to match the needles",
+    "source": [
+     "NELSON1909",
+     "BRADBURY1912",
+     "POSSELT1888"
+    ],
+    "basis": "doc",
+    "confidence": "high"
+   },
+   "face_width": {
+    "in": 2.4375,
+    "mm": 61.9,
+    "source": [
+     "POSSELT1888"
+    ],
+    "basis": "doc",
+    "confidence": "high",
+    "note": "'height of cylinder' 2 7/16 in = side of the square"
+   },
+   "length": {
+    "in": 13.0,
+    "mm": 330.2,
+    "source": [
+     "POSSELT1888"
+    ],
+    "basis": "doc",
+    "confidence": "high"
+   },
+   "lantern_size": {
+    "in": 1.5,
+    "mm": 38.1,
+    "source": [
+     "POSSELT1888"
+    ],
+    "basis": "doc",
+    "confidence": "high",
+    "note": "square end piece with rounded corners (Bradbury, Nelson) or four pins (Barlow p. 153)"
+   },
+   "spindle_length": {
+    "in": 2.0,
+    "mm": 50.8,
+    "source": [
+     "POSSELT1888"
+    ],
+    "basis": "doc",
+    "confidence": "high",
+    "note": "average"
+   },
+   "pegs_per_face": {
+    "value": 2,
+    "source": [
+     "POSSELT1888",
+     "NELSON1909"
+    ],
+    "basis": "doc",
+    "confidence": "high",
+    "note": "one near each end; brass; adjustable sideways"
+   },
+   "peg_length": {
+    "in": 0.5,
+    "mm": 12.7,
+    "source": [
+     "POSSELT1888"
+    ],
+    "basis": "doc",
+    "confidence": "high"
+   },
+   "turn_per_pick": {
+    "value": "90 deg, one face",
+    "source": [
+     "BRADBURY1912",
+     "BARLOW1878"
+    ],
+    "basis": "doc",
+    "confidence": "high"
+   },
+   "travel_out": {
+    "in": [
+     2.0,
+     3.0
+    ],
+    "mm": [
+     50.8,
+     76.2
+    ],
+    "source": [
+     "NELSON1909"
+    ],
+    "basis": "doc",
+    "confidence": "high",
+    "alternatives": [
+     "batten cam throw 3 1/2 in (NELSON1909)"
+    ],
+    "note": "'The cylinder is moved out from the needle board from two to three inches' (power, swing batten)"
+   },
+   "clearance_when_turning_starts": {
+    "in": 0.25,
+    "mm": 6.3,
+    "source": [
+     "NELSON1909"
+    ],
+    "basis": "doc",
+    "confidence": "high",
+    "note": "cylinder about 1/4 in from the needle points when it begins to turn"
+   }
+  },
+  "batten_swing_frame": {
+   "type": {
+    "value": "square iron frame hung on two pointed centre screws at the top of the machine; cylinder in brass cups with height-adjusting screws",
+    "source": [
+     "NELSON1909",
+     "BARLOW1878",
+     "BRADBURY1912"
+    ],
+    "basis": "doc",
+    "confidence": "high"
+   },
+   "drive": {
+    "value": "bowl on the griffe running in an S-iron / swan neck fixed to the frame (hand loom)",
+    "source": [
+     "BARLOW1878",
+     "BRADBURY1912"
+    ],
+    "basis": "doc",
+    "confidence": "high"
+   },
+   "swing_radius": {
+    "basis": "est",
+    "confidence": "low",
+    "note": "not found; make the pivot-to-cylinder-axis about 16-18 in so a 2.5 in travel is about 8-9 deg"
+   }
+  },
+  "hammer": {
+   "head_width": {
+    "in": 3.0,
+    "mm": 76.2,
+    "source": [
+     "POSSELT1888"
+    ],
+    "basis": "doc",
+    "confidence": "high"
+   },
+   "head_height": {
+    "in": 0.25,
+    "mm": 6.3,
+    "source": [
+     "POSSELT1888"
+    ],
+    "basis": "doc",
+    "confidence": "high"
+   },
+   "head_thickness": {
+    "in": 0.375,
+    "mm": 9.5,
+    "source": [
+     "POSSELT1888"
+    ],
+    "basis": "doc",
+    "confidence": "high"
+   },
+   "head_rest_above_top_guide": {
+    "in": 1.5,
+    "mm": 38.1,
+    "source": [
+     "POSSELT1888"
+    ],
+    "basis": "doc",
+    "confidence": "high"
+   },
+   "rod_width": {
+    "in": 0.5,
+    "mm": 12.7,
+    "source": [
+     "POSSELT1888"
+    ],
+    "basis": "doc",
+    "confidence": "high"
+   },
+   "top_guide_thickness": {
+    "in": 0.75,
+    "mm": 19.0,
+    "source": [
+     "POSSELT1888"
+    ],
+    "basis": "doc",
+    "confidence": "high"
+   },
+   "lower_guide_thickness": {
+    "in": 0.25,
+    "mm": 6.3,
+    "source": [
+     "POSSELT1888"
+    ],
+    "basis": "doc",
+    "confidence": "high"
+   },
+   "guide_spacing": {
+    "in": 9.0,
+    "mm": 228.6,
+    "source": [
+     "POSSELT1888"
+    ],
+    "basis": "doc",
+    "confidence": "high"
+   },
+   "rod_height": {
+    "in": 10.5,
+    "mm": 266.7,
+    "source": [
+     "POSSELT1888"
+    ],
+    "basis": "doc",
+    "confidence": "high"
+   },
+   "function": {
+    "value": "spring-loaded presser on the lantern square from below (Posselt Fig. X) or from above (Bradbury Fig. 66, Barlow p. 154); steadies the cylinder and squares it",
+    "source": [
+     "POSSELT1888",
+     "BRADBURY1912",
+     "BARLOW1878"
+    ],
+    "basis": "doc",
+    "confidence": "high"
+   }
+  },
+  "catches": {
+   "count": {
+    "value": "2 (top catch turns forward, bottom catch turns back) + optional protecting catch",
+    "source": [
+     "POSSELT1888",
+     "BRADBURY1912",
+     "BARLOW1878"
+    ],
+    "basis": "doc",
+    "confidence": "high"
+   },
+   "screw_centre_spacing": {
+    "in": 4.75,
+    "mm": 120.6,
+    "source": [
+     "POSSELT1888"
+    ],
+    "basis": "doc",
+    "confidence": "high"
+   },
+   "length_total": {
+    "in": 8.0,
+    "mm": 203.2,
+    "source": [
+     "POSSELT1888"
+    ],
+    "basis": "doc",
+    "confidence": "high",
+    "note": "5 1/4 in catch + 2 3/4 in mounting part"
+   },
+   "reverse_control": {
+    "value": "cord within the weaver's reach lifts the top catch and engages the bottom catch",
+    "source": [
+     "BRADBURY1912",
+     "BARLOW1878",
+     "NELSON1909"
+    ],
+    "basis": "doc",
+    "confidence": "high"
+   }
+  },
+  "card_springs": {
+   "value": "flat springs on the batten pressing the cards to the cylinder",
+   "source": [
+    "NELSON1909",
+    "BRADBURY1912",
+    "BARLOW1878"
+   ],
+   "basis": "doc",
+   "confidence": "high"
+  },
+  "lift_mechanism": {
+   "head_lever": {
+    "value": "simple lever on a post above the machine, link to the griffe, cord from the outer end to the treadle",
+    "source": [
+     "BRADBURY1912",
+     "BARLOW1878"
+    ],
+    "basis": "doc",
+    "confidence": "high"
+   },
+   "head_lever_arms_power": {
+    "in": [
+     10.5,
+     25.0
+    ],
+    "mm": [
+     266.7,
+     635.0
+    ],
+    "source": [
+     "NELSON1909"
+    ],
+    "basis": "doc",
+    "confidence": "medium",
+    "note": "36 in overhead lever for a power loom: 10 1/2 in griffe arm, 24-25 2/3 in rod arm; no hand-loom figure found"
+   },
+   "posselt_strap_drum_diameter": {
+    "in": 3.5,
+    "mm": 88.9,
+    "source": [
+     "POSSELT1888"
+    ],
+    "basis": "doc",
+    "confidence": "high",
+    "note": "hand-loom alternative: wooden drum on a shaft, leather strap to the plunger, triangular frame 14 1/4 in high"
+   },
+   "posselt_triangular_frame_height": {
+    "in": 14.25,
+    "mm": 361.9,
+    "source": [
+     "POSSELT1888"
+    ],
+    "basis": "doc",
+    "confidence": "high"
+   },
+   "treadle": {
+    "value": "'simple tread lever of the second order adjusted near the weaver's foot'",
+    "source": [
+     "BRADBURY1912"
+    ],
+    "basis": "doc",
+    "confidence": "high"
+   },
+   "counterpoise": {
+    "value": "weights or springs when the load is heavy; single-acting head otherwise rests with griffe down",
+    "source": [
+     "BELL1895"
+    ],
+    "basis": "doc",
+    "confidence": "medium"
+   }
+  }
+ },
+ "cards": {
+  "material": {
+   "value": "strong pasteboard, laced into an endless chain",
+   "source": [
+    "POSSELT1888",
+    "BARLOW1878"
+   ],
+   "basis": "doc",
+   "confidence": "high"
+  },
+  "card_200_french_index": {
+   "in": [
+    9.625,
+    2.3125
+   ],
+   "mm": [
+    244.5,
+    58.7
+   ],
+   "source": [
+    "POSSELT1888"
+   ],
+   "basis": "doc",
+   "confidence": "high",
+   "note": "lacing frame data p. 97: card length 9 5/8 in, width 2 5/16 in, peg centres 7 1/2 in apart, peg dia 3/8 in at the bottom, 1/4 in between cards on the frame"
+  },
+  "card_200_peg_spacing": {
+   "in": 7.5,
+   "mm": 190.5,
+   "source": [
+    "POSSELT1888"
+   ],
+   "basis": "doc",
+   "confidence": "high"
+  },
+  "card_600_french_index": {
+   "in": [
+    16.875,
+    3.375
+   ],
+   "mm": [
+    428.6,
+    85.7
+   ],
+   "source": [
+    "POSSELT1888"
+   ],
+   "basis": "doc",
+   "confidence": "high",
+   "note": "peg centres 14 5/8 in"
+  },
+  "card_600_peg_spacing": {
+   "in": 14.625,
+   "mm": 371.5,
+   "source": [
+    "POSSELT1888"
+   ],
+   "basis": "doc",
+   "confidence": "high"
+  },
+  "card_ingrain_american_index": {
+   "in": [
+    13.25,
+    2.75
+   ],
+   "mm": [
+    336.5,
+    69.8
+   ],
+   "source": [
+    "POSSELT1888"
+   ],
+   "basis": "doc",
+   "confidence": "high",
+   "note": "peg centres 11 3/8 in"
+  },
+  "card_408_ordinary_english": {
+   "in": [
+    16.5,
+    2.5
+   ],
+   "mm": [
+    419.1,
+    63.5
+   ],
+   "source": [
+    "BRADBURY1912"
+   ],
+   "basis": "doc",
+   "confidence": "high",
+   "note": "'each pattern card measures 16 1/2 x 2 1/2 in = 41.25 sq ins' (p. 245, checked on the page image)"
+  },
+  "card_896_verdol_paper": {
+   "in": [
+    12.625,
+    1.0625
+   ],
+   "mm": [
+    320.7,
+    27.0
+   ],
+   "source": [
+    "BRADBURY1912"
+   ],
+   "basis": "doc",
+   "confidence": "high",
+   "note": "continuous paper, 13.4 sq in per pick (p. 245, checked on the page image)"
+  },
+  "card_museum_platt_1912": {
+   "mm": [
+    245,
+    62,
+    1
+   ],
+   "source": [
+    "SMG-1912-320"
+   ],
+   "basis": "doc",
+   "confidence": "medium",
+   "note": "four punched cards from the Platt hand loom; matches the 200 French-index card (244.5 x 58.7 mm)"
+  },
+  "card_museum_spitalfields": {
+   "mm": [
+    500,
+    103,
+    10
+   ],
+   "source": [
+    "SMG-1914-469"
+   ],
+   "basis": "doc",
+   "confidence": "low",
+   "note": "'sixteen pattern cards' sewn into a round, measured as a bundle; card format not identified"
+  },
+  "holes_200": {
+   "value": "26 x 8 = 208 needle holes + 2 peg holes (Posselt Fig. XIV); lace holes blank",
+   "source": [
+    "POSSELT1888"
+   ],
+   "basis": "doc",
+   "confidence": "high"
+  },
+  "hole_pitch": {
+   "in": [
+    0.27,
+    0.25
+   ],
+   "mm": [
+    6.9,
+    6.3
+   ],
+   "source": [
+    "POSSELT1888"
+   ],
+   "basis": "derived",
+   "confidence": "medium",
+   "note": "along x across the card: from hook cross-row pitch 0.27 in (Posselt) and needle tier pitch 1/4 in (Barlow); fits the 200 card (25 x 0.27 = 6.75 in inside 7 1/2 in peg centres; 7 x 0.25 = 1.75 in inside 2 5/16 in)"
+  },
+  "hole_diameter": {
+   "in": 0.21875,
+   "mm": 5.6,
+   "source": [
+    "POSSELT1888"
+   ],
+   "basis": "doc",
+   "confidence": "medium",
+   "note": "Royle piano-machine punch diameter 7/32 in (American cards)"
+  },
+  "peg_hole_diameter": {
+   "in": 0.375,
+   "mm": 9.5,
+   "source": [
+    "POSSELT1888"
+   ],
+   "basis": "derived",
+   "confidence": "medium",
+   "note": "lacing-frame peg diameter 3/8 in at the bottom"
+  },
+  "lace_hole_series": {
+   "value": "three series (ends and centre) on 400/600 cards",
+   "source": [
+    "POSSELT1888"
+   ],
+   "basis": "doc",
+   "confidence": "high"
+  },
+  "folding": {
+   "value": "wire 1-1 1/2 in longer than the card every 12th-20th card hangs the chain in a rack",
+   "source": [
+    "POSSELT1888",
+    "BARLOW1878"
+   ],
+   "basis": "doc",
+   "confidence": "high"
+  }
+ },
+ "harness": {
+  "neck_cords": {
+   "value": "one tug / neck cord per hook, double-hitched on (not knotted), through the bottom board",
+   "source": [
+    "BARLOW1878",
+    "BRADBURY1912",
+    "POSSELT1888"
+   ],
+   "basis": "doc",
+   "confidence": "high"
+  },
+  "leash_joint": {
+   "in": [
+    0.5,
+    1.0
+   ],
+   "mm": [
+    12.7,
+    25.4
+   ],
+   "source": [
+    "POSSELT1888"
+   ],
+   "basis": "doc",
+   "confidence": "high",
+   "note": "harness cords tied to the neck cords 1/2 to 1 in above the frame that guides the neck cords"
+  },
+  "cords_per_neck": {
+   "value": "= number of repeats (divisions) across the comber board",
+   "source": [
+    "POSSELT1888",
+    "BARLOW1878"
+   ],
+   "basis": "doc",
+   "confidence": "high"
+  },
+  "comber_board_thickness_solid": {
+   "in": 0.75,
+   "mm": 19.0,
+   "source": [
+    "BELL1895"
+   ],
+   "basis": "doc",
+   "confidence": "high",
+   "alternatives": [
+    "about 1/4 in when thin and framed (BELL1895)",
+    "slips 1/4 - 5/16 in thick, about 1 1/2 in broad (BELL1895)"
+   ]
+  },
+  "comber_board_rule": {
+   "value": "holes per inch = warp ends per inch in the loom; rows in depth = hook rows (8 for an 8-row machine)",
+   "source": [
+    "POSSELT1888"
+   ],
+   "basis": "doc",
+   "confidence": "high"
+  },
+  "comber_board_example": {
+   "value": "100 ends/in x 36 in = 3600 holes; 600 machine, 12 rows deep -> 300 holes in width",
+   "source": [
+    "POSSELT1888"
+   ],
+   "basis": "doc",
+   "confidence": "high"
+  },
+  "comber_board_strips_example": {
+   "value": "8 rows deep, 10 strips x 5 cross-rows = 400 holes; at 100 ends/in the harness is 4 in wide",
+   "source": [
+    "POSSELT1888"
+   ],
+   "basis": "doc",
+   "confidence": "high"
+  },
+  "comber_board_vs_reed": {
+   "value": "board a little finer than the reed: reed set 37 in -> board 36 in (Scotland)",
+   "source": [
+    "BELL1895"
+   ],
+   "basis": "doc",
+   "confidence": "high"
+  },
+  "height_tug_to_comber_board": {
+   "mm": 1000,
+   "basis": "est",
+   "confidence": "low",
+   "alternatives": [
+    "84 in to the heck (BELL1895 example, wide harness)",
+    "60 and 90 in (BRADBURY1912 problems, wide harness)"
+   ],
+   "note": "no hand-loom figure found; for a 16-24 in wide harness 0.9-1.2 m is an estimate"
+  },
+  "couplings": {
+   "value": "upper coupling (sleeper, double cord) - mail - lower coupling (hanger) - lingo",
+   "source": [
+    "BRADBURY1912",
+    "NELSON1909",
+    "BELL1895"
+   ],
+   "basis": "doc",
+   "confidence": "high"
+  },
+  "coupling_lengths_example": {
+   "value": {
+    "connecting_cord_in": 6,
+    "upper_heddle_in": 10,
+    "mail_in": 0.75,
+    "lower_heddle_in": 8,
+    "lingo_in": 9
+   },
+   "source": [
+    "POSSELT1888"
+   ],
+   "basis": "doc",
+   "confidence": "medium",
+   "note": "Posselt Fig. CXI (ingrain-carpet harness): convert each x 25.4 mm"
+  },
+  "sleeper_length": {
+   "in": 5.0,
+   "mm": 127.0,
+   "source": [
+    "BELL1895"
+   ],
+   "basis": "doc",
+   "confidence": "medium"
+  },
+  "lingo_weight_moderate": {
+   "value": "18 to 25 per lb (about 18-25 g each)",
+   "source": [
+    "BELL1895"
+   ],
+   "basis": "doc",
+   "confidence": "medium",
+   "alternatives": [
+    "11-15 per lb 'leads' (30-41 g)",
+    "60-70 per lb for curtains (6.5-7.5 g)"
+   ]
+  },
+  "lingo_length": {
+   "in": 9.0,
+   "mm": 228.6,
+   "source": [
+    "POSSELT1888"
+   ],
+   "basis": "doc",
+   "confidence": "medium"
+  },
+  "mail": {
+   "value": "glass (silk) or steel/brass eyelet; one warp end each",
+   "source": [
+    "BARLOW1878",
+    "BRADBURY1912"
+   ],
+   "basis": "doc",
+   "confidence": "high"
+  },
+  "first_mail_height": {
+   "value": "mails levelled so the unlifted warp lies on the race; front-row eyes set by a levelling frame, back rows a little higher",
+   "source": [
+    "BELL1895",
+    "BRADBURY1912"
+   ],
+   "basis": "doc",
+   "confidence": "medium"
+  }
+ },
+ "loom": {
+  "overall_spitalfields_1914_469": {
+   "mm": [
+    2800,
+    1630,
+    3050
+   ],
+   "source": [
+    "SMG-1914-469"
+   ],
+   "basis": "doc",
+   "confidence": "high",
+   "note": "silk hand loom with 400-needle Jacquard, loom c. 1840; axis order as catalogued (likely L x W x H)"
+  },
+  "overall_platt_1912_320": {
+   "mm": [
+    2885,
+    1450,
+    2400
+   ],
+   "source": [
+    "SMG-1912-320"
+   ],
+   "basis": "doc",
+   "confidence": "high",
+   "note": "hand loom, 16 in reed space, 3 shuttle boxes, 3 yarn beams"
+  },
+  "overall_archer_y1973_43": {
+   "mm": [
+    3048,
+    1524,
+    1830
+   ],
+   "source": [
+    "SMG-Y1973.43"
+   ],
+   "basis": "doc",
+   "confidence": "medium",
+   "note": "hand Jacquard loom c. 1910, foot lever; axis order unknown"
+  },
+  "cloth_width_silk": {
+   "in": [
+    24.0,
+    36.0
+   ],
+   "mm": [
+    609.6,
+    914.4
+   ],
+   "source": [
+    "BARLOW1878"
+   ],
+   "basis": "doc",
+   "confidence": "high",
+   "note": "Spitalfields scarf silk, 400-needle Jacquard (p. 160)"
+  },
+  "reed_space_platt": {
+   "in": 16.0,
+   "mm": 406.4,
+   "source": [
+    "SMG-1912-320"
+   ],
+   "basis": "doc",
+   "confidence": "high"
+  },
+  "fly_shuttle_silk": {
+   "in": [
+    11.0,
+    1.0,
+    1.0
+   ],
+   "mm": [
+    279.4,
+    25.4,
+    25.4
+   ],
+   "source": [
+    "BARLOW1878"
+   ],
+   "basis": "doc",
+   "confidence": "high",
+   "note": "'eleven inches in length and about one inch square', about 3 oz (85 g)"
+  },
+  "shuttle_museum": {
+   "mm": [
+    245,
+    22,
+    17
+   ],
+   "source": [
+    "SMG-1914-469",
+    "SMG-1912-320"
+   ],
+   "basis": "doc",
+   "confidence": "high",
+   "alternatives": [
+    "310-312 x 32-36 x 25-28 mm (Platt 1912 shuttles)"
+   ],
+   "note": "1914-469/10, 81 g"
+  },
+  "warp_tension": {
+   "value": "weights on a rope wound once or twice round the warp beam",
+   "source": [
+    "BARLOW1878"
+   ],
+   "basis": "doc",
+   "confidence": "high"
+  },
+  "take_up": {
+   "value": "cloth beam with ratchet wheel, pawl and handle",
+   "source": [
+    "BARLOW1878"
+   ],
+   "basis": "doc",
+   "confidence": "high"
+  },
+  "breast_beam_height": {
+   "mm": 800,
+   "basis": "est",
+   "confidence": "low",
+   "note": "no source found; typical seated hand loom"
+  },
+  "warp_line_height": {
+   "mm": 780,
+   "basis": "est",
+   "confidence": "low"
+  },
+  "jacquard_head_top_above_floor": {
+   "mm": 3050,
+   "source": [
+    "SMG-1914-469"
+   ],
+   "basis": "derived",
+   "confidence": "low",
+   "note": "= catalogue height of the Spitalfields loom"
+  }
+ },
+ "kinematics": {
+  "griffe_lift": {
+   "in": 3.5,
+   "mm": 88.9,
+   "source": [
+    "NELSON1909",
+    "BELL1895"
+   ],
+   "basis": "derived",
+   "confidence": "medium",
+   "alternatives": [
+    "3 1/3 in (NELSON1909 calc)",
+    "4 in (BRADBURY1912, NELSON1909 cradle lever)"
+   ]
+  },
+  "needle_stroke": {
+   "in": 0.5,
+   "mm": 12.7,
+   "source": [
+    "POSSELT1888"
+   ],
+   "basis": "derived",
+   "confidence": "medium",
+   "alternatives": [
+    "1/4 in (BARLOW1878)"
+   ],
+   "note": "= needle protrusion; a blank presses the head flush with the board"
+  },
+  "cylinder_travel": {
+   "in": 2.5,
+   "mm": 63.5,
+   "source": [
+    "NELSON1909"
+   ],
+   "basis": "derived",
+   "confidence": "medium",
+   "note": "middle of Nelson's 2-3 in"
+  },
+  "cylinder_turn": {
+   "value": "90 deg per pick, during the last part of the outward travel",
+   "source": [
+    "BRADBURY1912",
+    "BARLOW1878"
+   ],
+   "basis": "doc",
+   "confidence": "high"
+  },
+  "hook_top_shift_when_pushed": {
+   "mm": 12,
+   "basis": "est",
+   "confidence": "low",
+   "note": "must exceed knife-crook overlap; Nelson: knife top 'just touching the hook' when set"
+  },
+  "shed_at_mail": {
+   "in": 3.0,
+   "mm": 76.2,
+   "source": [
+    "NELSON1909"
+   ],
+   "basis": "doc",
+   "confidence": "medium",
+   "note": "'about a three-inch shed in the harnesses'"
+  },
+  "edge_cord_lift_loss": {
+   "value": "side cords rise less than centre cords: 4 in head lift gives about 3.6 in at the edge for 90 in drop and 45 in offset",
+   "source": [
+    "BRADBURY1912"
+   ],
+   "basis": "doc",
+   "confidence": "high"
+  }
+ },
+ "speeds": {
+  "single_lift_power": {
+   "value": "90-130 picks/min (NELSON1909); about 120 for 5/4 looms (BRADBURY1912 p. 68); 120-140 (BELL1895)",
+   "source": [
+    "NELSON1909",
+    "BRADBURY1912",
+    "BELL1895"
+   ],
+   "basis": "doc",
+   "confidence": "high"
+  },
+  "double_lift_double_cylinder_power": {
+   "value": "170-180 (NELSON1909); 160-200 (BELL1895); 140 loom = 70 per cylinder (POSSELT1888)",
+   "source": [
+    "NELSON1909",
+    "BELL1895",
+    "POSSELT1888"
+   ],
+   "basis": "doc",
+   "confidence": "high"
+  },
+  "hand_loom": {
+   "value": "30-60 picks/min; default 40",
+   "basis": "est",
+   "confidence": "low",
+   "note": "no period source found for a hand Jacquard; a handloom silk-sari record of about 65 picks/min (DECCAN-2026) is an upper bound for a non-Jacquard handloom"
+  },
+  "card_cutting": {
+   "value": "100-150 cards/hour on a piano machine (BELL1895); repeaters 40-60 cards/min (BELL1895); lacing machine 28 cards/min (BRADBURY1912)",
+   "source": [
+    "BELL1895",
+    "BRADBURY1912"
+   ],
+   "basis": "doc",
+   "confidence": "high"
+  }
+ },
+ "loads": {
+  "lingo_load_per_lifted_end": {
+   "value": "about 44 g per lifted harness cord incl. share of hooks",
+   "source": [
+    "BRADBURY1912"
+   ],
+   "basis": "derived",
+   "confidence": "low",
+   "note": "Bradbury pp. 169-170: half load of 2448 hooks and 4408 harness cords with lingoes = 215 lb -> 97.5 kg / 2204 cords"
+  },
+  "toy_estimate_200_hooks": {
+   "value": "200 hooks x 4 cords x 20 g x 1/2 lifted = 8 kg at the griffe plus about 10 kg griffe and hooks",
+   "basis": "est",
+   "confidence": "low",
+   "note": "for a sense of treadle effort; not a measured value"
+  }
+ }
+}

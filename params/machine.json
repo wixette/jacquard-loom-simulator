@@ -1,0 +1,640 @@
+{
+  "_schema": "Every numeric entry is {v, unit, conf, src, note?}. Units: mm, deg, and phi (the fraction of one pick, 0 to 1). conf: doc = stated in a document; drawing = scaled from a dimensioned or to-scale drawing; derived = computed from documented values; est = estimate; design = our own choice where the sources are silent, made for legibility. Source keys are defined in research/sources/bibliography.md. The sources give inches; each note keeps the inch value. 2D section frame (M0): one cross-row of the head seen from the side; x along the needles, 0 at the needle board's face, positive toward the spring box; y up, 0 at the top of the bottom board.",
+  "version": "0.1.0",
+  "reference_machine": "Single-lift, single-cylinder Jacquard head of the 200-hook class (26 x 8), as dimensioned by Posselt (1887), on a treadle hand loom; research/REPORT.md section 2",
+  "head": {
+    "rows": {
+      "v": 8,
+      "unit": "count",
+      "conf": "doc",
+      "src": "POSSELT-1888, NELSON-1909",
+      "note": "8 needle tiers, 8 knives, 8 hooks per cross-row"
+    },
+    "bottom_board_thickness": {
+      "v": 19.0,
+      "unit": "mm",
+      "conf": "doc",
+      "src": "POSSELT-1888",
+      "note": "3/4 in; 12 x 8 x 3/4 in board"
+    },
+    "needle_board_thickness": {
+      "v": 19.0,
+      "unit": "mm",
+      "conf": "est",
+      "src": "POSSELT-1888",
+      "note": "Fig. XI gives only its face (9 1/2 x 2 3/8 in); wood, taken as thick as the bottom board"
+    },
+    "needle_board_height": {
+      "v": 60.3,
+      "unit": "mm",
+      "conf": "doc",
+      "src": "POSSELT-1888",
+      "note": "2 3/8 in, Fig. XI"
+    }
+  },
+  "hooks": {
+    "height": {
+      "v": 422.3,
+      "unit": "mm",
+      "conf": "doc",
+      "src": "POSSELT-1888",
+      "note": "16 5/8 in, Fig. V a to c"
+    },
+    "rester_height": {
+      "v": 168.3,
+      "unit": "mm",
+      "conf": "doc",
+      "src": "POSSELT-1888",
+      "note": "6 5/8 in, the turned-up lower leg"
+    },
+    "wire_diameter": {
+      "v": 2.3,
+      "unit": "mm",
+      "conf": "derived",
+      "src": "POSSELT-1888",
+      "note": "No. 13 1/4 spring wire, between BWG 13 (2.41 mm) and 14 (2.11 mm)"
+    },
+    "pitch_across_knives": {
+      "v": 22.2,
+      "unit": "mm",
+      "conf": "doc",
+      "src": "POSSELT-1888",
+      "note": "7/8 in; the hooks of one cross-row stand this far apart along the needles, one over each knife"
+    },
+    "first_from_needle_board": {
+      "v": 40.0,
+      "unit": "mm",
+      "conf": "est",
+      "src": "POSSELT-1888",
+      "note": "Hook 1 (served by the top needle) is nearest the needle board (NELSON-1909). Its distance from the board's face is not given; chosen so that needle 8's eye (hook 8) lies inside Posselt's head-to-loop length of 9 1/8 in"
+    },
+    "crook_overhang": {
+      "v": 10.0,
+      "unit": "mm",
+      "conf": "est",
+      "src": "POSSELT-1888, BARLOW-1878",
+      "note": "The crook is bent over toward its knife (drawn, not dimensioned); to be scaled from Posselt Fig. V"
+    },
+    "crook_tip_drop": {
+      "v": 2.0,
+      "unit": "mm",
+      "conf": "est",
+      "src": "POSSELT-1888",
+      "note": "the short downturned tip of the crook, beyond the knife; it must stay above the knife at rest (rest_gap_under_crook), or a hook pushed off would drag it through the knife"
+    }
+  },
+  "needles": {
+    "length": {
+      "v": 273.1,
+      "unit": "mm",
+      "conf": "doc",
+      "src": "POSSELT-1888",
+      "note": "10 3/4 in, Fig. VI"
+    },
+    "head_to_loop": {
+      "v": 231.8,
+      "unit": "mm",
+      "conf": "doc",
+      "src": "POSSELT-1888",
+      "note": "9 1/8 in; the rear loop is 1 5/8 in"
+    },
+    "eye_length": {
+      "v": 9.5,
+      "unit": "mm",
+      "conf": "doc",
+      "src": "POSSELT-1888",
+      "note": "3/8 in"
+    },
+    "wire_diameter": {
+      "v": 1.7,
+      "unit": "mm",
+      "conf": "derived",
+      "src": "POSSELT-1888",
+      "note": "No. 15 1/2 spring wire, between BWG 15 (1.83 mm) and 16 (1.65 mm)"
+    },
+    "protrusion": {
+      "v": 12.7,
+      "unit": "mm",
+      "conf": "doc",
+      "src": "POSSELT-1888",
+      "note": "1/2 in beyond the needle board; also the stroke when a blank presses the needle flush. Barlow gives 1/4 in"
+    },
+    "tier_pitch": {
+      "v": 6.3,
+      "unit": "mm",
+      "conf": "doc",
+      "src": "BARLOW-1878",
+      "note": "'about 1/4 in. apart' (p. 157, page image)"
+    },
+    "top_tier_height": {
+      "v": 300.0,
+      "unit": "mm",
+      "conf": "est",
+      "src": "POSSELT-1888",
+      "note": "above the bottom board; Posselt Fig. I puts the needles in the upper opening of the frame, above the hook resters (6 5/8 in); to be scaled from the figure"
+    }
+  },
+  "springs": {
+    "box_inner_face": {
+      "v": 236.0,
+      "unit": "mm",
+      "conf": "est",
+      "src": "POSSELT-1888",
+      "note": "the spring box encloses the needles' rear loops"
+    },
+    "box_back": {
+      "v": 290.0,
+      "unit": "mm",
+      "conf": "est",
+      "src": "POSSELT-1888",
+      "note": "springs bear between the needle loop and the box"
+    },
+    "coil_diameter": {
+      "v": 4.5,
+      "unit": "mm",
+      "conf": "est",
+      "src": "research/REPORT.md section 3",
+      "note": "estimated 4-5 mm; no source gives the size"
+    }
+  },
+  "griffe": {
+    "knife_height": {
+      "v": 22.2,
+      "unit": "mm",
+      "conf": "doc",
+      "src": "POSSELT-1888",
+      "note": "7/8 in, Fig. IV"
+    },
+    "knife_thickness": {
+      "v": 3.2,
+      "unit": "mm",
+      "conf": "est",
+      "src": "BARLOW-1878",
+      "note": "'strong hoop iron' with feather (bevelled) edges; the bevel and incline are not drawn in M0"
+    },
+    "knife_to_hook_gap": {
+      "v": 1.0,
+      "unit": "mm",
+      "conf": "design",
+      "src": "",
+      "note": "clearance between a knife's face and the shank of an upright hook"
+    },
+    "rest_gap_under_crook": {
+      "v": 4.0,
+      "unit": "mm",
+      "conf": "est",
+      "src": "NELSON-1909",
+      "note": "the griffe rises this far before its knives meet the crooks; chosen so the selected hooks rise 84.9 mm of an 88.9 mm stroke, as in research/data/operation_cycle.json"
+    },
+    "lift": {
+      "v": 88.9,
+      "unit": "mm",
+      "conf": "derived",
+      "src": "NELSON-1909, BRADBURY-1912",
+      "note": "3 1/2 in: Nelson's lever gives 3 1/3 in, Bradbury 4 in"
+    }
+  },
+  "cylinder": {
+    "face": {
+      "v": 61.9,
+      "unit": "mm",
+      "conf": "doc",
+      "src": "POSSELT-1888",
+      "note": "2 7/16 in, the side of the square prism"
+    },
+    "travel_out": {
+      "v": 63.5,
+      "unit": "mm",
+      "conf": "derived",
+      "src": "NELSON-1909",
+      "note": "2 1/2 in, the middle of 'from two to three inches'. On the loom the batten swings from pivots high above the head; M0 draws the swing as a straight slide"
+    },
+    "card_thickness": {
+      "v": 1.2,
+      "unit": "mm",
+      "conf": "est",
+      "src": "POSSELT-1888",
+      "note": "strong pasteboard"
+    },
+    "card_width": {
+      "v": 58.7,
+      "unit": "mm",
+      "conf": "doc",
+      "src": "POSSELT-1888",
+      "note": "2 5/16 in, the short side of the 200 card, across the 8 hole rows"
+    },
+    "hole_diameter": {
+      "v": 5.6,
+      "unit": "mm",
+      "conf": "doc",
+      "src": "POSSELT-1888",
+      "note": "7/32 in punch"
+    }
+  },
+  "harness": {
+    "drawn_cord_length": {
+      "v": 70.0,
+      "unit": "mm",
+      "conf": "design",
+      "src": "",
+      "note": "the neck cords drawn below the bottom board before the break; the real harness is about 1 m (est, research)"
+    },
+    "drawn_mail_drop": {
+      "v": 130.0,
+      "unit": "mm",
+      "conf": "design",
+      "src": "",
+      "note": "from the comber board to the mails, as drawn; longer than the lift, so a lifted mail stays below the board"
+    },
+    "comber_board_thickness": {
+      "v": 19.0,
+      "unit": "mm",
+      "conf": "doc",
+      "src": "BELL-1895",
+      "note": "3/4 in, solid board"
+    },
+    "lingo_length": {
+      "v": 228.6,
+      "unit": "mm",
+      "conf": "doc",
+      "src": "POSSELT-1888",
+      "note": "9 in; drawn at a third"
+    }
+  },
+  "cycle": {
+    "_note": "Phase boundaries of one pick, phi from 0 (the treadle starts down and the griffe starts to rise) to 1. The ORDER of events is documented (BRADBURY-1912 pp. 74-82; BARLOW-1878 pp. 83-84, 157); the fractions are estimates for a hand loom, derived from Bradbury's measured power-loom timing (research/data/operation_cycle.json). Each window is eased with a smoothstep.",
+    "griffe_rise": {
+      "v": [
+        0.0,
+        0.32
+      ],
+      "unit": "phi",
+      "conf": "derived",
+      "src": "BRADBURY-1912",
+      "note": "Bradbury's rise takes 155 of 360 deg; shortened so the hand weaver holds an open shed longer"
+    },
+    "griffe_fall": {
+      "v": [
+        0.66,
+        0.95
+      ],
+      "unit": "phi",
+      "conf": "derived",
+      "src": "BRADBURY-1912",
+      "note": "Bradbury: the griffe reaches rest at phi 0.958"
+    },
+    "cylinder_out": {
+      "v": [
+        0.06,
+        0.32
+      ],
+      "unit": "phi",
+      "conf": "derived",
+      "src": "BRADBURY-1912",
+      "note": "the cylinder stays on the needles until the knives have caught under the selected hooks (Bradbury p. 78)"
+    },
+    "cylinder_turn": {
+      "v": [
+        0.15,
+        0.3
+      ],
+      "unit": "phi",
+      "conf": "derived",
+      "src": "BRADBURY-1912",
+      "note": "the lantern meets the top catch at phi 0.153 (Bradbury); a quarter turn in the last part of the outward travel"
+    },
+    "cylinder_back": {
+      "v": [
+        0.66,
+        0.93
+      ],
+      "unit": "phi",
+      "conf": "derived",
+      "src": "BRADBURY-1912",
+      "note": "back until the card meets the needle points"
+    },
+    "card_press": {
+      "v": [
+        0.93,
+        0.95
+      ],
+      "unit": "phi",
+      "conf": "derived",
+      "src": "BRADBURY-1912",
+      "note": "the card meets the needles at phi 0.931 in Bradbury's table, after the hooks have landed and before the griffe is at rest, once the knives are below the crooks' tips. Barlow (p. 157) has it strike just before the hooks land; M0 has rigid hooks, so the hooks land first"
+    },
+    "shuttle": {
+      "v": [
+        0.34,
+        0.53
+      ],
+      "unit": "phi",
+      "conf": "est",
+      "src": "BARLOW-1878",
+      "note": "the weaver holds the treadle down and throws the shuttle through the open shed"
+    },
+    "beat": {
+      "v": [
+        0.55,
+        0.66
+      ],
+      "unit": "phi",
+      "conf": "est",
+      "src": "BARLOW-1878",
+      "note": "the reed beats the pick into the cloth before the shed changes; low confidence (research section 10)"
+    },
+    "stops": {
+      "v": [
+        0.06,
+        0.32,
+        0.55,
+        0.66,
+        0.92,
+        1.0
+      ],
+      "unit": "phi",
+      "conf": "design",
+      "src": "",
+      "note": "the step stops: hooks taken; shed open and cylinder turned; shuttle across; beaten up; shed closed (hooks landed); next card pressed (griffe at rest), which is where the next pick starts"
+    }
+  },
+  "machine_frame": {
+    "_note": "The 3D models (M3, M4) are built in one machine frame, mm: X across the loom's width, along the needles (the 2D section's x, so the needle board's face is X = 0 and the cylinder on the -X side); Y from the front (the weaver, the cloth) to the back (the warp beam), as the 2D side view's x; Z up from the floor. A point (x, y) of the 2D section is (x, section_y, section_z + y) in the machine frame. glTF files hold the same frame in metres, Y up: glTF (x, y, z) = (X, Z, -Y) / 1000.",
+    "section_y": {
+      "v": 1300.0,
+      "unit": "mm",
+      "conf": "design",
+      "src": "SMG-1914-469",
+      "note": "Y of the cross-row cut by the 2D section: the head stands over the mails, at the 2D side view's x = 1300"
+    },
+    "section_z": {
+      "v": 2399.0,
+      "unit": "mm",
+      "conf": "design",
+      "src": "SMG-1914-469",
+      "note": "Z of the top of the bottom board: the head's bottom at 2380 in the side view, plus the board's 19 mm"
+    },
+    "warp_z": {
+      "v": 780.0,
+      "unit": "mm",
+      "conf": "est",
+      "src": "SMG-1914-469",
+      "note": "the warp line at rest, as in the 2D side view"
+    },
+    "fell_y": {
+      "v": 520.0,
+      "unit": "mm",
+      "conf": "est",
+      "src": "SMG-1914-469",
+      "note": "the fell of the cloth, as in the 2D side view"
+    },
+    "back_rest_y": {
+      "v": 2400.0,
+      "unit": "mm",
+      "conf": "est",
+      "src": "SMG-1914-469",
+      "note": "the back rest, as in the 2D side view (the 3D warp runs level at warp_z to it)"
+    },
+    "comber_z": {
+      "v": 1700.0,
+      "unit": "mm",
+      "conf": "est",
+      "src": "SMG-1914-469",
+      "note": "the comber board's top, as in the 2D side view"
+    },
+    "harness_knot_z": {
+      "v": 2050.0,
+      "unit": "mm",
+      "conf": "design",
+      "src": "BRADBURY-1912",
+      "note": "where a neck cord is knotted to its harness cords, between the head and the comber board"
+    },
+    "repeat_spacing": {
+      "v": 400.0,
+      "unit": "mm",
+      "conf": "design",
+      "src": "BRADBURY-1912",
+      "note": "how far apart along the warp two harness cords of one hook reach the warp, in the U4 unit (one hook, two repeats)"
+    },
+    "frame_posts_y": {
+      "v": [
+        200.0,
+        2500.0
+      ],
+      "unit": "mm",
+      "conf": "est",
+      "src": "SMG-1914-469",
+      "note": "the front and back posts, as in the 2D side view"
+    },
+    "frame_width": {
+      "v": 1500.0,
+      "unit": "mm",
+      "conf": "est",
+      "src": "SMG-1914-469",
+      "note": "between the outsides of the side frames, across the loom (X): room for the warp and a shuttle box on each side of it"
+    },
+    "frame_height": {
+      "v": 2390.0,
+      "unit": "mm",
+      "conf": "est",
+      "src": "SMG-1914-469",
+      "note": "the top rails, as in the 2D side view"
+    },
+    "warp_width": {
+      "v": 600.0,
+      "unit": "mm",
+      "conf": "est",
+      "src": "SMG-1914-469",
+      "note": "the width of the warp in the reed, centred under the head: 24 in, a common width for figured silks on the hand loom"
+    }
+  },
+  "units3d": {
+    "_note": "Sizes of parts that exist only in the 3D units (M3): estimates or design choices for legibility, each with what it stands for. The units show one of each part (decision 0001).",
+    "slice_depth": {
+      "v": 36.0,
+      "unit": "mm",
+      "conf": "design",
+      "src": "design",
+      "note": "how deep (along Y) the boards, the card and the knife are cut in the U1 selector"
+    },
+    "knife_length": {
+      "v": 400.0,
+      "unit": "mm",
+      "conf": "derived",
+      "src": "POSSELT-1888, NELSON-1909",
+      "note": "a knife runs the depth of the reference 400 head (52 cross-rows of 8, two of them reserve: Nelson) at about 6.9 mm, with ends: Posselt's 200-head knife made about 7 in longer (research section 2)"
+    },
+    "prism_length": {
+      "v": 450.0,
+      "unit": "mm",
+      "conf": "derived",
+      "src": "BRADBURY-1912, NELSON-1909",
+      "note": "the cylinder of the reference 400 head, in the U2 unit: room for the 408 card (16 1/2 in) and the lantern"
+    },
+    "lantern_half": {
+      "v": 26.0,
+      "unit": "mm",
+      "conf": "est",
+      "src": "BARLOW-1878",
+      "note": "half the side of the square lantern at the cylinder's end, on which the catches turn it"
+    },
+    "peg_diameter": {
+      "v": 9.5,
+      "unit": "mm",
+      "conf": "est",
+      "src": "POSSELT-1888",
+      "note": "the cylinder's two pegs per face and the card's peg holes they pass through (3/8 in); est: Posselt gives the peg's length (about 1/2 in), not its diameter"
+    },
+    "hammer_arm": {
+      "v": 90.0,
+      "unit": "mm",
+      "conf": "est",
+      "src": "BARLOW-1878",
+      "note": "the spring hammer's arm, from its pivot over the lantern"
+    },
+    "lever_pivot": {
+      "v": [
+        1150.0,
+        2960.0
+      ],
+      "unit": "mm",
+      "conf": "est",
+      "src": "SMG-1914-469",
+      "note": "the head lever's pivot (Y, Z), as in the 2D side view"
+    },
+    "lever_arm": {
+      "v": 150.0,
+      "unit": "mm",
+      "conf": "est",
+      "src": "SMG-1914-469",
+      "note": "each arm of the head lever, as in the 2D side view: equal arms, so the treadle's cord drops by the griffe's lift"
+    },
+    "treadle_pivot": {
+      "v": [
+        2400.0,
+        100.0
+      ],
+      "unit": "mm",
+      "conf": "est",
+      "src": "SMG-1914-469",
+      "note": "the treadle's pivot (Y, Z), at the back, as in the 2D side view"
+    },
+    "treadle_cord": {
+      "v": [
+        1000.0,
+        330.0
+      ],
+      "unit": "mm",
+      "conf": "est",
+      "src": "SMG-1914-469",
+      "note": "the treadle's cord point at rest (Y, Z), as in the 2D side view"
+    },
+    "treadle_foot_y": {
+      "v": 700.0,
+      "unit": "mm",
+      "conf": "est",
+      "src": "SMG-1914-469",
+      "note": "the treadle's front end, under the weaver's foot"
+    },
+    "batten_pivot": {
+      "v": [
+        640.0,
+        2250.0
+      ],
+      "unit": "mm",
+      "conf": "est",
+      "src": "SMG-1914-469",
+      "note": "the batten's pivot (Y, Z): a batten hung from above, as in the 2D side view"
+    },
+    "reed_rest_y": {
+      "v": 600.0,
+      "unit": "mm",
+      "conf": "est",
+      "src": "SMG-1914-469",
+      "note": "the reed at rest, as in the 2D side view"
+    },
+    "reed_back_y": {
+      "v": 900.0,
+      "unit": "mm",
+      "conf": "design",
+      "src": "SMG-1914-469",
+      "note": "the reed swung back for the shuttle: far enough that the shed in front of it is taller than the shuttle"
+    },
+    "shuttle": {
+      "v": [
+        300.0,
+        36.0,
+        26.0
+      ],
+      "unit": "mm",
+      "conf": "est",
+      "src": "BARLOW-1878",
+      "note": "the shuttle's length (along X), width (Y) and height (Z): a silk shuttle about 12 in long"
+    },
+    "shuttle_travel": {
+      "v": [
+        -470.0,
+        470.0
+      ],
+      "unit": "mm",
+      "conf": "design",
+      "src": "design",
+      "note": "the shuttle's centre in its two boxes (X, from the warp's centre), clear of both edges of the warp"
+    },
+    "face_slice_length": {
+      "v": 160.0,
+      "unit": "mm",
+      "conf": "design",
+      "src": "design",
+      "note": "the slice of the cylinder's face in the U1 selector: room for the learner's card (at most 64 hooks: 132.3 mm with its pegs)"
+    }
+  },
+  "reference_head": {
+    "_note": "The machine the ghosted loom shows (M4): Barlow's 'ordinary 400-needle machine' of the silk hand loom, the size of the Science Museum's Spitalfields loom 1914-469, built from Posselt's parts as Nelson extends them. The learner's 2D head (8 to 64 hooks) stands in for it; its parts are the same.",
+    "cross_rows": {
+      "v": 52,
+      "unit": "count",
+      "conf": "doc",
+      "src": "NELSON-1909",
+      "note": "8 x 50 working cross-rows plus 2 reserve: 416 needles in 52 rows of 8 (research REPORT section 2)"
+    },
+    "hooks": {
+      "v": 400,
+      "unit": "count",
+      "conf": "doc",
+      "src": "BARLOW-1878, SMG-1914-469",
+      "note": "the working hooks; the reserve rows are not tied up"
+    },
+    "repeats": {
+      "v": 4,
+      "unit": "count",
+      "conf": "doc",
+      "src": "research data, 400-hook case",
+      "note": "a straight tie in 4 divisions: 1,600 warp ends (research REPORT section 4)"
+    },
+    "card_length": {
+      "v": 419.1,
+      "unit": "mm",
+      "conf": "doc",
+      "src": "BRADBURY-1912",
+      "note": "the 408 card, 16 1/2 in"
+    },
+    "frame_height": {
+      "v": 3050.0,
+      "unit": "mm",
+      "conf": "doc",
+      "src": "SMG-1914-469",
+      "note": "the loom's overall height with the head on it: the head's frame rises to it"
+    },
+    "rack_end": {
+      "v": [
+        -850.0,
+        1650.0
+      ],
+      "unit": "mm",
+      "conf": "est",
+      "src": "POSSELT-1888",
+      "note": "where the card rack's lower end stands (X, Z): out beyond the loom's side, so the chain hangs outside the frame (Fig. XVII: a rack of guiding prisms and rollers, the cards falling through a wooden frame)"
+    }
+  }
+}

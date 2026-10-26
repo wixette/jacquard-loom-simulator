@@ -1,0 +1,21 @@
+// The type check, `pnpm typecheck`. It reads the JSDoc in the JavaScript and checks
+// it against the code, strictly; nothing is compiled, and the pages run the files as
+// they are.
+{
+  "compilerOptions": {
+    "allowJs": true,
+    "checkJs": true,
+    "noEmit": true,
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "target": "es2022",
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "resolveJsonModule": true,
+    "lib": ["es2022", "dom", "dom.iterable"],
+    "types": ["node"],
+    "skipLibCheck": true
+  },
+  "include": ["js", "dev", "tests", "tools/stamp.mjs", "tools/serve.mjs", "tools/vendor.mjs"]
+}

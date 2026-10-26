@@ -16,6 +16,18 @@
   },
   "scripts": {
     "check:refs": "node tools/check-refs.mjs",
-    "test": "node --test \"tools/*.test.mjs\""
+    "test": "node --test \"tests/**/*.test.js\" \"tools/*.test.mjs\"",
+    "typecheck": "tsc -p tsconfig.json",
+    "stamp": "node tools/stamp.mjs",
+    "version": "node tools/stamp.mjs",
+    "serve": "node tools/serve.mjs 8000",
+    "vendor": "node tools/vendor.mjs",
+    "build:model": "\"${BLENDER:-/Applications/Blender.app/Contents/MacOS/Blender}\" --background --factory-startup --python-exit-code 1 --python blender/scripts/build_units.py"
+  },
+  "devDependencies": {
+    "@types/node": "24.19.2",
+    "@types/three": "0.186.0",
+    "three": "0.186.1",
+    "typescript": "7.0.2"
   }
 }

@@ -1,0 +1,11 @@
+This material is in the public domain.
+
+It consists of reproductions of works whose authors died more than 70 years ago, or
+that were published before 1900 (e.g. E. A. Posselt, The Jacquard Machine Analysed
+and Explained (1887); A. Barlow, The History and Principles of Weaving by Hand and
+by Power (1878); A. Ure, A Dictionary of Arts, Manufactures, and Mines (1839)), of
+files marked as public domain by their source (see the per-file catalogue in
+research/data/photo_catalog.json), or of works their author dedicated to the public
+domain (the Unscii font by Viznut).
+
+No copyright is claimed on faithful reproductions of these works.

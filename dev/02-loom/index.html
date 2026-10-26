@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>M1 · The whole Jacquard loom in 2D</title>
+    <meta name="description" content="Punch a chain of Jacquard cards for a head of 8 to 64 hooks, turn the loom, and follow any thread of the cloth back to its hole, needle and hook." />
+    <link rel="icon" href="../../images/favicon.svg?v=0.0.1" type="image/svg+xml" />
+    <link rel="stylesheet" href="../../css/loom.css?v=0.0.1" />
+    <!-- Every file name here carries the version (?v=), and so does each module the
+         scripts import, through this map, so no cache can serve an old file to a new
+         page. pnpm version writes them, or pnpm stamp (tools/stamp.mjs); do not edit them
+         by hand. -->
+    <script type="importmap">
+    {
+      "imports": {
+        "three": "../../vendor/three/build/three.module.js?v=0.0.1",
+        "three/addons/controls/OrbitControls.js": "../../vendor/three/examples/jsm/controls/OrbitControls.js?v=0.0.1",
+        "three/addons/loaders/GLTFLoader.js": "../../vendor/three/examples/jsm/loaders/GLTFLoader.js?v=0.0.1",
+        "three/addons/utils/BufferGeometryUtils.js": "../../vendor/three/examples/jsm/utils/BufferGeometryUtils.js?v=0.0.1",
+        "three/addons/utils/SkeletonUtils.js": "../../vendor/three/examples/jsm/utils/SkeletonUtils.js?v=0.0.1",
+        "../../js/accept/clothCheck.js": "../../js/accept/clothCheck.js?v=0.0.1",
+        "../../js/accept/gameChecks.js": "../../js/accept/gameChecks.js?v=0.0.1",
+        "../../js/accept/harness.js": "../../js/accept/harness.js?v=0.0.1",
+        "../../js/accept/labelCheck.js": "../../js/accept/labelCheck.js?v=0.0.1",
+        "../../js/accept/m0Checks.js": "../../js/accept/m0Checks.js?v=0.0.1",
+        "../../js/accept/m1Checks.js": "../../js/accept/m1Checks.js?v=0.0.1",
+        "../../js/accept/m2Checks.js": "../../js/accept/m2Checks.js?v=0.0.1",
+        "../../js/accept/m3Checks.js": "../../js/accept/m3Checks.js?v=0.0.1",
+        "../../js/accept/m4Checks.js": "../../js/accept/m4Checks.js?v=0.0.1",
+        "../../js/accept/selftestPanel.js": "../../js/accept/selftestPanel.js?v=0.0.1",
+        "../../js/app/learnerPage.js": "../../js/app/learnerPage.js?v=0.0.1",
+        "../../js/app/lessonDock.js": "../../js/app/lessonDock.js?v=0.0.1",
+        "../../js/app/loomPage.js": "../../js/app/loomPage.js?v=0.0.1",
+        "../../js/app/parts3d.js": "../../js/app/parts3d.js?v=0.0.1",
+        "../../js/app/pictureHelper.js": "../../js/app/pictureHelper.js?v=0.0.1",
+        "../../js/game/nameGame.js": "../../js/game/nameGame.js?v=0.0.1",
+        "../../js/game/unscii16.js": "../../js/game/unscii16.js?v=0.0.1",
+        "../../js/main.js": "../../js/main.js?v=0.0.1",
+        "../../js/scene/cards3d.js": "../../js/scene/cards3d.js?v=0.0.1",
+        "../../js/scene/frame.js": "../../js/scene/frame.js?v=0.0.1",
+        "../../js/scene/rig.js": "../../js/scene/rig.js?v=0.0.1",
+        "../../js/scene/units.js": "../../js/scene/units.js?v=0.0.1",
+        "../../js/scene/unitsView.js": "../../js/scene/unitsView.js?v=0.0.1",
+        "../../js/scene/viewer.js": "../../js/scene/viewer.js?v=0.0.1",
+        "../../js/sim/cycle.js": "../../js/sim/cycle.js?v=0.0.1",
+        "../../js/sim/deck.js": "../../js/sim/deck.js?v=0.0.1",
+        "../../js/sim/design.js": "../../js/sim/design.js?v=0.0.1",
+        "../../js/sim/head.js": "../../js/sim/head.js?v=0.0.1",
+        "../../js/sim/link.js": "../../js/sim/link.js?v=0.0.1",
+        "../../js/sim/loom.js": "../../js/sim/loom.js?v=0.0.1",
+        "../../js/sim/params.js": "../../js/sim/params.js?v=0.0.1",
+        "../../js/sim/tieup.js": "../../js/sim/tieup.js?v=0.0.1",
+        "../../js/sim/trace.js": "../../js/sim/trace.js?v=0.0.1",
+        "../../js/teach/lessons.js": "../../js/teach/lessons.js?v=0.0.1",
+        "../../js/teach/printCards.js": "../../js/teach/printCards.js?v=0.0.1",
+        "../../js/view2d/cardEditor.js": "../../js/view2d/cardEditor.js?v=0.0.1",
+        "../../js/view2d/cardLayout.js": "../../js/view2d/cardLayout.js?v=0.0.1",
+        "../../js/view2d/chainEditor.js": "../../js/view2d/chainEditor.js?v=0.0.1",
+        "../../js/view2d/clothGrid.js": "../../js/view2d/clothGrid.js?v=0.0.1",
+        "../../js/view2d/clothView.js": "../../js/view2d/clothView.js?v=0.0.1",
+        "../../js/view2d/frontView.js": "../../js/view2d/frontView.js?v=0.0.1",
+        "../../js/view2d/labels.js": "../../js/view2d/labels.js?v=0.0.1",
+        "../../js/view2d/layout.js": "../../js/view2d/layout.js?v=0.0.1",
+        "../../js/view2d/sectionView.js": "../../js/view2d/sectionView.js?v=0.0.1",
+        "../../js/view2d/sideView.js": "../../js/view2d/sideView.js?v=0.0.1",
+        "../../package.json": "../../package.json?v=0.0.1",
+        "../../params/machine.json": "../../params/machine.json?v=0.0.1",
+        "../../vendor/three/build/three.core.js": "../../vendor/three/build/three.core.js?v=0.0.1",
+        "../../vendor/three/build/three.module.js": "../../vendor/three/build/three.module.js?v=0.0.1",
+        "../../vendor/three/examples/jsm/controls/OrbitControls.js": "../../vendor/three/examples/jsm/controls/OrbitControls.js?v=0.0.1",
+        "../../vendor/three/examples/jsm/loaders/GLTFLoader.js": "../../vendor/three/examples/jsm/loaders/GLTFLoader.js?v=0.0.1",
+        "../../vendor/three/examples/jsm/utils/BufferGeometryUtils.js": "../../vendor/three/examples/jsm/utils/BufferGeometryUtils.js?v=0.0.1",
+        "../../vendor/three/examples/jsm/utils/SkeletonUtils.js": "../../vendor/three/examples/jsm/utils/SkeletonUtils.js?v=0.0.1"
+      }
+    }
+    </script>
+  </head>
+  <body>
+    <header class="top">
+      <div>
+        <h1>A Jacquard loom</h1>
+        <p class="sub">M1 prototype · a single-lift head of the 1810s–1900 on a hand loom: punch the cards, turn the loom, follow any thread</p>
+      </div>
+      <p class="rule"><strong>hole = 1 = warp end lifted</strong> · blank = 0 = warp stays down</p>
+    </header>
+
+    <aside id="chain-panel" class="panel">
+      <div class="row">
+        <label class="field">Hooks
+          <select id="hooks" aria-label="How many hooks the head has"></select>
+        </label>
+        <label class="field grow">Deck
+          <select id="preset" aria-label="Ready-made decks"></select>
+        </label>
+        <button id="load" type="button" class="end">Load</button>
+      </div>
+      <h2>The card on the bench</h2>
+      <div id="bench"></div>
+      <h2>The chain</h2>
+      <div class="row tools">
+        <button id="add" type="button" title="Add a blank card after the selected one">+ Card</button>
+        <button id="dup" type="button" title="Duplicate the selected card">Duplicate</button>
+        <button id="del" type="button" title="Delete the selected card">Delete</button>
+        <button id="up" type="button" title="Move the selected card earlier" aria-label="Move card earlier">↑</button>
+        <button id="down" type="button" title="Move the selected card later" aria-label="Move card later">↓</button>
+        <button id="inv" type="button" title="Punch the blanks and fill the holes of the selected card">Invert</button>
+      </div>
+      <label class="check"><input id="loop" type="checkbox" /> Lace the chain into a loop</label>
+      <p class="hint">Each card is unfolded into one line of holes, hook 1 at the left. Click a hole to punch it; click a card's number to put it on the bench.</p>
+      <div id="chain"></div>
+    </aside>
+
+    <main id="stage">
+      <section class="pane" id="section-pane">
+        <div class="pane-bar">
+          <h2>The head, in section</h2>
+          <div class="seg" role="group" aria-label="View">
+            <button type="button" data-view="whole" class="on">Whole</button>
+            <button type="button" data-view="needles">Needles</button>
+            <button type="button" data-view="crooks">Crooks</button>
+          </div>
+          <label class="field inline">Cross-row <select id="cross" aria-label="Which cross-row of hooks the section cuts"></select></label>
+        </div>
+        <div id="section" class="canvas-host"></div>
+      </section>
+      <section class="pane" id="side-pane">
+        <div class="pane-bar"><h2>The loom, from the side</h2></div>
+        <div id="side" class="canvas-host"></div>
+      </section>
+      <section class="pane" id="front-pane">
+        <div class="pane-bar"><h2>The loom, from the front: harness, shed and shuttle</h2></div>
+        <div id="front" class="canvas-host"></div>
+      </section>
+      <p id="status" role="status" aria-live="polite">The first card is pressed against the needles. Press Step ▸ to turn the loom to the next moment, or Play.</p>
+    </main>
+
+    <aside id="side-panel" class="panel">
+      <section>
+        <h2>Turn the loom</h2>
+        <div class="row transport">
+          <button id="back" type="button" title="Back to the previous moment">◂ Step</button>
+          <button id="play" type="button" title="Play or pause">▶ Play</button>
+          <button id="fwd" type="button" title="On to the next moment">Step ▸</button>
+        </div>
+        <label class="slider">Speed: <span id="speed-out">10</span> picks a minute <input id="speed" type="range" min="2" max="60" value="10" /></label>
+        <ol id="stops" class="stops" aria-label="The moments of one pick"></ol>
+        <p id="where" class="where"></p>
+        <div class="row">
+          <button id="reset" type="button" title="Back to the first card, no cloth">↺ Reset machine</button>
+          <button id="share" type="button" title="Copy a link that opens the loom as it is now">Copy link</button>
+        </div>
+      </section>
+      <section>
+        <h2>The thread followed</h2>
+        <p id="trace" class="trace">Click a cell of the cloth, a thread in the front view, or any part of the head to follow it through the machine.</p>
+        <button id="unfollow" type="button" hidden>Stop following</button>
+      </section>
+      <section>
+        <h2>The cloth</h2>
+        <div class="row">
+          <label class="field grow">Tie-up <select id="tie"></select></label>
+        </div>
+        <div class="row colours">
+          <label class="field inline">Warp <input id="warp" type="color" value="#5b3f8c" /></label>
+          <label class="field inline">Weft <input id="weft" type="color" value="#efe3c2" /></label>
+          <div class="seg" role="group" aria-label="Face">
+            <button type="button" data-face="front" class="on">Front</button>
+            <button type="button" data-face="back">Back</button>
+          </div>
+          <label class="check"><input id="bits" type="checkbox" /> 0/1</label>
+        </div>
+        <div id="cloth"></div>
+        <p class="hint">First pick at the bottom. On the front, the warp's colour shows where an end was lifted (1), the weft's where it stayed down (0). The back is the cloth turned over.</p>
+      </section>
+      <footer>
+        <p>Simplifications: the timing within a pick is estimated (the order of events is documented); a pushed hook is drawn moving sideways above the grate; the cylinder's swing is drawn as a slide; the harness is shortened; the front view is schematic and the side view only roughly to scale; stepping back unweaves exactly.</p>
+      </footer>
+    </aside>
+    <script type="module" src="./main.js?v=0.0.1"></script>
+  </body>
+</html>
