@@ -1,0 +1,151 @@
+/* The interface's components (docs/ui-design.md, P10), in the theme's colours (css/theme.css):
+   icons, buttons, chips, tabs, menus and tooltips, after Material Design 3, as the Stepped
+   Reckoner draws them. js/ui/components.js makes the elements. */
+
+.icon { width: 20px; height: 20px; fill: currentColor; flex: none; display: block; }
+:focus-visible { outline: 2px solid var(--md-primary); outline-offset: 2px; }
+
+/* ---- buttons (filled, tonal, text, icon; state layers) ------------------------------------- */
+.btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--md-primary);
+  font: inherit;
+  font-weight: 560;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  white-space: nowrap;
+  user-select: none;
+  -webkit-user-select: none;
+  isolation: isolate;
+}
+.btn::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: currentColor;
+  opacity: 0;
+  transition: opacity 120ms var(--ease);
+  z-index: -1;
+}
+.btn:hover::before { opacity: var(--state-hover); }
+.btn:active::before { opacity: var(--state-press); }
+.btn.filled { background: var(--md-primary); color: var(--md-on-primary); }
+.btn.tonal { background: var(--md-secondary-container); color: var(--md-on-secondary-container); }
+.btn.has-icon { padding-left: 12px; }
+.btn[disabled], .btn[aria-disabled="true"] { cursor: default; color: color-mix(in srgb, var(--md-on-surface) 38%, transparent); background: transparent; }
+.btn.filled[disabled], .btn.tonal[disabled], .btn.filled[aria-disabled="true"], .btn.tonal[aria-disabled="true"] { background: color-mix(in srgb, var(--md-on-surface) 12%, transparent); }
+.btn[disabled]::before, .btn[aria-disabled="true"]::before { display: none; }
+.btn.icon-only { width: 40px; padding: 0; color: var(--md-on-surface-variant); }
+.btn.icon-only.tonal { color: var(--md-on-secondary-container); }
+.btn.icon-only.filled { color: var(--md-on-primary); }
+/* a task's control: the one a tutorial step asks for */
+.btn.wanted:not([disabled]):not([aria-disabled="true"]) { box-shadow: 0 0 0 2px var(--attention), 0 0 14px color-mix(in srgb, var(--attention) 45%, transparent); }
+/* buttons joined into one control: the outer corners round, the inner ones square */
+.joined { display: inline-flex; gap: 2px; }
+.joined > .btn:not(:first-child) { border-top-left-radius: 6px; border-bottom-left-radius: 6px; }
+.joined > .btn:not(:last-child) { border-top-right-radius: 6px; border-bottom-right-radius: 6px; }
+
+/* ---- chips -------------------------------------------------------------------------------- */
+.chip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 12px;
+  border: 1px solid var(--md-outline-variant);
+  border-radius: var(--radius-s);
+  background: color-mix(in srgb, var(--md-surface) 72%, transparent);
+  color: var(--md-on-surface-variant);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 520;
+  cursor: pointer;
+  isolation: isolate;
+}
+.chip::before { content: ""; position: absolute; inset: 0; border-radius: inherit; background: currentColor; opacity: 0; z-index: -1; }
+.chip:hover::before { opacity: var(--state-hover); }
+.chip:active::before { opacity: var(--state-press); }
+.chip[aria-pressed="true"], .chip[aria-checked="true"] { border-color: transparent; background: var(--md-secondary-container); color: var(--md-on-secondary-container); }
+.chip[aria-disabled="true"] { opacity: 0.4; cursor: default; }
+.chip[aria-disabled="true"]::before { display: none; }
+.chip .icon { width: 18px; height: 18px; }
+
+/* ---- tabs ----------------------------------------------------------------------------------- */
+.tabs { display: flex; border-bottom: 1px solid var(--md-outline-variant); padding: 0 4px; background: var(--md-surface-high); }
+.tab {
+  position: relative;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 8px 9px;
+  border: 0;
+  background: transparent;
+  color: var(--md-on-surface-variant);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 560;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.tab:hover { color: var(--md-on-surface); }
+.tab[aria-selected="true"] { color: var(--md-primary); }
+.tab[aria-selected="true"]::after { content: ""; position: absolute; left: 22%; right: 22%; bottom: -1px; height: 3px; border-radius: 3px 3px 0 0; background: var(--md-primary); }
+
+/* ---- menus and tooltips --------------------------------------------------------------------- */
+.menu {
+  position: fixed;
+  z-index: 20;
+  min-width: 180px;
+  max-height: 70vh;
+  overflow-y: auto;
+  padding: 6px 0;
+  border-radius: var(--radius-s);
+  background: var(--md-surface-highest);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.45);
+}
+.menu [role^="menuitem"] {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  height: 40px;
+  padding: 0 14px;
+  border: 0;
+  background: transparent;
+  color: var(--md-on-surface);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.menu [role^="menuitem"]:hover, .menu [role^="menuitem"]:focus-visible { background: color-mix(in srgb, var(--md-on-surface) 14%, transparent); outline: none; }
+.menu [aria-checked="true"] { color: var(--md-primary); font-weight: 620; }
+.menu .check { width: 20px; }
+.menu [role="menuitemcheckbox"][aria-checked="true"] { color: inherit; font-weight: inherit; }
+.menu [role="menuitemcheckbox"] .icon { color: var(--md-primary); }
+.menu-divider { margin: 6px 0; border-top: 1px solid var(--md-outline-variant); }
+.menu-divider span { display: block; padding: 8px 14px 2px; color: var(--md-on-surface-variant); font-size: 11px; font-weight: 620; letter-spacing: 0.06em; text-transform: uppercase; }
+.tooltip {
+  position: fixed;
+  z-index: 30;
+  max-width: 280px;
+  padding: 5px 9px;
+  border-radius: 6px;
+  background: var(--md-on-surface);
+  color: var(--md-surface-low);
+  font-size: 12px;
+  pointer-events: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+}

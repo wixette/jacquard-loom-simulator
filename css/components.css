@@ -1,0 +1,27 @@
+/* The app's panels as components (js/app/components/panels.js), in the theme (css/theme.css)
+   with the interface's components (css/ui.css). Each fills the host it is placed in and
+   scrolls inside itself; none assumes a width. The drawings are in css/views.css. */
+
+.cloth-box, .chain-box { height: 100%; overflow: auto; scrollbar-gutter: stable; }
+.cloth-box { padding: 6px 4px; }
+.chain-box { padding: 4px 6px; }
+.bench-box { height: 100%; display: flex; flex-direction: column; gap: 6px; padding: 10px; background: var(--stage-bg); border-radius: var(--radius-s); overflow: auto; }
+.bench-box svg.bench-card { flex: 1 1 auto; min-height: 60px; max-height: none; }
+.bench-box .bench-label { margin: 0; font-size: 11px; color: var(--md-on-surface-variant); }
+
+/* the transport: the loom's buttons, the speed, the six moments, where it is */
+.transport { display: flex; flex-direction: column; gap: 8px; padding: 8px 10px; }
+.transport-row { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.transport .speed { display: flex; align-items: center; gap: 8px; flex: 1 1 160px; font-size: 12px; color: var(--md-on-surface-variant); }
+.transport .speed input { flex: 1; min-width: 80px; accent-color: var(--md-primary); }
+.moments { list-style: none; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 3px; margin: 0; padding: 0; font-size: 11px; }
+.moments li { padding: 4px 4px; border-radius: 6px; background: var(--md-surface-mid); color: var(--md-on-surface-variant); text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.moments li.done { background: var(--md-secondary-container); color: var(--md-on-secondary-container); }
+.moments li.here { background: var(--md-primary); color: var(--md-on-primary); font-weight: 600; }
+.where { margin: 0; font-size: 12px; color: var(--md-on-surface-variant); font-variant-numeric: tabular-nums; }
+
+/* the status line, and the thread followed */
+.status-line { margin: 0; padding: 8px 12px; font-size: 13px; line-height: 1.45; user-select: text; -webkit-user-select: text; }
+.status-line.warn { color: var(--md-error); }
+.trace-box { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; padding: 8px 12px; }
+.trace-text { margin: 0; font-size: 13px; line-height: 1.45; user-select: text; -webkit-user-select: text; }

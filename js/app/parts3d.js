@@ -9,7 +9,7 @@ import { UnitsView } from "../scene/unitsView.js";
 /** @import { UnitId } from "../scene/units.js" */
 
 /** What the whole loom view says under it. */
-const MACHINE_IDEA = "The whole loom, ghosted, with one of each core unit in its place. The orange bands mark where the real machine repeats a unit: hundreds of hooks, needles and harness cords like the one shown. Click a unit, or a band's label, to open it.";
+const MACHINE_IDEA = "The whole loom, ghosted, with one of each core unit in its place. The blue bands mark where the real machine repeats a unit: hundreds of hooks, needles and harness cords like the one shown. Click a unit, or a band's label, to open it.";
 
 /**
  * @typedef {object} Parts3D

@@ -6,6 +6,9 @@
     <title>M3 · Jacquard Core Units</title>
     <meta name="description" content="The five core units of a Jacquard loom in 3D, one of each part at its documented size, moving with the loom: the selector, the card cylinder, the griffe and lift, the harness line, and the shed with its shuttle and batten." />
     <link rel="icon" href="../../images/favicon.svg?v=0.0.1" type="image/svg+xml" />
+    <link rel="stylesheet" href="../../css/fonts.css?v=0.0.1" />
+    <link rel="stylesheet" href="../../css/theme.css?v=0.0.1" />
+    <link rel="stylesheet" href="../../css/views.css?v=0.0.1" />
     <link rel="stylesheet" href="../../css/loom.css?v=0.0.1" />
     <link rel="stylesheet" href="./style.css?v=0.0.1" />
     <!-- Every file name here carries the version (?v=), and so does each module the
@@ -29,15 +32,34 @@
         "../../js/accept/m2Checks.js": "../../js/accept/m2Checks.js?v=0.0.1",
         "../../js/accept/m3Checks.js": "../../js/accept/m3Checks.js?v=0.0.1",
         "../../js/accept/m4Checks.js": "../../js/accept/m4Checks.js?v=0.0.1",
+        "../../js/accept/m5Checks.js": "../../js/accept/m5Checks.js?v=0.0.1",
         "../../js/accept/selftestPanel.js": "../../js/accept/selftestPanel.js?v=0.0.1",
+        "../../js/app/components/all.js": "../../js/app/components/all.js?v=0.0.1",
+        "../../js/app/components/component.js": "../../js/app/components/component.js?v=0.0.1",
+        "../../js/app/components/panels.js": "../../js/app/components/panels.js?v=0.0.1",
+        "../../js/app/components/views.js": "../../js/app/components/views.js?v=0.0.1",
+        "../../js/app/language.js": "../../js/app/language.js?v=0.0.1",
         "../../js/app/learnerPage.js": "../../js/app/learnerPage.js?v=0.0.1",
         "../../js/app/lessonDock.js": "../../js/app/lessonDock.js?v=0.0.1",
         "../../js/app/loomPage.js": "../../js/app/loomPage.js?v=0.0.1",
+        "../../js/app/looms.js": "../../js/app/looms.js?v=0.0.1",
         "../../js/app/parts3d.js": "../../js/app/parts3d.js?v=0.0.1",
         "../../js/app/pictureHelper.js": "../../js/app/pictureHelper.js?v=0.0.1",
+        "../../js/app/store.js": "../../js/app/store.js?v=0.0.1",
         "../../js/game/nameGame.js": "../../js/game/nameGame.js?v=0.0.1",
         "../../js/game/unscii16.js": "../../js/game/unscii16.js?v=0.0.1",
-        "../../js/main.js": "../../js/main.js?v=0.0.1",
+        "../../js/l10n/all.js": "../../js/l10n/all.js?v=0.0.1",
+        "../../js/l10n/de.js": "../../js/l10n/de.js?v=0.0.1",
+        "../../js/l10n/en.js": "../../js/l10n/en.js?v=0.0.1",
+        "../../js/l10n/es.js": "../../js/l10n/es.js?v=0.0.1",
+        "../../js/l10n/fr.js": "../../js/l10n/fr.js?v=0.0.1",
+        "../../js/l10n/it.js": "../../js/l10n/it.js?v=0.0.1",
+        "../../js/l10n/ja.js": "../../js/l10n/ja.js?v=0.0.1",
+        "../../js/l10n/ko.js": "../../js/l10n/ko.js?v=0.0.1",
+        "../../js/l10n/l10n.js": "../../js/l10n/l10n.js?v=0.0.1",
+        "../../js/l10n/pt-BR.js": "../../js/l10n/pt-BR.js?v=0.0.1",
+        "../../js/l10n/zh-TW.js": "../../js/l10n/zh-TW.js?v=0.0.1",
+        "../../js/l10n/zh.js": "../../js/l10n/zh.js?v=0.0.1",
         "../../js/scene/cards3d.js": "../../js/scene/cards3d.js?v=0.0.1",
         "../../js/scene/frame.js": "../../js/scene/frame.js?v=0.0.1",
         "../../js/scene/rig.js": "../../js/scene/rig.js?v=0.0.1",
@@ -55,6 +77,8 @@
         "../../js/sim/trace.js": "../../js/sim/trace.js?v=0.0.1",
         "../../js/teach/lessons.js": "../../js/teach/lessons.js?v=0.0.1",
         "../../js/teach/printCards.js": "../../js/teach/printCards.js?v=0.0.1",
+        "../../js/ui/components.js": "../../js/ui/components.js?v=0.0.1",
+        "../../js/ui/theme.js": "../../js/ui/theme.js?v=0.0.1",
         "../../js/view2d/cardEditor.js": "../../js/view2d/cardEditor.js?v=0.0.1",
         "../../js/view2d/cardLayout.js": "../../js/view2d/cardLayout.js?v=0.0.1",
         "../../js/view2d/chainEditor.js": "../../js/view2d/chainEditor.js?v=0.0.1",
@@ -67,6 +91,7 @@
         "../../js/view2d/sideView.js": "../../js/view2d/sideView.js?v=0.0.1",
         "../../package.json": "../../package.json?v=0.0.1",
         "../../params/machine.json": "../../params/machine.json?v=0.0.1",
+        "../../vendor/material-symbols/icons.js": "../../vendor/material-symbols/icons.js?v=0.0.1",
         "../../vendor/three/build/three.core.js": "../../vendor/three/build/three.core.js?v=0.0.1",
         "../../vendor/three/build/three.module.js": "../../vendor/three/build/three.module.js?v=0.0.1",
         "../../vendor/three/examples/jsm/controls/OrbitControls.js": "../../vendor/three/examples/jsm/controls/OrbitControls.js?v=0.0.1",

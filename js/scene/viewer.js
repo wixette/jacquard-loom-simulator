@@ -4,6 +4,7 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+import { token } from "../ui/theme.js";
 
 /**
  * Studio environment for the metals: a warm grey dome (light above, a lighter table below) with
@@ -22,7 +23,7 @@ function studioEnvironment() {
   for (let i = 0; i < pos.count; i++) {
     const h = pos.getY(i) / 10; // -1 (floor) .. 1 (top)
     const v = h >= 0 ? 0.38 + 0.32 * h : 0.38 - 0.16 * h * h; // a mid-grey table below, not a black floor
-    c.setRGB(v * 1.04, v, v * 0.92);
+    c.setRGB(v * 1.04, v, v * 0.92); // not a theme colour: the studio's light, reflected by the metals
     colours.push(c.r, c.g, c.b);
   }
   dome.setAttribute("color", new THREE.Float32BufferAttribute(colours, 3));
@@ -35,7 +36,7 @@ function studioEnvironment() {
    */
   const box = (w, h, intensity, p) => {
     const m = new THREE.MeshBasicMaterial({ side: THREE.DoubleSide });
-    m.color.setScalar(intensity);
+    m.color.setScalar(intensity); // not a theme colour: a softbox's brightness
     const b = new THREE.Mesh(new THREE.PlaneGeometry(w, h), m);
     b.position.set(...p);
     b.lookAt(0, 0, 0);
@@ -48,6 +49,14 @@ function studioEnvironment() {
   box(8, 1, 3, [0, 3, -6]); // rim, behind
   return env;
 }
+
+/** The overlays' materials (by their name in the glTF) and the theme tokens they take. */
+const OVERLAYS = /** @type {Record<string, [string, string]>} */ ({ ghost: ["--ghost-3d", "#8a96a6"], band: ["--band-3d", "#7fa6d6"] }); // not a theme colour: fallbacks, for a page without the theme
+
+/** The lights that keep dark parts visible on the dark stage: rim, fill and sky (intensities). */
+const RIM = 2.2;
+const FILL = 0.5;
+const HEMI = 0.6;
 
 /** Parts smaller than this (bounding-sphere radius, m) do not cast shadows: LEDs, leads, pins. */
 const SHADOW_MIN_RADIUS = 0.004;
@@ -121,13 +130,11 @@ export class Viewer {
   host;
 
   /**
-   * @param {HTMLElement} host
-   * @param {{ transparent?: boolean }} [options] transparent: no background of its own, so the
-   *   page's shows through (the main page's dark stage); the developer pages keep the light grey.
+   * @param {HTMLElement} host its background (the theme's dark stage) shows through the scene
    */
-  constructor(host, options = {}) {
+  constructor(host) {
     this.host = host;
-    this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: !!options.transparent });
+    this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     // Neutral keeps the hue of brass (ACES pushes yellows towards olive)
     this.renderer.toneMapping = THREE.NeutralToneMapping;
@@ -145,9 +152,9 @@ export class Viewer {
       m.geometry.dispose();
       /** @type {THREE.Material} */ (m.material).dispose();
     });
-    this.scene.background = options.transparent ? null : new THREE.Color(0xe9e7e2);
+    this.scene.background = null;
 
-    const key = new THREE.DirectionalLight(0xfff4e6, 1.2);
+    const key = new THREE.DirectionalLight(0xfff4e6, 1.2); // not a theme colour: the lights' colour temperature
     key.position.set(0.25, 0.45, 0.3);
     key.castShadow = true;
     key.shadow.mapSize.set(2048, 2048);
@@ -160,12 +167,26 @@ export class Viewer {
 
     this.camera = new THREE.PerspectiveCamera(35, 1, 0.005, 20);
     this.camera.position.set(0.18, 0.2, 0.95);
+    // On the dark stage a dark part would vanish into the background, so two lights go with
+    // the camera wherever it is turned: a cool rim from behind the parts, which draws their
+    // outlines, and a soft fill from the viewer's side, which lifts the iron's dark faces.
+    this.scene.add(this.camera);
+    const rim = new THREE.DirectionalLight(0xd6e6ff, RIM); // not a theme colour: the lights' colour temperature
+    rim.position.set(0.35, 0.6, -1);
+    rim.target = this.camera;
+    this.camera.add(rim);
+    const fill = new THREE.DirectionalLight(0xffffff, FILL); // not a theme colour: the lights' colour temperature
+    fill.position.set(-0.3, 0.2, 1);
+    fill.target = this.camera;
+    this.camera.add(fill);
+    this.scene.add(new THREE.HemisphereLight(0xc8d8ec, 0x2a2018, HEMI)); // not a theme colour: the sky's and the floor's light
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
     this.controls.target.set(0, 0.09, 0.2);
     this.controls.enableDamping = true;
 
     this.controls.addEventListener("change", () => this.invalidate(false));
-    new ResizeObserver(() => this.resize()).observe(host);
+    this.resized = new ResizeObserver(() => this.resize());
+    this.resized.observe(host);
     this.resize();
     this.timer.connect(document);
     this.renderer.setAnimationLoop((time) => this.tick(time));
@@ -199,6 +220,12 @@ export class Viewer {
       m.geometry.computeBoundingSphere();
       m.castShadow = (m.geometry.boundingSphere?.radius ?? 1) >= SHADOW_MIN_RADIUS;
       m.receiveShadow = true;
+      // The overlays that are not the machine (the ghosted machine, the repeat bands) take the
+      // theme's colours (docs/ui-design.md, Theme); the machine keeps its materials.
+      for (const mt of /** @type {THREE.MeshStandardMaterial[]} */ ([]).concat(/** @type {THREE.MeshStandardMaterial} */ (m.material))) {
+        const tint = OVERLAYS[mt.name];
+        if (tint) mt.color.set(token(...tint));
+      }
       // Parts marked translucent by the build (the warp sheets) let the parts behind show.
       let p = /** @type {THREE.Object3D | null} */ (m);
       while (p && !p.userData.translucent) p = p.parent;
@@ -405,5 +432,26 @@ export class Viewer {
       if (this.slowFrames.length === 60 && avg > 1000 / LITE_BELOW_FPS) this.setQuality("lite");
     }
     this.lastRender = time;
+  }
+
+  /**
+   * Stop drawing and give back what the view holds: the GPU's buffers, its canvas, its
+   * listeners. The view cannot be used again.
+   * @returns {void}
+   */
+  dispose() {
+    this.renderer.setAnimationLoop(null);
+    this.resized.disconnect();
+    this.timer.disconnect();
+    this.controls.dispose();
+    this.scene.traverse((o) => {
+      const m = /** @type {THREE.Mesh} */ (o);
+      if (!m.isMesh) return;
+      m.geometry.dispose();
+      for (const mt of /** @type {THREE.Material[]} */ ([]).concat(m.material)) mt.dispose();
+    });
+    this.scene.environment?.dispose();
+    this.renderer.dispose();
+    this.renderer.domElement.remove();
   }
 }

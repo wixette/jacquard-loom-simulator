@@ -29,7 +29,7 @@ button.primary:disabled { opacity: 0.45; cursor: not-allowed; }
 .parts3d[hidden], #section[hidden], .section-only[hidden] { display: none; }
 .parts-bar { display: flex; flex-wrap: wrap; gap: 4px; }
 .parts-bar button { font-size: 12px; padding: 4px 8px; }
-.parts3d-view { flex: 1; min-height: 0; position: relative; background: #e9e7e2; border-radius: 6px; overflow: hidden; }
+.parts3d-view { flex: 1; min-height: 0; position: relative; background: var(--stage-bg); border-radius: 6px; overflow: hidden; }
 .parts3d-view > canvas { width: 100%; height: 100%; display: block; }
 .parts3d-view .loading { position: absolute; inset: 0; display: grid; place-items: center; margin: 0; color: var(--muted); font-size: 13px; }
 .parts-idea { margin: 0; font-size: 12px; color: var(--muted); line-height: 1.4; }
@@ -49,18 +49,18 @@ body.learner #stage.three #side-pane { display: none; }
 .goal { color: var(--muted); }
 .steps { padding-left: 1.3em; margin: 6px 0; }
 .steps li { margin: 3px 0; }
-.notice { background: #eef3f9; border-radius: 6px; padding: 7px 9px; }
-.question { background: #fdf3dc; border-radius: 6px; padding: 7px 9px; }
+.notice { background: var(--note); border-radius: 6px; padding: 7px 9px; }
+.question { background: var(--attention-container); color: var(--on-attention-container); border-radius: 6px; padding: 7px 9px; }
 
 /* ---- the picture helper ------------------------------------------------------------------ */
 .pic-grid { width: 100%; max-width: 320px; aspect-ratio: 1; display: block; margin: 4px auto 8px; border: 1px solid var(--line); border-radius: 4px; cursor: crosshair; touch-action: none; }
 .pic-preview { display: block; margin: 6px auto; max-width: 100%; image-rendering: pixelated; border: 1px solid var(--line); }
-.pic-report { background: #f3efe6; border-radius: 6px; padding: 7px 9px; font-size: 12px; }
-.pic-report.warn { background: #fdebd8; }
-.float-key { color: #d62d20; font-weight: 600; }
+.pic-report { background: var(--note); border-radius: 6px; padding: 7px 9px; font-size: 12px; }
+.pic-report.warn { background: var(--warn); }
+.float-key { color: var(--md-error); font-weight: 600; }
 .row.opts { align-items: flex-end; margin-top: 6px; }
 .row.opts > * { flex: 0 1 auto; }
-.file-btn { font-size: 13px; padding: 6px 9px; border-radius: 6px; border: 1px solid var(--line); background: #fbfaf7; cursor: pointer; position: relative; overflow: hidden; }
+.file-btn { font-size: 13px; padding: 6px 9px; border-radius: 6px; border: 1px solid var(--line); background: var(--md-surface-high); cursor: pointer; position: relative; overflow: hidden; }
 .file-btn:hover { border-color: var(--accent); }
 .file-btn input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
 .dock-panel .seg { margin: 4px 0; }

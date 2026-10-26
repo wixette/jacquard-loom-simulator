@@ -3,10 +3,11 @@
 // uses and measure the same shapes it draws. Run by tests/accept/m0.accept.test.js and by
 // the developer page's ?selftest.
 
+import { say, t } from "../l10n/l10n.js";
 import { cylinderOut, griffeHeight } from "../sim/cycle.js";
 import { makeDeck, PRESETS } from "../sim/deck.js";
 import { hookX, KNIFE_REST_TOP, needleY } from "../sim/head.js";
-import { Loom, STOP_NAMES, STOPS } from "../sim/loom.js";
+import { Loom, STOP_KEYS, STOPS } from "../sim/loom.js";
 import { P } from "../sim/params.js";
 import { endCount, hookOfEnd, rowOfCard } from "../sim/tieup.js";
 import { sectionLayout } from "../view2d/layout.js";
@@ -188,11 +189,12 @@ function indexAndLoop() {
   while (arrow.stepForward().ok) steps++;
   const refused = arrow.stepForward();
   if (steps !== 8 * STOPS.length) bad.push(`open arrow chain ran ${steps} steps`);
-  if (refused.ok || !/run out/.test(refused.reason)) bad.push(`past the end: ${refused.ok ? "not refused" : refused.reason}`);
+  const reason = refused.ok ? "" : say(refused.reason, "en");
+  if (refused.ok || !/run out/.test(reason)) bad.push(`past the end: ${refused.ok ? "not refused" : reason}`);
   const empty = new Loom({ hooks: 8, cards: [], loop: true });
   const none = empty.stepForward();
   if (none.ok) bad.push("an empty chain started");
-  return result("J0-5", "One card per pick; a loop wraps; an open chain refuses to run past its end", bad.length === 0, bad.join("; ") || `refused with: "${refused.ok ? "" : refused.reason}"`);
+  return result("J0-5", "One card per pick; a loop wraps; an open chain refuses to run past its end", bad.length === 0, bad.join("; ") || `refused with: "${reason}"`);
 }
 
 /** @returns {CheckResult} */
@@ -233,8 +235,9 @@ function stepStops() {
       if (!r.ok) break;
       n++;
       const stop = i % STOPS.length;
-      if (!r.message.startsWith(STOP_NAMES[stop]) && !(stop === STOPS.length - 1 && r.message.startsWith(`${STOP_NAMES[stop]}?`))) bad.push(`${name} step ${i + 1}: "${r.message.slice(0, 30)}"`);
-      if (visible(loom.snapshot()) === before) bad.push(`${name} step ${i + 1} (${STOP_NAMES[stop]}) changed nothing visible`);
+      const words = say(r.message, "en");
+      if (!words.startsWith(t(STOP_KEYS[stop], {}, "en"))) bad.push(`${name} step ${i + 1}: "${words.slice(0, 30)}"`);
+      if (visible(loom.snapshot()) === before) bad.push(`${name} step ${i + 1} (${t(STOP_KEYS[stop], {}, "en")}) changed nothing visible`);
     }
   }
   return result("J0-7", "Every step changes something visible and is the next of the six named stops", bad.length === 0, bad.slice(0, 3).join("; ") || `${n} steps over 4 decks`);

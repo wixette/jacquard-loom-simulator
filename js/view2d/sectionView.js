@@ -3,6 +3,7 @@
 // data-hook="h" (the hook's 0-based number in the whole head), so the page can follow a
 // hook by clicking any of them.
 
+import { t } from "../l10n/l10n.js";
 import { KNIFE_REST_TOP } from "../sim/head.js";
 import { P } from "../sim/params.js";
 import { boxAround, LabelPlacer, NUMBER_PX, screenFrame } from "./labels.js";
@@ -60,8 +61,7 @@ export class SectionView {
     this.svg = /** @type {SVGSVGElement} */ (document.createElementNS(NS, "svg"));
     this.svg.setAttribute("class", "section");
     this.svg.setAttribute("role", "img");
-    this.svg.setAttribute("aria-label", "Side section through one cross-row of the Jacquard head");
-    this.svg.setAttribute("preserveAspectRatio", "xMidYMid meet");
+        this.svg.setAttribute("preserveAspectRatio", "xMidYMid meet");
     host.appendChild(this.svg);
   }
 
@@ -70,6 +70,7 @@ export class SectionView {
    * @param {SectionOptions} o
    */
   render(L, o) {
+    this.svg.setAttribute("aria-label", t("section.name"));
     const v = L.views[o.view];
     this.svg.setAttribute("viewBox", `${f(v.x)} ${f(Y(v.y + v.h))} ${f(v.w)} ${f(v.h)}`);
     // Labels and numbers are sized in screen pixels, whatever the view's scale.
@@ -114,7 +115,7 @@ export class SectionView {
     // The card cylinder and the chain near it, under the needles, so a needle going into a
     // hole can be seen inside the cylinder. Each card is a pasteboard strip with all eight
     // hole positions marked as in the card editor: a filled dot is punched, a hollow circle
-    // blank; the card at the needles is gold. A face with no card has a dashed edge and its
+    // blank; the card at the needles is the brightest. A face with no card has a dashed edge and its
     // bored holes, faint and small. Cards hanging from the cylinder fade out along the
     // strands; the rest of the chain is dashed.
     const c = L.cylinder;
@@ -128,7 +129,7 @@ export class SectionView {
     for (const card of L.chain.cards) {
       const cls = card.facing ? " facing" : "";
       const op = card.opacity < 1 ? ` opacity="${f(card.opacity)}"` : "";
-      out.push(`<g class="chain-card${card.face === null ? " hanging" : ""}"${op}><polygon class="card-strip${cls}" points="${pts(card.strip)}"><title>Card ${card.index + 1}</title></polygon>`);
+      out.push(`<g class="chain-card${card.face === null ? " hanging" : ""}"${op}><polygon class="card-strip${cls}" points="${pts(card.strip)}"><title>${t("section.card", { card: card.index + 1 })}</title></polygon>`);
       for (const m of card.marks) out.push(`<circle class="card-mark${m.punched ? " punched" : ""}" cx="${f(m.at[0])}" cy="${f(Y(m.at[1]))}" r="2.3"/>`);
       // The number: inside the cylinder while the card lies on a face, outside while it hangs,
       // crossfaded while it moves between the two.
@@ -261,30 +262,30 @@ function sectionLabels(L, frame, bx0, bx1) {
   const out = [];
   LEFT_OUT.length = 0;
   // Each label tries a few spots beside its part, in order, and is left out if none is clear.
-  out.push(labels.placeAt("card cylinder", [[cylinderRange.x + cylinderRange.w / 2, cylinderRange.y + cylinderRange.h + 4, "middle"], [cylinderRange.x - 4, cylinderRange.y + cylinderRange.h - s * 1.2, "end"], [cylinderRange.x, cylinderRange.y + cylinderRange.h + 4]]));
+  out.push(labels.placeAt(t("part.cardCylinder"), [[cylinderRange.x + cylinderRange.w / 2, cylinderRange.y + cylinderRange.h + 4, "middle"], [cylinderRange.x - 4, cylinderRange.y + cylinderRange.h - s * 1.2, "end"], [cylinderRange.x, cylinderRange.y + cylinderRange.h + 4]]));
   const pastCylinder = cylinderRange.x + cylinderRange.w + s * 0.3 + 1;
-  const needleBoard = labels.placeAt("needle board", [[nb.x + nb.w / 2, nb.y + nb.h + 4, "middle"], [pastCylinder, nb.y + nb.h + 4], [pastCylinder, nb.y - 4 - s], [nb.x + nb.w / 2, nb.y - 4 - s, "middle"]]);
+  const needleBoard = labels.placeAt(t("part.needleBoard"), [[nb.x + nb.w / 2, nb.y + nb.h + 4, "middle"], [pastCylinder, nb.y + nb.h + 4], [pastCylinder, nb.y - 4 - s], [nb.x + nb.w / 2, nb.y - 4 - s, "middle"]]);
   if (needleBoard) out.push(needleBoard);
   else {
     // No room beside the board at this scale: above it, with a leader down to it.
     const tried = labels.left.length;
-    const withLeader = labels.placeWithLeader("needle board", [[griffeRange.x - s * 0.4, cylinderRange.y + cylinderRange.h + 4 + 1.6 * s, "end"], [griffeRange.x - s * 0.4, cylinderRange.y + cylinderRange.h + 4 + 3 * s, "end"]], [nb.x + nb.w / 2, nb.y + nb.h]);
+    const withLeader = labels.placeWithLeader(t("part.needleBoard"), [[griffeRange.x - s * 0.4, cylinderRange.y + cylinderRange.h + 4 + 1.6 * s, "end"], [griffeRange.x - s * 0.4, cylinderRange.y + cylinderRange.h + 4 + 3 * s, "end"]], [nb.x + nb.w / 2, nb.y + nb.h]);
     if (withLeader) labels.left.splice(tried - 2, 2);
     out.push(withLeader);
   }
-  out.push(labels.placeAt("spring box", [[sb.x + sb.w / 2, sb.y + sb.h + 4, "middle"], [sb.x + sb.w / 2, sb.y - 4 - s, "middle"], [sb.x + sb.w + 4, mid(sb)]]));
+  out.push(labels.placeAt(t("part.springBox"), [[sb.x + sb.w / 2, sb.y + sb.h + 4, "middle"], [sb.x + sb.w / 2, sb.y - 4 - s, "middle"], [sb.x + sb.w + 4, mid(sb)]]));
   const knivesRest = KNIFE_REST_TOP - P.knifeHeight / 2 - s * 0.35;
-  out.push(labels.placeAt("knives", [[griffeRange.x - 4, knivesRest, "end"], [griffeRange.x - 4, griffeRange.y + griffeRange.h / 2, "end"], [griffeRange.x + griffeRange.w + 4, knivesRest]]));
-  out.push(labels.placeAt("griffe", [[griffeRange.x + griffeRange.w / 2, griffeRange.y + griffeRange.h + 4, "middle"], [griffeRange.x + griffeRange.w + 4, griffeRange.y + griffeRange.h - s * 1.5], [griffeRange.x - 4, griffeRange.y + griffeRange.h - s * 1.5, "end"]]));
+  out.push(labels.placeAt(t("part.knives"), [[griffeRange.x - 4, knivesRest, "end"], [griffeRange.x - 4, griffeRange.y + griffeRange.h / 2, "end"], [griffeRange.x + griffeRange.w + 4, knivesRest]]));
+  out.push(labels.placeAt(t("part.griffe"), [[griffeRange.x + griffeRange.w / 2, griffeRange.y + griffeRange.h + 4, "middle"], [griffeRange.x + griffeRange.w + 4, griffeRange.y + griffeRange.h - s * 1.5], [griffeRange.x - 4, griffeRange.y + griffeRange.h - s * 1.5, "end"]]));
   const beyond = hooksRight + s * 0.3 + 1;
-  out.push(labels.placeAt("hooks", [[beyond, 200], [beyond, 120], [beyond, 60], [hooksRange.x - 4, 120, "end"]]));
-  out.push(labels.placeAt("bottom board", [[bottom.x + bottom.w + 4, mid(bottom)], [bottom.x - 4, mid(bottom), "end"]]));
+  out.push(labels.placeAt(t("part.hooks"), [[beyond, 200], [beyond, 120], [beyond, 60], [hooksRange.x - 4, 120, "end"]]));
+  out.push(labels.placeAt(t("part.bottomBoard"), [[bottom.x + bottom.w + 4, mid(bottom)], [bottom.x - 4, mid(bottom), "end"]]));
   const breakMid = (L.breakY[0] + L.breakY[1]) / 2 - s * 0.35;
-  out.push(labels.placeAt("harness, shortened", [[bx1 + 4 + s * 0.3, breakMid], [bx0 - 4 - s * 0.3, breakMid, "end"]]));
-  out.push(labels.placeAt("comber board", [[comber.x + comber.w + 4, mid(comber)], [comber.x - 4, mid(comber), "end"]]));
-  out.push(labels.placeAt("warp up", [[bx1 + 4, L.shed.top - s * 0.35], [bx0 - 4, L.shed.top - s * 0.35, "end"]]));
-  out.push(labels.placeAt("mails: warp down", [[bx1 + 4, L.shed.rest - s * 0.35], [bx0 - 4, L.shed.rest - s * 0.35, "end"]]));
-  out.push(labels.placeAt("lingoes", [[harnessRange.x - 4, lingoBottom + 10, "end"], [bx1 + 4, lingoBottom + 10]]));
+  out.push(labels.placeAt(t("part.harnessShortened"), [[bx1 + 4 + s * 0.3, breakMid], [bx0 - 4 - s * 0.3, breakMid, "end"]]));
+  out.push(labels.placeAt(t("part.comberBoard"), [[comber.x + comber.w + 4, mid(comber)], [comber.x - 4, mid(comber), "end"]]));
+  out.push(labels.placeAt(t("part.warpUp"), [[bx1 + 4, L.shed.top - s * 0.35], [bx0 - 4, L.shed.top - s * 0.35, "end"]]));
+  out.push(labels.placeAt(t("part.mailsWarpDown"), [[bx1 + 4, L.shed.rest - s * 0.35], [bx0 - 4, L.shed.rest - s * 0.35, "end"]]));
+  out.push(labels.placeAt(t("part.lingoes"), [[harnessRange.x - 4, lingoBottom + 10, "end"], [bx1 + 4, lingoBottom + 10]]));
   // The first and last hooks' numbers, by their feet.
   const numbers = new LabelPlacer(frame, { boxes, segs }, NUMBER_PX);
   numbers.placed = labels.placed;

@@ -7,12 +7,14 @@ import { result } from "../../js/accept/harness.js";
 import { runM3Checks } from "../../js/accept/m3Checks.js";
 import { runM4Checks } from "../../js/accept/m4Checks.js";
 import { selftestRequested, showSelftest } from "../../js/accept/selftestPanel.js";
+import { msg, say as words, t } from "../../js/l10n/l10n.js";
 import { HOOK_COUNTS, presetDeck, PRESETS } from "../../js/sim/deck.js";
-import { Loom, STOP_NAMES, STOPS } from "../../js/sim/loom.js";
+import { Loom, STOP_KEYS, STOPS } from "../../js/sim/loom.js";
 import { UNITS } from "../../js/scene/units.js";
 import { UnitsView } from "../../js/scene/unitsView.js";
 import { sectionLayout } from "../../js/view2d/layout.js";
 import { SectionView } from "../../js/view2d/sectionView.js";
+/** @import { Msg } from "../../js/l10n/l10n.js" */
 /** @import { UnitId, Unit } from "../../js/scene/units.js" */
 
 /**
@@ -31,20 +33,20 @@ const view = new UnitsView($("units3d"), { onChange: (mode) => mark(mode) });
 /** For inspecting the scene from the browser's console. */
 /** @type {Window & { unitsView?: UnitsView }} */ (window).unitsView = view;
 
-const MACHINE_IDEA = "The whole loom, ghosted, with one of each core unit where it stands. The orange bands mark where the real machine repeats a unit, with how many: 416 hooks and needles in the 400 head, 1,600 harness cords and warp ends with a 4-repeat tie. Click a unit, or a band's label, to open it alone.";
+const MACHINE_IDEA = "The whole loom, ghosted, with one of each core unit where it stands. The blue bands mark where the real machine repeats a unit, with how many: 416 hooks and needles in the 400 head, 1,600 harness cords and warp ends with a 4-repeat tie. Click a unit, or a band's label, to open it alone.";
 const section = new SectionView($("section"));
 const preset = /** @type {HTMLSelectElement} */ ($("preset"));
 const hooksSelect = /** @type {HTMLSelectElement} */ ($("hooks"));
 const hookSelect = /** @type {HTMLSelectElement} */ ($("hook"));
 const speed = /** @type {HTMLInputElement} */ ($("speed"));
 
-/** @param {string} text @param {boolean} [warn] */
+/** @param {string | Msg} text @param {boolean} [warn] */
 function say(text, warn = false) {
-  $("status").textContent = text;
+  $("status").textContent = typeof text === "string" ? text : words(text);
   $("status").classList.toggle("warn", warn);
 }
 
-for (const [key, p] of Object.entries(PRESETS)) preset.add(new Option(p.label.replace(/ \(.*\)$/, ""), key, key === "arrow", key === "arrow"));
+for (const [key, p] of Object.entries(PRESETS)) preset.add(new Option(t(p.name), key, key === "arrow", key === "arrow"));
 for (const n of HOOK_COUNTS) hooksSelect.add(new Option(String(n), String(n)));
 function fillHooks() {
   hookSelect.innerHTML = "";
@@ -58,7 +60,7 @@ fillHooks();
 function newDeck() {
   loom = new Loom(presetDeck(preset.value, Number(hooksSelect.value)));
   fillHooks();
-  say(`New cards: ${PRESETS[preset.value].label}, on ${loom.deck.hooks} hooks. The loom is back at the first card.`);
+  say(`New cards: ${t(PRESETS[preset.value].name)}, on ${loom.deck.hooks} hooks. The loom is back at the first card.`);
   draw();
 }
 preset.addEventListener("change", newDeck);
@@ -87,7 +89,7 @@ $("unit-list").addEventListener("click", (e) => {
 });
 
 // Turning the loom.
-$("stops").innerHTML = STOP_NAMES.map((n, i) => `<li data-stop="${i}">${n}</li>`).join("");
+$("stops").innerHTML = STOP_KEYS.map((k, i) => `<li data-stop="${i}">${t(k)}</li>`).join("");
 function pause() {
   playing = false;
   $("play").textContent = "▶ Play";
@@ -95,7 +97,7 @@ function pause() {
 $("fwd").addEventListener("click", () => {
   pause();
   const r = loom.stepForward();
-  say(r.ok ? `Step: ${r.message}` : r.reason, !r.ok);
+  say(r.ok ? msg("status.step", { what: r.message }) : r.reason, !r.ok);
   draw();
 });
 $("back").addEventListener("click", () => {
@@ -114,7 +116,7 @@ speed.addEventListener("input", () => ($("speed-out").textContent = speed.value)
 $("play").addEventListener("click", () => {
   if (playing) return pause();
   const can = loom.phi === 0 ? loom.canStart() : { ok: true };
-  if (!can.ok) return say(/** @type {{ reason: string }} */ (can).reason, true);
+  if (!can.ok) return say(/** @type {{ reason: Msg }} */ (can).reason, true);
   playing = true;
   last = performance.now();
   $("play").textContent = "❚❚ Pause";

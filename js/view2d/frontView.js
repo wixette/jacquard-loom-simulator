@@ -6,6 +6,7 @@
 //
 // frontLayout() is pure (units of the drawing, y up); FrontView draws it as SVG.
 
+import { t } from "../l10n/l10n.js";
 import { endCount, hookOfEnd } from "../sim/tieup.js";
 import { LabelPlacer, screenFrame } from "./labels.js";
 import { P } from "../sim/params.js";
@@ -99,8 +100,7 @@ export class FrontView {
     this.svg = /** @type {SVGSVGElement} */ (document.createElementNS(NS, "svg"));
     this.svg.setAttribute("class", "front");
     this.svg.setAttribute("role", "img");
-    this.svg.setAttribute("aria-label", "The loom from the front: hooks, harness, shed and shuttle");
-    this.svg.setAttribute("preserveAspectRatio", "xMidYMid meet");
+        this.svg.setAttribute("preserveAspectRatio", "xMidYMid meet");
     host.appendChild(this.svg);
   }
 
@@ -109,6 +109,7 @@ export class FrontView {
    * @param {Trace | null} trace
    */
   render(L, trace) {
+    this.svg.setAttribute("aria-label", t("front.name"));
     const v = L.view;
     const Y = (/** @type {number} */ y) => -y;
     this.svg.setAttribute("viewBox", `${f(v.x)} ${f(Y(v.y + v.h))} ${f(v.w)} ${f(v.h)}`);
@@ -158,10 +159,10 @@ export class FrontView {
     for (const h of L.hooks) out.push(`<rect class="hookmark${h.lifted ? " up" : ""}${fol(h.hook)}" data-hook="${h.hook}" x="${f(h.x - 2)}" y="${f(Y(h.y + 18 * L.u))}" width="4" height="${f(18 * L.u)}"/>`);
     const left = v.x + fs * 0.3;
     const right = L.width + fs * 0.5;
-    out.push(labels.placeAt("hooks", [[L.head.x + L.head.w + fs * 0.4, L.head.y + L.head.h / 2 - fs * 0.35], [L.head.x - fs * 0.4, L.head.y + L.head.h / 2 - fs * 0.35, "end"]]));
-    out.push(labels.placeAt("comber board", [[left, L.comber.y + L.comber.h + fs * 0.4], [left, L.comber.y - fs * 1.2], [right, L.comber.y + L.comber.h + fs * 0.4]]));
-    out.push(labels.placeAt("up", [[left, L.shed.top + fs * 0.4], [right, L.shed.top + fs * 0.4]]));
-    out.push(labels.placeAt("down", [[left, L.shed.rest - fs * 1.2], [right, L.shed.rest - fs * 1.2]]));
+    out.push(labels.placeAt(t("part.hooks"), [[L.head.x + L.head.w + fs * 0.4, L.head.y + L.head.h / 2 - fs * 0.35], [L.head.x - fs * 0.4, L.head.y + L.head.h / 2 - fs * 0.35, "end"]]));
+    out.push(labels.placeAt(t("part.comberBoard"), [[left, L.comber.y + L.comber.h + fs * 0.4], [left, L.comber.y - fs * 1.2], [right, L.comber.y + L.comber.h + fs * 0.4]]));
+    out.push(labels.placeAt(t("part.up"), [[left, L.shed.top + fs * 0.4], [right, L.shed.top + fs * 0.4]]));
+    out.push(labels.placeAt(t("part.down"), [[left, L.shed.rest - fs * 1.2], [right, L.shed.rest - fs * 1.2]]));
     this.svg.innerHTML = out.join("");
   }
 }

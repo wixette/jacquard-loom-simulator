@@ -4,7 +4,14 @@ What changed in each release. Versions follow `package.json` and are tagged `vX.
 
 ## Unreleased
 
-Nothing yet.
+**M5, the foundations of the main app (2026-10-27)** ([notes](design/m5-notes.md))
+- The dark theme on every 2D and 3D view, from one set of tokens (`css/theme.css`); what a hole lifts shows green; iron and lead lighter in 3D, with lights that travel with the camera.
+- Ten languages, the sibling Stepped Reckoner's: the loom, the trace, the drawings and the links speak in message keys.
+- One store for the app, with the learner's, the tutorial's and a game's looms; every view and panel a component that mounts in any slot (`dev/07-foundations/`).
+- The link format of the main app, version 2, for review before 0.1.0 ([design/links.md](design/links.md)).
+- The prototype learner page moved to `dev/03-learner/`; `pnpm shots` and `pnpm selftest`; Roboto Flex and Material Symbols vendored.
+
+- The main app's design revised (2026-10-27): it replaces the prototype learner page at `index.html`; a six-part tutorial instead of lessons; the sibling Stepped Reckoner's dark theme, ten languages, components and sounds; the tutorial and the games on looms of their own; three releases, 0.1.0, 0.2.0 and 1.0.0 ([design/public-app.md](design/public-app.md), [design/ui-layout.md](design/ui-layout.md), [docs/ui-design.md](docs/ui-design.md)).
 
 ## 0.0.1
 
