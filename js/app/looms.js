@@ -75,7 +75,7 @@ export const tieKey = (t) => (t.kind === "point" ? "p" : `s${t.repeats}`);
  * @returns {LoomState}
  */
 export function loomState(deck, tie = STRAIGHT) {
-  return { loom: new Loom(deck, tie), rev: 0, selected: 0, follow: null, crossRow: 0, warp: WARP, weft: WEFT, face: "front", bits: false, playing: false, speed: 10, status: { msg: msg("status.start"), warn: false } };
+  return { loom: new Loom(deck, tie), rev: 0, selected: 0, follow: null, crossRow: 0, warp: WARP, weft: WEFT, face: "front", bits: false, playing: false, speed: 12, status: { msg: msg("status.start"), warn: false } };
 }
 
 /**

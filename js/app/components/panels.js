@@ -164,7 +164,7 @@ export function transportPanel(store, o = {}) {
   return {
     name: "comp.transport",
     mount(h) {
-      speed = el("input", { type: "range", min: "2", max: "60", step: "1" });
+      speed = el("input", { type: "range", min: "6", max: "60", step: "1" });
       speed.addEventListener("input", () => setSpeed(store, Number(speed.value), o.loom));
       speedOut = el("span", { class: "speed-out" });
       moments = el("ol", { class: "moments" });

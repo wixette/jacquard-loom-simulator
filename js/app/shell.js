@@ -54,6 +54,18 @@ function viewComponent(store, v) {
 /** The views each arrangement opens with, when the stage is split. */
 const SPLIT = /** @type {Record<1 | 2 | 4, StageView[]>} */ ({ 1: ["section"], 2: ["section", "3d"], 4: ["section", "front", "side", "3d"] });
 
+/** The narrowest stage that holds two views side by side (each about as wide as a laptop's one). */
+const TWO_VIEWS = 1040;
+
+/**
+ * The views Weave opens with when no link names them: two where the stage holds them, else one.
+ * @returns {StageView[]}
+ */
+export function openingViews() {
+  const stage = window.innerWidth - 320 - 340 - 2;
+  return modeOf() === "desktop" && stage >= TWO_VIEWS ? SPLIT[2] : SPLIT[1];
+}
+
 /**
  * @param {AppStore} store
  * @param {HTMLElement} root

@@ -42,7 +42,7 @@ const APP_READY = "document.querySelector('.app') && !document.querySelector('.v
 
 const SHOTS = [
   { name: "app-1366", path: "index.html", ready: APP_READY, setup: APP, size: [1366, 768] },
-  { name: "app-1920-two", path: "index.html#v=2&view=section,3d", ready: APP_READY, setup: `${APP} await sleep(1500);`, size: [1920, 1080] },
+  { name: "app-1920-two", path: "index.html", ready: APP_READY, setup: `${APP} await sleep(1500);`, size: [1920, 1080] },
   { name: "app-1920-four", path: "index.html#v=2&view=section,front,side,3d", ready: APP_READY, setup: `${APP} await sleep(1500);`, size: [1920, 1080] },
   { name: "app-1366-learn", path: "index.html", ready: APP_READY, setup: `document.getElementById('ws-learn')?.click(); await sleep(300); ${APP}`, size: [1366, 768] },
   { name: "app-tablet", path: "index.html", ready: APP_READY, setup: APP, size: [820, 1180] },

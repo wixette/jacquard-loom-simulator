@@ -36,6 +36,7 @@ export async function openLink(store, fragment) {
   act.setFace(store, l.face);
   act.setBits(store, l.bits);
   act.setSectionView(store, l.sectionView);
-  act.setViews(store, l.views);
+  // A link that names no views leaves the stage as the screen chose it (design/links.md).
+  if (new URLSearchParams(fragment.replace(/^#/, "")).has("view")) act.setViews(store, l.views);
   return true;
 }
