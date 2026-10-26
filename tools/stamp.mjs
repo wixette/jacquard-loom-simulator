@@ -30,7 +30,7 @@ import { fileURLToPath } from "node:url";
 const ROOT = fileURLToPath(new URL("..", import.meta.url));
 
 /** The pages that load modules. (index.html joins them again with the main app, in M6.) */
-export const PAGES = ["dev/01-section/index.html", "dev/02-loom/index.html", "dev/03-learner/index.html", "dev/04-units/index.html", "dev/05-machine/index.html", "dev/06-name-game/index.html"];
+export const PAGES = ["dev/01-section/index.html", "dev/02-loom/index.html", "dev/03-learner/index.html", "dev/04-units/index.html", "dev/05-machine/index.html", "dev/06-name-game/index.html", "dev/07-foundations/index.html"];
 
 /**
  * Files under a folder of the repository with one of the given endings, relative to the

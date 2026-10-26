@@ -10,7 +10,7 @@ import { parseArgs } from "node:util";
 import { openBrowser } from "./headless.mjs";
 
 /** The pages with a ?selftest. */
-export const SELFTEST_PAGES = ["dev/01-section/", "dev/02-loom/", "dev/03-learner/", "dev/04-units/", "dev/05-machine/", "dev/06-name-game/"];
+export const SELFTEST_PAGES = ["dev/01-section/", "dev/02-loom/", "dev/03-learner/", "dev/04-units/", "dev/05-machine/", "dev/06-name-game/", "dev/07-foundations/"];
 
 const { values } = parseArgs({ options: { only: { type: "string" } } });
 

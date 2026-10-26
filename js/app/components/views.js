@@ -211,6 +211,7 @@ export function unitsView(store, o = {}) {
     update(s) {
       if (note.isConnected) say();
       if (!view?.loaded) return;
+      view.relabel();
       const ls = loomOf(s, o.loom);
       view.pose(ls.loom.snapshot(), ls.follow ? ls.follow.hook : 0);
     },

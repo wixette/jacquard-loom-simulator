@@ -52,6 +52,12 @@ const SHOTS = [
   })),
   { name: "machine", path: "dev/05-machine/", ready: LOADED_3D, setup: "await click('#fwd', 2); await sleep(2500);" },
   { name: "name-game", path: "dev/06-name-game/?text=Ada", setup: "await click('#all'); await sleep(800);" },
+  ...["en", "fr", "zh", "ja"].map((lang) => ({
+    name: `foundations-${lang}`,
+    path: `dev/07-foundations/?lang=${lang}`,
+    ready: "!document.querySelector('.view-note')",
+    setup: "for (let i = 0; i < 9; i++) { document.querySelector('.transport .joined .btn:last-child')?.click(); await sleep(40); } document.querySelector('svg.section .hook.caught')?.dispatchEvent(new MouseEvent('click', { bubbles: true })); await sleep(800);",
+  })),
   { name: "learner-phone", path: "dev/03-learner/", setup: WEAVE, size: [390, 844] },
 ];
 

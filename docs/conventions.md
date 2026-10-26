@@ -64,10 +64,10 @@ Every value in `params/machine.json` is `{v, unit, conf, src, note}`: `conf` say
 
 | Layer | Question | Where it is tested | Runs in |
 |---|---|---|---|
-| 1. Logic | Do the chain, the tie-up, the cycle and the cloth behave? | `tests/sim/*.test.js` | `pnpm test` |
+| 1. Logic | Do the chain, the tie-up, the cycle, the cloth, the links, the store and the languages behave? | `tests/sim/*.test.js`, `tests/app/*.test.js`, `tests/l10n.test.js` | `pnpm test` |
 | 2. The 2D drawings | Does each drawing show what the simulation says, and do its parts touch and clear where they should? | `tests/accept/m0`–`m2` (checks in `js/accept/`, measured on the layouts the views draw) | `pnpm test` |
 | 3. The 3D models | Do the real 3D parts, posed as the browser poses them, match the 2D section and each other? | `tests/accept/m3`, `m4` (acceptance tests on the `.glb`) | `pnpm test` |
-| 4. What is seen | Labels readable and clear of the drawing, the cloth steady, the pages' own behaviour | The pages' `?selftest` (V-1 to V-3, J2-7 to J2-9, J4-6 to J4-9, G-5), and by hand | the browser |
+| 4. What is seen | Labels readable and clear of the drawing, the cloth steady, the components in their slots, every language, the pages' own behaviour | The pages' `?selftest` (V-1 to V-3, J2-7 to J2-9, J4-6 to J4-9, G-5, F-3, F-6), and by hand | the browser, or headless: `pnpm selftest` |
 
 ### Rules
 

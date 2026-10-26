@@ -25,8 +25,9 @@ This simulator shows a single-lift Jacquard head on a silk hand loom, of the kin
   - `dev/04-units/`: the five core units in 3D (the selector, the card cylinder, the griffe and lift, the harness line, the shed with its shuttle and batten), turned with the mouse and moving with the loom beside the 2D section.
   - `dev/05-machine/`: the ghosted whole loom, with the 400-hook head of the Science Museum's Spitalfields loom.
   - `dev/06-name-game/`: a prototype of the first mini game: type a name, and the page sets it in a pixel font, cuts the cards, weaves it, and reads the cloth back.
+  - `dev/07-foundations/`: the main app's foundations: every view and panel as a component, placed in any slot, on any of the app's looms, in any of ten languages.
 
-Add `?selftest` to any page to run its acceptance checks in the browser.
+Add `?selftest` to any page to run its acceptance checks in the browser (`pnpm selftest` runs them all, headless).
 
 ## How faithful is it?
 
@@ -55,6 +56,7 @@ pnpm serve        # http://localhost:8000/, with caching off
 pnpm check:refs   # no private references, local paths or broken links
 pnpm typecheck    # the JSDoc types, checked strictly; nothing is compiled
 pnpm test         # the logic, the 2D and 3D acceptance tests (Node, no browser)
+pnpm selftest     # every page's checks in headless Chrome
 ```
 
 Start with **[docs/development.md](docs/development.md)**: requirements, page options, commands, versions and releases, publishing. The rules the code follows are in [docs/conventions.md](docs/conventions.md), and the page's design principles in [docs/ui-design.md](docs/ui-design.md).
@@ -63,7 +65,7 @@ Start with **[docs/development.md](docs/development.md)**: requirements, page op
 
 | Folder | Contents |
 |---|---|
-| `index.html`, `css/`, `js/` | The main app (being built) and the code shared with the prototypes: `js/sim/` the machine, the picture reader, the trace and the links (pure logic); `js/view2d/` the 2D drawings; `js/scene/` the 3D units (three.js); `js/app/` the pages' shells; `js/teach/` the lessons; `js/game/` the name game; `js/accept/` the acceptance checks |
+| `index.html`, `css/`, `js/` | The main app (being built) and the code shared with the prototypes: `js/sim/` the machine, the picture reader, the trace and the links (pure logic); `js/view2d/` the 2D drawings; `js/scene/` the 3D units (three.js); `js/app/` the app's store, components and the prototypes' shells; `js/ui/` the interface's components and theme; `js/l10n/` the ten languages; `js/teach/` the lessons; `js/game/` the name game; `js/accept/` the acceptance checks |
 | `dev/` | The developer pages, one per stage |
 | `params/` | `machine.json`: every dimension and angle, each with a source and a confidence |
 | `blender/scripts/` | Headless build scripts (params → parts → `.glb`) |

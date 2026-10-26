@@ -4,6 +4,8 @@
 // unit (or its band) in the whole machine flies to it and opens it alone.
 
 import * as THREE from "three";
+import { t } from "../l10n/l10n.js";
+import { P, PARAMS } from "../sim/params.js";
 import { anchors, gltfName } from "./rig.js";
 import { Unit, UNITS } from "./units.js";
 import { Viewer } from "./viewer.js";
@@ -85,6 +87,26 @@ export class UnitsView {
   }
 
   /**
+   * The bands' labels in the page's language (the models carry them in English; the counts
+   * are the reference head's, params reference_head).
+   * @returns {void}
+   */
+  relabel() {
+    const rows = PARAMS.reference_head.cross_rows.v;
+    const hooks = PARAMS.reference_head.hooks.v;
+    const repeats = PARAMS.reference_head.repeats.v;
+    const n = { "band.hooks": rows * P.rows, "band.needles": rows * P.rows, "band.harness": hooks * repeats, "band.warp": hooks * repeats };
+    for (const b of this.bands) {
+      const key = /** @type {keyof typeof n} */ (b.node.name.replace(/^band/, "band."));
+      if (!(key in n)) continue;
+      b.label = t(key, { n: n[key] });
+      b.note = t(`${key}.note`, { rows, hooks, repeats });
+      b.tag.textContent = b.label;
+      b.tag.title = b.note;
+    }
+  }
+
+  /**
    * Stop and take the view away: the scene, its canvas, the part's tip and the bands' labels.
    * @returns {void}
    */
@@ -129,13 +151,12 @@ export class UnitsView {
       const tag = document.createElement("button");
       tag.type = "button";
       tag.className = "band-tag";
-      tag.textContent = o.userData.label_en;
-      tag.title = o.userData.note_en;
       const unit = /** @type {UnitId} */ (o.userData.unit_ref);
       tag.addEventListener("click", () => this.show(unit));
       this.host.appendChild(tag);
       this.bands.push({ node: o, label: o.userData.label_en, note: o.userData.note_en, unit, tag });
     });
+    this.relabel();
     this.loaded = true;
     if (this.mode === "machine") this.showMachine(false);
     else this.show(this.mode, false);

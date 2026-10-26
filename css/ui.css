@@ -47,6 +47,7 @@
 .btn[disabled]::before, .btn[aria-disabled="true"]::before { display: none; }
 .btn.icon-only { width: 40px; padding: 0; color: var(--md-on-surface-variant); }
 .btn.icon-only.tonal { color: var(--md-on-secondary-container); }
+.btn.icon-only.filled { color: var(--md-on-primary); }
 /* a task's control: the one a tutorial step asks for */
 .btn.wanted:not([disabled]):not([aria-disabled="true"]) { box-shadow: 0 0 0 2px var(--attention), 0 0 14px color-mix(in srgb, var(--attention) 45%, transparent); }
 /* buttons joined into one control: the outer corners round, the inner ones square */

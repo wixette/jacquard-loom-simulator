@@ -196,6 +196,16 @@ export default {
   "units.loading": "Loading the loom in 3D… {percent} %",
   "units.failed": "The loom in 3D could not be loaded: {error}",
 
+  // the bands where the real machine repeats a unit (the reference 400 head)
+  "band.hooks": "{n} hooks like U1's",
+  "band.hooks.note": "{rows} cross-rows of 8 hooks, one hole of the card each ({hooks} working, 2 rows in reserve)",
+  "band.needles": "{n} needles and springs",
+  "band.needles.note": "one needle for every hook, 8 tiers deep, {rows} across",
+  "band.harness": "{n} harness cords, mails and lingoes like U4's",
+  "band.harness.note": "one for every working hook in each of {repeats} repeats across the warp",
+  "band.warp": "{n} warp ends like U5's",
+  "band.warp.note": "each lifted, or left down, by its hook at every pick",
+
   // ---- the views and panels, by name (for the slots that hold them, and screen readers) -----
   "comp.section": "The head in section",
   "comp.side": "The loom from the side",
