@@ -4,6 +4,7 @@
 //     pnpm shots                       (into shots/)
 //     pnpm shots --out ~/Pictures/before
 //     pnpm shots --only machine        (the shots whose name contains "machine")
+//     pnpm shots --set=--lift=#ff6b5b  (a theme token changed, to try a colour)
 //
 // It drives headless Chrome (tools/headless.mjs) at 1600 × 900 and writes PNGs. Each shot
 // loads its page afresh and sets it up as a learner would leave it.
@@ -54,7 +55,9 @@ const SHOTS = [
   { name: "learner-phone", path: "index.html", setup: WEAVE, size: [390, 844] },
 ];
 
-const { values } = parseArgs({ options: { out: { type: "string", default: "shots" }, only: { type: "string" } } });
+const { values } = parseArgs({ options: { out: { type: "string", default: "shots" }, only: { type: "string" }, set: { type: "string", multiple: true } } });
+/** The tokens to change, as [name, value]. */
+const tokens = (values.set ?? []).map((t) => /** @type {[string, string]} */ (t.split(/=(.*)/s).slice(0, 2)));
 const out = resolve(ROOT, values.out ?? "shots");
 mkdirSync(out, { recursive: true });
 
@@ -64,6 +67,7 @@ try {
     const [w, h] = s.size ?? [1600, 900];
     await browser.resize(w, h, w < 600);
     await browser.open(s.path, s.ready);
+    if (tokens.length) await browser.evaluate(`(() => { for (const [k, v] of ${JSON.stringify(tokens)}) document.documentElement.style.setProperty(k, v); })()`);
     if (s.setup) await browser.evaluate(`(async () => { ${HELPERS} ${s.setup} })()`);
     const file = join(out, `${s.name}.png`);
     writeFileSync(file, await browser.shot());

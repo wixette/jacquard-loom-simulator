@@ -84,6 +84,10 @@
   --cord: #79838e;
   --cord-act: #d7dee6;
   --lead: #7c8691;
+  /* lifted: the one state colour of the machine, along the chain a hole sets going: the hook
+     caught on its knife, its cord, its mail and its warp end up (the machine's own, as the
+     Stepped Reckoner's red digits are; it is not one of the interface's meanings) */
+  --lift: #6fdc8c;
   /* the warp ends as drawn (not the cloth's colours, which the learner sets) */
   --thread: #9483bf;
   --thread-act: #dccfff;

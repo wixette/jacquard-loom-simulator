@@ -29,13 +29,15 @@ MATERIALS = {
     "beech": ((0.55, 0.36, 0.18), 0.0, 0.58, None),          # the cylinder, the needle board
     "steel_wire": ((0.62, 0.63, 0.65), 1.0, 0.32, None),     # hooks, needles
     "spring_steel": ((0.70, 0.55, 0.30), 1.0, 0.35, None),   # springs (brass-coloured, as drawn in 2D)
-    "iron": ((0.10, 0.10, 0.11), 0.7, 0.48, None),           # knives, griffe, lever, catches, hammer
+    # Iron and lead are lighter than in a museum's half-light (blackened iron reads near black),
+    # so they stay visible on the page's dark stage (docs/ui-design.md, Theme).
+    "iron": ((0.30, 0.31, 0.33), 0.55, 0.42, None),          # knives, griffe, lever, catches, hammer
     "brass": ((0.80, 0.55, 0.22), 1.0, 0.30, None),          # mails, pegs, lantern
     "card": ((0.80, 0.66, 0.40), 0.0, 0.70, None),           # pasteboard
     "hole_dark": ((0.03, 0.02, 0.01), 0.0, 0.80, None),      # a punched hole, seen dark
     "bore": ((0.36, 0.22, 0.10), 0.0, 0.70, None),           # the cylinder's bores: faint, so they cannot pass for a card's holes
     "cord": ((0.72, 0.66, 0.52), 0.0, 0.85, None),           # linen harness and neck cords
-    "lead": ((0.22, 0.23, 0.25), 0.8, 0.45, None),           # lingoes (lead or iron weights)
+    "lead": ((0.34, 0.35, 0.38), 0.6, 0.45, None),           # lingoes (lead or iron weights)
     "warp_silk": ((0.24, 0.12, 0.40), 0.0, 0.55, None),      # warp, the 2D views' purple
     "weft_silk": ((0.86, 0.78, 0.55), 0.0, 0.55, None),
     "reed_steel": ((0.35, 0.36, 0.38), 0.9, 0.40, None),

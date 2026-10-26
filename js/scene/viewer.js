@@ -53,6 +53,11 @@ function studioEnvironment() {
 /** The overlays' materials (by their name in the glTF) and the theme tokens they take. */
 const OVERLAYS = /** @type {Record<string, [string, string]>} */ ({ ghost: ["--ghost-3d", "#8a96a6"], band: ["--band-3d", "#7fa6d6"] });
 
+/** The lights that keep dark parts visible on the dark stage: rim, fill and sky (intensities). */
+const RIM = 2.2;
+const FILL = 0.5;
+const HEMI = 0.6;
+
 /** Parts smaller than this (bounding-sphere radius, m) do not cast shadows: LEDs, leads, pins. */
 const SHADOW_MIN_RADIUS = 0.004;
 /** Below this frame rate while animating, "auto" quality drops to "lite" (once). */
@@ -162,6 +167,19 @@ export class Viewer {
 
     this.camera = new THREE.PerspectiveCamera(35, 1, 0.005, 20);
     this.camera.position.set(0.18, 0.2, 0.95);
+    // On the dark stage a dark part would vanish into the background, so two lights go with
+    // the camera wherever it is turned: a cool rim from behind the parts, which draws their
+    // outlines, and a soft fill from the viewer's side, which lifts the iron's dark faces.
+    this.scene.add(this.camera);
+    const rim = new THREE.DirectionalLight(0xd6e6ff, RIM);
+    rim.position.set(0.35, 0.6, -1);
+    rim.target = this.camera;
+    this.camera.add(rim);
+    const fill = new THREE.DirectionalLight(0xffffff, FILL);
+    fill.position.set(-0.3, 0.2, 1);
+    fill.target = this.camera;
+    this.camera.add(fill);
+    this.scene.add(new THREE.HemisphereLight(0xc8d8ec, 0x2a2018, HEMI));
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
     this.controls.target.set(0, 0.09, 0.2);
     this.controls.enableDamping = true;
