@@ -22,6 +22,7 @@ Pages cannot be opened from `file://`, because browsers do not load modules from
 | Option | Where | What it does |
 |---|---|---|
 | `#v=2&…` (a copied link) | `index.html` | Open the app as the link says: the workspace, the language, the cards and the moment, the thread followed, the colours, the views ([design/links.md](../design/links.md)) |
+| `#v=2&w=learn&step=weave-twill` | `index.html` | Open the tutorial at that step (the steps' names are in [design/links.md](../design/links.md), Learn) |
 | `?lang=fr` | `index.html` | Open the app in that language (one of the ten), whatever the browser prefers |
 | `?lesson=L3` | `dev/03-learner/` | Open a lesson (L1 to L10) |
 | `?view=3d` | `dev/03-learner/` | Open the mechanism pane on the parts in 3D |

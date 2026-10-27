@@ -262,30 +262,30 @@ function sectionLabels(L, frame, bx0, bx1) {
   const out = [];
   LEFT_OUT.length = 0;
   // Each label tries a few spots beside its part, in order, and is left out if none is clear.
-  out.push(labels.placeAt(t("part.cardCylinder"), [[cylinderRange.x + cylinderRange.w / 2, cylinderRange.y + cylinderRange.h + 4, "middle"], [cylinderRange.x - 4, cylinderRange.y + cylinderRange.h - s * 1.2, "end"], [cylinderRange.x, cylinderRange.y + cylinderRange.h + 4]]));
+  out.push(labels.placeAt(t("part.cardCylinder"), [[cylinderRange.x + cylinderRange.w / 2, cylinderRange.y + cylinderRange.h + 4, "middle"], [cylinderRange.x - 4, cylinderRange.y + cylinderRange.h - s * 1.2, "end"], [cylinderRange.x, cylinderRange.y + cylinderRange.h + 4]], "lbl p-cylinder"));
   const pastCylinder = cylinderRange.x + cylinderRange.w + s * 0.3 + 1;
-  const needleBoard = labels.placeAt(t("part.needleBoard"), [[nb.x + nb.w / 2, nb.y + nb.h + 4, "middle"], [pastCylinder, nb.y + nb.h + 4], [pastCylinder, nb.y - 4 - s], [nb.x + nb.w / 2, nb.y - 4 - s, "middle"]]);
+  const needleBoard = labels.placeAt(t("part.needleBoard"), [[nb.x + nb.w / 2, nb.y + nb.h + 4, "middle"], [pastCylinder, nb.y + nb.h + 4], [pastCylinder, nb.y - 4 - s], [nb.x + nb.w / 2, nb.y - 4 - s, "middle"]], "lbl p-needles");
   if (needleBoard) out.push(needleBoard);
   else {
     // No room beside the board at this scale: above it, with a leader down to it.
     const tried = labels.left.length;
-    const withLeader = labels.placeWithLeader(t("part.needleBoard"), [[griffeRange.x - s * 0.4, cylinderRange.y + cylinderRange.h + 4 + 1.6 * s, "end"], [griffeRange.x - s * 0.4, cylinderRange.y + cylinderRange.h + 4 + 3 * s, "end"]], [nb.x + nb.w / 2, nb.y + nb.h]);
+    const withLeader = labels.placeWithLeader(t("part.needleBoard"), [[griffeRange.x - s * 0.4, cylinderRange.y + cylinderRange.h + 4 + 1.6 * s, "end"], [griffeRange.x - s * 0.4, cylinderRange.y + cylinderRange.h + 4 + 3 * s, "end"]], [nb.x + nb.w / 2, nb.y + nb.h], "lbl p-needles");
     if (withLeader) labels.left.splice(tried - 2, 2);
     out.push(withLeader);
   }
-  out.push(labels.placeAt(t("part.springBox"), [[sb.x + sb.w / 2, sb.y + sb.h + 4, "middle"], [sb.x + sb.w / 2, sb.y - 4 - s, "middle"], [sb.x + sb.w + 4, mid(sb)]]));
+  out.push(labels.placeAt(t("part.springBox"), [[sb.x + sb.w / 2, sb.y + sb.h + 4, "middle"], [sb.x + sb.w / 2, sb.y - 4 - s, "middle"], [sb.x + sb.w + 4, mid(sb)]], "lbl p-needles"));
   const knivesRest = KNIFE_REST_TOP - P.knifeHeight / 2 - s * 0.35;
-  out.push(labels.placeAt(t("part.knives"), [[griffeRange.x - 4, knivesRest, "end"], [griffeRange.x - 4, griffeRange.y + griffeRange.h / 2, "end"], [griffeRange.x + griffeRange.w + 4, knivesRest]]));
-  out.push(labels.placeAt(t("part.griffe"), [[griffeRange.x + griffeRange.w / 2, griffeRange.y + griffeRange.h + 4, "middle"], [griffeRange.x + griffeRange.w + 4, griffeRange.y + griffeRange.h - s * 1.5], [griffeRange.x - 4, griffeRange.y + griffeRange.h - s * 1.5, "end"]]));
+  out.push(labels.placeAt(t("part.knives"), [[griffeRange.x - 4, knivesRest, "end"], [griffeRange.x - 4, griffeRange.y + griffeRange.h / 2, "end"], [griffeRange.x + griffeRange.w + 4, knivesRest]], "lbl p-knives"));
+  out.push(labels.placeAt(t("part.griffe"), [[griffeRange.x + griffeRange.w / 2, griffeRange.y + griffeRange.h + 4, "middle"], [griffeRange.x + griffeRange.w + 4, griffeRange.y + griffeRange.h - s * 1.5], [griffeRange.x - 4, griffeRange.y + griffeRange.h - s * 1.5, "end"]], "lbl p-griffe"));
   const beyond = hooksRight + s * 0.3 + 1;
-  out.push(labels.placeAt(t("part.hooks"), [[beyond, 200], [beyond, 120], [beyond, 60], [hooksRange.x - 4, 120, "end"]]));
+  out.push(labels.placeAt(t("part.hooks"), [[beyond, 200], [beyond, 120], [beyond, 60], [hooksRange.x - 4, 120, "end"]], "lbl p-hooks"));
   out.push(labels.placeAt(t("part.bottomBoard"), [[bottom.x + bottom.w + 4, mid(bottom)], [bottom.x - 4, mid(bottom), "end"]]));
   const breakMid = (L.breakY[0] + L.breakY[1]) / 2 - s * 0.35;
-  out.push(labels.placeAt(t("part.harnessShortened"), [[bx1 + 4 + s * 0.3, breakMid], [bx0 - 4 - s * 0.3, breakMid, "end"]]));
-  out.push(labels.placeAt(t("part.comberBoard"), [[comber.x + comber.w + 4, mid(comber)], [comber.x - 4, mid(comber), "end"]]));
-  out.push(labels.placeAt(t("part.warpUp"), [[bx1 + 4, L.shed.top - s * 0.35], [bx0 - 4, L.shed.top - s * 0.35, "end"]]));
-  out.push(labels.placeAt(t("part.mailsWarpDown"), [[bx1 + 4, L.shed.rest - s * 0.35], [bx0 - 4, L.shed.rest - s * 0.35, "end"]]));
-  out.push(labels.placeAt(t("part.lingoes"), [[harnessRange.x - 4, lingoBottom + 10, "end"], [bx1 + 4, lingoBottom + 10]]));
+  out.push(labels.placeAt(t("part.harnessShortened"), [[bx1 + 4 + s * 0.3, breakMid], [bx0 - 4 - s * 0.3, breakMid, "end"]], "lbl p-harness"));
+  out.push(labels.placeAt(t("part.comberBoard"), [[comber.x + comber.w + 4, mid(comber)], [comber.x - 4, mid(comber), "end"]], "lbl p-harness"));
+  out.push(labels.placeAt(t("part.warpUp"), [[bx1 + 4, L.shed.top - s * 0.35], [bx0 - 4, L.shed.top - s * 0.35, "end"]], "lbl p-mails"));
+  out.push(labels.placeAt(t("part.mailsWarpDown"), [[bx1 + 4, L.shed.rest - s * 0.35], [bx0 - 4, L.shed.rest - s * 0.35, "end"]], "lbl p-mails"));
+  out.push(labels.placeAt(t("part.lingoes"), [[harnessRange.x - 4, lingoBottom + 10, "end"], [bx1 + 4, lingoBottom + 10]], "lbl p-lingoes"));
   // The first and last hooks' numbers, by their feet.
   const numbers = new LabelPlacer(frame, { boxes, segs }, NUMBER_PX);
   numbers.placed = labels.placed;

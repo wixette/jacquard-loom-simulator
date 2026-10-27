@@ -7,7 +7,7 @@
 // on the left and the sheet beside it. The frame is built again when the screen changes kind or
 // the workspace changes; its own texts follow the language without a rebuild.
 
-import { LOCALE_NAMES, LOCALE_SHORT, LOCALES, say as words, t, tn } from "../l10n/l10n.js";
+import { LOCALE_NAMES, LOCALE_SHORT, LOCALES, msg, say as words, t, tn } from "../l10n/l10n.js";
 import { HOOK_COUNTS, PRESETS } from "../sim/deck.js";
 import { encodeLink, LONG_LINK, STAGE_VIEWS } from "../sim/link.js";
 import { linkOf } from "./links.js";
@@ -22,6 +22,9 @@ import { place } from "./components/component.js";
 import { benchPanel, chainPanel, clothPanel, statusPanel, tracePanel, transportPanel } from "./components/panels.js";
 import { frontView, sectionView, sideView, UNIT_VIEWS, unitsView } from "./components/views.js";
 import { chooseLanguage } from "./language.js";
+import { leaveLearn, openLearn, watchDone } from "./learn.js";
+import { guidePanel } from "./components/guide.js";
+import { allowedAt, placeInPart, shownAt } from "../teach/tutorial.js";
 import * as act from "./looms.js";
 import { TIES, tieKey } from "./looms.js";
 /** @import { AppStore, StageView, Workspace } from "./looms.js" */
@@ -29,6 +32,7 @@ import { TIES, tieKey } from "./looms.js";
 /** @import { Component, Placed } from "./components/component.js" */
 /** @import { IconName } from "../ui/components.js" */
 /** @import { Edge } from "../ui/edge.js" */
+/** @import { Control } from "../teach/tutorial.js" */
 
 /** @typedef {"desktop" | "phone" | "landscape"} Mode */
 
@@ -278,14 +282,56 @@ export function createShell(store, root) {
     popover(anchor, "colours", t("colours.tip"), [el("label", { for: "colour-warp", text: t("setup.warp") }), warp, el("label", { for: "colour-weft", text: t("setup.weft") }), weft, el("span"), again]);
   }
 
+  /**
+   * Open a workspace: Learn at the tutorial's place, Weave as the learner left it.
+   * @param {Workspace} w
+   */
+  function goWorkspace(w) {
+    if (w === store.state.workspace) return;
+    if (w === "learn") openLearn(store);
+    else leaveLearn(store);
+  }
+
+  /**
+   * Mark a control that changes the cards or the loom, so that it greys while a step of the
+   * tutorial locks it (P6: pressed, it says why in the status line).
+   * @template {HTMLElement} E
+   * @param {E} e
+   * @param {Control} control
+   * @returns {E}
+   */
+  function controls(e, control) {
+    e.dataset.control = control;
+    return e;
+  }
+
+  /** Grey the controls the step on show locks, on the tutorial's loom. */
+  function greyLocked() {
+    const s = store.state;
+    const free = s.current === "tutorial" ? allowedAt(s.learn.step) : null;
+    for (const e of /** @type {NodeListOf<HTMLElement>} */ (root.querySelectorAll("[data-control]"))) {
+      const locked = free !== null && !free.includes(/** @type {Control} */ (e.dataset.control));
+      e.classList.toggle("locked", locked);
+      if (e instanceof HTMLButtonElement) e.setAttribute("aria-disabled", String(locked));
+    }
+  }
+
   function topbar() {
     const list = el("nav", { class: "workspaces tabs", role: "tablist", "data-l10n-name": "ws.name" });
     for (const w of WORKSPACES) {
-      const tab = label("button", `ws.${w}`, { type: "button", role: "tab", class: "tab", id: `ws-${w}` });
+      const tab = el("button", { type: "button", role: "tab", class: "tab", id: `ws-${w}` }, [label("span", `ws.${w}`)]);
       list.appendChild(tab);
     }
-    tabs(list, (id) => act.setWorkspace(store, /** @type {Workspace} */ (id.slice(3))));
+    tabs(list, (id) => goWorkspace(/** @type {Workspace} */ (id.slice(3))));
     for (const tab of list.children) tab.setAttribute("aria-selected", String(tab.id === `ws-${store.state.workspace}`));
+    // Learn carries the tutorial's place while it is on (the mode in the top bar, the sibling's U27)
+    const where = el("span", { class: "ws-where" });
+    list.querySelector("#ws-learn")?.append(where);
+    follow((s) => [s.workspace, s.learn.step, s.locale], () => {
+      const p = placeInPart(store.state.learn.step);
+      where.hidden = store.state.workspace !== "learn";
+      where.textContent = t("learn.where", { part: p.part, at: p.at, of: p.of });
+    });
     const share = el("button", { type: "button", class: "btn has-icon", "aria-haspopup": "menu" }, [icon("share"), label("span", "bar.share")]);
     share.dataset.l10nTip = "bar.share.tip";
     share.setAttribute("data-tip-describes", "");
@@ -301,7 +347,7 @@ export function createShell(store, root) {
     const ws = el("select", { class: "ws", "data-l10n-name": "ws.name" });
     for (const w of WORKSPACES) ws.appendChild(label("option", `ws.${w}`, { value: w }));
     ws.value = store.state.workspace;
-    ws.addEventListener("change", () => act.setWorkspace(store, /** @type {Workspace} */ (ws.value)));
+    ws.addEventListener("change", () => goWorkspace(/** @type {Workspace} */ (ws.value)));
     const menu = iconButton("menu", "bar.menu", () =>
       showMenu(menu, [
         { label: t("bar.language"), run: () => languageMenu(menu) },
@@ -314,22 +360,24 @@ export function createShell(store, root) {
 
   /** The card tools, over the chain. */
   function cardTools() {
-    const decks = iconButton("menu_book", "cards.decks", () =>
+    const decks = controls(iconButton("menu_book", "cards.decks", () =>
       showMenu(
         decks,
         Object.entries(PRESETS).map(([key, p]) => ({ label: tn("preset.option", p.rows.length, { name: t(p.name) }), run: () => act.loadPreset(store, key) })),
       ),
-    );
-    const loop = iconButton("repeat", "cards.loop", () => act.lace(store, !ls().loom.deck.loop));
+    ), "cards");
+    const loop = controls(iconButton("repeat", "cards.loop", () => act.lace(store, !ls().loom.deck.loop)), "loop");
     follow((s) => [s.looms[s.current].rev], () => loop.setAttribute("aria-pressed", String(ls().loom.deck.loop)));
     return [
       decks,
-      iconButton("add", "cards.add", () => act.add(store)),
-      iconButton("content_copy", "cards.duplicate", () => act.duplicate(store)),
-      iconButton("delete", "cards.remove", () => act.remove(store)),
-      iconButton("arrow_upward", "cards.up", () => act.move(store, -1)),
-      iconButton("arrow_downward", "cards.down", () => act.move(store, 1)),
-      iconButton("invert_colors", "cards.invert", () => act.invert(store)),
+      ...[
+        iconButton("add", "cards.add", () => act.add(store)),
+        iconButton("content_copy", "cards.duplicate", () => act.duplicate(store)),
+        iconButton("delete", "cards.remove", () => act.remove(store)),
+        iconButton("arrow_upward", "cards.up", () => act.move(store, -1)),
+        iconButton("arrow_downward", "cards.down", () => act.move(store, 1)),
+        iconButton("invert_colors", "cards.invert", () => act.invert(store)),
+      ].map((b) => controls(b, "cards")),
       loop,
     ];
   }
@@ -349,7 +397,7 @@ export function createShell(store, root) {
       back.setAttribute("aria-pressed", String(ls().face === "back"));
       bits.setAttribute("aria-pressed", String(ls().bits));
     });
-    const colours = iconButton("palette", "colours.tip", () => coloursPopover(colours));
+    const colours = controls(iconButton("palette", "colours.tip", () => (colours.classList.contains("locked") ? act.say(store, msg("learn.locked"), true) : coloursPopover(colours))), "colours");
     colours.setAttribute("aria-haspopup", "dialog");
     return [el("div", { class: "seg", role: "group" }, [front, back]), bits, colours];
   }
@@ -377,10 +425,11 @@ export function createShell(store, root) {
   /** The head and its tie-up, shown as they are, over the cards; pressed, they can be changed. */
   function setupRow() {
     const text = el("span");
-    const chip = el("button", { type: "button", class: "chip setup-chip", "aria-haspopup": "dialog" }, [icon("tune"), text, icon("keyboard_arrow_down")]);
+    const chip = controls(el("button", { type: "button", class: "chip setup-chip", "aria-haspopup": "dialog" }, [icon("tune"), text, icon("keyboard_arrow_down")]), "setup");
     chip.dataset.l10nTip = "setup.tip";
     chip.setAttribute("data-tip-describes", "");
-    chip.addEventListener("click", () => setupPopover(chip));
+    // locked, it says why instead of opening
+    chip.addEventListener("click", () => (chip.classList.contains("locked") ? act.say(store, msg("learn.locked"), true) : setupPopover(chip)));
     follow((s) => [s.looms[s.current].rev, s.locale], () => {
       const { deck, tie } = ls().loom;
       text.textContent = t("setup.chip", { head: tn("hooks.option", deck.hooks / 8, { hooks: deck.hooks }), tie: words(tieLabel(tie)) });
@@ -388,14 +437,28 @@ export function createShell(store, root) {
     return el("div", { class: "setup-row" }, [chip]);
   }
 
-  /** The program: the card on the bench above the chain (and, in Learn, the guide above both). */
+  /**
+   * The program: the card on the bench above the chain. In Learn the guide is above both, and
+   * alone where the step does not use the cards (the story).
+   */
   function programPanel() {
-    const bench = el("div", { class: "bench-slot" });
-    const chain = el("div", { class: "chain-slot" });
+    const bench = controls(el("div", { class: "bench-slot" }), "punch");
+    const chain = controls(el("div", { class: "chain-slot" }), "punch");
     const head = el("div", { class: "panel-head" }, [label("h2", "cards.title"), ...cardTools()]);
-    const panel = el("aside", { class: "panel left" }, [rail("left"), ...(store.state.workspace === "learn" ? [guide()] : []), head, setupRow(), bench, chain]);
+    const learn = store.state.workspace === "learn";
+    const setup = setupRow();
+    const panel = el("aside", { class: "panel left" }, [rail("left"), ...(learn ? [guide()] : []), head, setup, bench, chain]);
     put(benchPanel(store), bench);
     put(chainPanel(store), chain);
+    // in Learn the guide has the room: the bench shows only for a step that punches cards, the
+    // head and tie-up only for one that changes them
+    if (learn)
+      follow((s) => [s.learn.step], () => {
+        const i = store.state.learn.step;
+        panel.classList.toggle("guide-only", !shownAt(i).cards);
+        bench.hidden = !allowedAt(i).includes("punch");
+        setup.hidden = !allowedAt(i).includes("setup");
+      });
     return panel;
   }
 
@@ -409,17 +472,11 @@ export function createShell(store, root) {
     return panel;
   }
 
-  /** A sample step of the tutorial, to show where it goes (the tutorial itself comes in M7). */
+  /** The guide: the tutorial's step (js/app/components/guide.js). */
   function guide() {
-    return el("div", { class: "guide" }, [
-      el("div", { class: "step-card" }, [
-        el("p", { class: "step-kicker", text: "3 · Weave · 2/9" }),
-        el("h3", { text: "Plain weave" }),
-        el("p", { text: "Two cards, taking turns: the first lifts the odd ends, the second the even ones. Predict the cloth, then weave four picks." }),
-        el("div", { class: "taskline" }, [icon("play_arrow"), el("span", { text: "Your turn: weave four picks" })]),
-        el("div", { class: "step-nav" }, [el("button", { type: "button", class: "btn", text: "Back" }), el("button", { type: "button", class: "btn filled", text: "Next" })]),
-      ]),
-    ]);
+    const host = el("div", { class: "guide" });
+    put(guidePanel(store, { onWeave: () => goWorkspace("weave") }), host);
+    return host;
   }
 
   /**
@@ -665,6 +722,7 @@ export function createShell(store, root) {
       }
       mine = placed.slice(before);
       relabel();
+      greyLocked();
     };
     const select = tabs(list, (tab) => show(tab.slice("sheet-".length)));
     select(`sheet-${ids[0]}`);
@@ -681,6 +739,7 @@ export function createShell(store, root) {
     document.querySelector(".popover")?.remove();
     mode = modeOf();
     root.className = `app ${mode}`;
+    root.dataset.ws = store.state.workspace;
     if (mode !== "phone") delete root.dataset.sheet;
     root.replaceChildren();
     edges = {};
@@ -704,10 +763,12 @@ export function createShell(store, root) {
     }
     applyIcons(root);
     relabel();
+    follow((s) => [s.current, s.learn.step, s.looms[s.current].rev], greyLocked);
   }
 
   build();
   wireKeys(store);
+  watchDone(store);
   window.addEventListener("resize", () => {
     if (modeOf() !== mode) build();
   });

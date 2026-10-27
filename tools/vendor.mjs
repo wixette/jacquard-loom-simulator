@@ -90,6 +90,7 @@ export const ICONS = [
   "splitscreen_left",
   "sports_esports",
   "swap_vert",
+  "toc",
   "translate",
   "tune",
   "view_column_2",

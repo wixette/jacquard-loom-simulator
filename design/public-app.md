@@ -1,7 +1,7 @@
 # The public app: design
 
 - **Status:** agreed on 2026-10-26; revised on 2026-10-27 for the main app at `index.html`, which replaces the prototype learner page. The developer pages (`dev/`) are prototypes; the lessons of M2 and M4 are not carried over as lessons, only as material for the tutorial (§1).
-- **Built so far:** the name game's prototype, [`dev/06-name-game/`](../dev/06-name-game/) ([notes](name-game-notes.md)).
+- **Built so far:** the main app's frame and Weave (M6, [notes](m6-notes.md)); the tutorial's parts 1 to 3 (M7, [notes](m7-notes.md)); the name game's prototype, [`dev/06-name-game/`](../dev/06-name-game/) ([notes](name-game-notes.md)).
 - **Layout:** how the many views and panels are organized on desktop and phone: [ui-layout.md](ui-layout.md). The look (a dark theme), the languages and the components are shared with the sibling project, the [Stepped Reckoner](https://github.com/wixette/leibniz-stepped-reckoner) ([docs/ui-design.md](../docs/ui-design.md)).
 - **Releases:** §4.
 

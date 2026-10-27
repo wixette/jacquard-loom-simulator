@@ -4,6 +4,7 @@
 
 import { t } from "../../l10n/l10n.js";
 import { traceOf } from "../../sim/trace.js";
+import { STEPS } from "../../teach/tutorial.js";
 import { frontLayout, FrontView } from "../../view2d/frontView.js";
 import { sectionLayout } from "../../view2d/layout.js";
 import { SectionView } from "../../view2d/sectionView.js";
@@ -55,11 +56,13 @@ export function sectionView(store, o = {}) {
     },
     watch(s) {
       const ls = loomOf(s, o.loom);
-      return [ls.loom, ls.rev, ls.crossRow, ls.follow, s.sectionView, s.locale];
+      return [ls.loom, ls.rev, ls.crossRow, ls.follow, s.sectionView, s.locale, s.workspace, s.learn.step];
     },
     update(s) {
       if (!shown(host)) return;
       const ls = loomOf(s, o.loom);
+      // the parts a step of the tutorial points at glow (css/views.css)
+      view.svg.dataset.glow = s.workspace === "learn" && (o.loom ?? s.current) === "tutorial" ? (STEPS[s.learn.step].glow ?? []).join(" ") : "";
       const snap = ls.loom.snapshot();
       const trace = ls.follow ? traceOf(snap, ls.follow) : null;
       view.render(sectionLayout(snap, ls.crossRow), { follow: trace ? trace.hook : null, view: s.sectionView, labels: true });
