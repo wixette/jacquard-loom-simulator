@@ -42,7 +42,7 @@ The learner's loom: its head and tie-up, its cards, the moment it is at, and how
 | `sv` | `whole`, `needles`, `crooks` | `whole` | How close the section looks |
 | `face` | `front`, `back` | `front` | The face of the cloth shown |
 | `bits` | `0`, `1` | `0` | The 0/1 overlay on the cloth |
-| `view` | one, two or four of `section`, `side`, `front`, `3d`, `u1` … `u5`, joined by `,` | `section` | The stage's views, in order: one fills the stage, two stand side by side, four make the quad view. `3d` is the whole loom, `u1` to `u5` its units alone. |
+| `view` | one, two or four of `section`, `side`, `front`, `3d`, `u1` … `u5`, joined by `,` | the screen's: `section,3d` where the stage is wide enough for two, else `section` | The stage's views, in order: one fills the stage, two stand side by side, four make the quad view. `3d` is the whole loom, `u1` to `u5` its units alone. A link written with the one view `section` leaves it out. |
 
 **A deck** (`c`) is written in one of three encodings, named by its first letter and a dot. Every reader reads all three; which one a writer chooses is not part of the contract (today: readable hex up to 80 characters, so a teacher can read a small deck, and otherwise the shorter of the other two).
 

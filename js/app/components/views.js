@@ -150,11 +150,21 @@ export function frontView(store, o = {}) {
   };
 }
 
+/** The unit each 3D view of the stage shows (js/sim/link.js, STAGE_VIEWS), with its code. */
+export const UNIT_VIEWS = /** @type {const} */ ({
+  "3d": { unit: "machine", code: "" },
+  u1: { unit: "selector", code: "U1" },
+  u2: { unit: "cylinder", code: "U2" },
+  u3: { unit: "griffe", code: "U3" },
+  u4: { unit: "harness", code: "U4" },
+  u5: { unit: "shed", code: "U5" },
+});
+
 /**
  * The loom in 3D: the ghosted whole machine with its five core units, or one unit alone. The
  * 3D code and the models load only when this is first mounted.
  * @param {AppStore} store
- * @param {ViewOptions & { unit?: "machine" | UnitId }} [o]
+ * @param {ViewOptions & { unit?: "machine" | UnitId; onMode?: (mode: "machine" | UnitId) => void }} [o] onMode: what it shows, each time that changes (a click on a unit opens it alone)
  * @returns {Component}
  */
 export function unitsView(store, o = {}) {
@@ -186,7 +196,7 @@ export function unitsView(store, o = {}) {
       import("../../scene/unitsView.js")
         .then(({ UnitsView }) => {
           if (gone) return;
-          view = new UnitsView(h);
+          view = new UnitsView(h, { onChange: o.onMode });
           if (o.unit && o.unit !== "machine") view.show(o.unit, false);
           else view.showMachine(false);
           return view.load((f) => {

@@ -3,6 +3,7 @@
 // control has two homes). Loaded the first time the learner chooses it, since it brings
 // three.js and the models; posed from the loom at every redraw.
 
+import { t } from "../l10n/l10n.js";
 import { UNITS } from "../scene/units.js";
 import { UnitsView } from "../scene/unitsView.js";
 /** @import { LoomPage } from "./loomPage.js" */
@@ -28,7 +29,7 @@ export function createParts3D(host, page) {
   host.innerHTML = `
     <div class="parts-bar" role="group" aria-label="What the 3D view shows">
       <button type="button" data-part="machine">Whole loom</button>
-      ${UNITS.map((u) => `<button type="button" data-part="${u.id}" title="${u.title}">${u.code} ${u.title.replace(/^The /, "").replace(/ and .*/, "")}</button>`).join("")}
+      ${UNITS.map((u) => `<button type="button" data-part="${u.id}" title="${t(u.title)}">${u.code} ${t(u.title).replace(/^The /, "").replace(/ and .*/, "")}</button>`).join("")}
     </div>
     <div class="parts3d-view"><p class="loading">Loading the 3D parts…</p></div>
     <p class="parts-idea"></p>`;
@@ -39,7 +40,7 @@ export function createParts3D(host, page) {
     onChange(mode) {
       for (const b of host.querySelectorAll("[data-part]")) b.classList.toggle("on", /** @type {HTMLElement} */ (b).dataset.part === mode);
       const spec = UNITS.find((u) => u.id === mode);
-      idea.textContent = spec ? `${spec.code} · ${spec.title}. ${spec.idea}` : MACHINE_IDEA;
+      idea.textContent = spec ? `${spec.code} · ${t(spec.title)}. ${t(spec.idea)}` : MACHINE_IDEA;
     },
   });
   host.querySelector(".parts-bar")?.addEventListener("click", (e) => {

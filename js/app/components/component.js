@@ -34,13 +34,9 @@ export function place(component, host, store) {
   component.mount(host);
   const draw = () => component.update(store.state);
   const unwatch = store.watch(component.watch, draw);
-  // A resize redraws (the views draw to their host's size); the first report, for the size
-  // the host already had, is skipped: the component was drawn just below.
-  let first = true;
-  const resized = new ResizeObserver(() => {
-    if (first) first = false;
-    else draw();
-  });
+  // A resize redraws (the views draw to their host's size). The first report comes when the
+  // host is laid out: a component placed before its host was in the page draws then.
+  const resized = new ResizeObserver(draw);
   resized.observe(host);
   draw();
   return {

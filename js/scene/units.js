@@ -21,8 +21,8 @@ import { anchors, Rig } from "./rig.js";
  * @property {UnitId} id
  * @property {string} code U1 … U5
  * @property {string} file in assets/
- * @property {string} title
- * @property {string} idea the mechanical idea it teaches (plan §5)
+ * @property {string} title its name: a message key
+ * @property {string} idea the mechanical idea it teaches (plan §5): a message key
  * @property {string} root the unit's root node
  * @property {Record<string, string>} nodes the moving parts, by key
  */
@@ -33,8 +33,8 @@ export const UNITS = [
     id: "selector",
     code: "U1",
     file: "u1-selector.glb",
-    title: "The selector",
-    idea: "Selection by displacement: a light needle decides, a heavy rising knife does the lifting. Each column of the card is read by the 8 needles of one cross-row, one per row. A blank pushes its needle back, the needle's eye pushes its hook off the knife, and the knife passes it by; a hole lets the needle in, and the hook stays over its knife. The springs push the needles back out. The followed hook's needle is drawn solid, its hole ringed on the card.",
+    title: "unit.selector",
+    idea: "unit.selector.idea",
     root: "unit.selector",
     nodes: {
       ...Object.fromEntries([...Array(8).keys()].flatMap((k) => [[`needle${k}`, `needles.needle.${k}`], [`spring${k}`, `springs.spring.${k}`]])),
@@ -53,8 +53,8 @@ export const UNITS = [
     id: "cylinder",
     code: "U2",
     file: "u2-cylinder.glb",
-    title: "The card cylinder",
-    idea: "Indexing (the cylinder is the 400 head's, longer than your card): as the batten carries the cylinder out, the upper catch takes a pin of the square lantern and turns the cylinder a quarter, like a ratchet and pawl, bringing the card lying on top to the needles; the card just read swings off and hangs below. The spring hammer, pressing from below, squares it: a detent. The pegs pass through the card's peg holes, so every hole lands on its bore.",
+    title: "unit.cylinder",
+    idea: "unit.cylinder.idea",
     root: "unit.cylinder",
     nodes: { batten: "cylinder.batten", prism: "cylinder.prism", hammer: "cylinder.hammer" },
   },
@@ -62,8 +62,8 @@ export const UNITS = [
     id: "griffe",
     code: "U3",
     file: "u3-griffe.glb",
-    title: "The griffe and the lift",
-    idea: "The lever: the weaver's foot powers every lift. The treadle pulls the cord, the head lever's front arm goes down and its back arm lifts the griffe, with all its knives and every hook left over them, by about 3½ in.",
+    title: "unit.griffe",
+    idea: "unit.griffe.idea",
     root: "unit.griffe",
     nodes: { frame: "griffe.frame", rod: "lift.rod", lever: "lift.head_lever", cord: "lift.cord", treadle: "lift.treadle" },
   },
@@ -71,8 +71,8 @@ export const UNITS = [
     id: "harness",
     code: "U4",
     file: "u4-harness.glb",
-    title: "The harness line",
-    idea: "Fan-out and gravity: one hook drives one warp end in every repeat of the pattern. The comber board spreads its cords across the warp; each mail holds an end; each lingo's weight pulls it back down when the hook falls.",
+    title: "unit.harness",
+    idea: "unit.harness.idea",
     root: "unit.harness",
     nodes: {
       neck: "harness.neck_cord.0",
@@ -94,8 +94,8 @@ export const UNITS = [
     id: "shed",
     code: "U5",
     file: "u5-shed.glb",
-    title: "The shed, the shuttle and the batten",
-    idea: "The shed: the lifted ends and the ends left down open a passage, the shuttle crosses through it and lays the weft between them, and the batten's reed beats the new pick into the cloth.",
+    title: "unit.shed",
+    idea: "unit.shed.idea",
     root: "unit.shed",
     nodes: {
       endBack: "warp.end.up.back",

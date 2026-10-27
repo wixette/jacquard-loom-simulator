@@ -14,11 +14,12 @@ This simulator shows a single-lift Jacquard head on a silk hand loom, of the kin
 
 ## Status
 
-**0.0.1, a working prototype.** Everything below works and is tested; the public app designed for it (a step-by-step tutorial, four mini games, a layout for desktop and phone) is not built yet. Its design is in [design/public-app.md](design/public-app.md) and [design/ui-layout.md](design/ui-layout.md), and the history so far in [CHANGELOG.md](CHANGELOG.md).
+**On the way to 0.1.0.** The main app works: the whole loom in 2D and 3D, on desktop and phone, in ten languages. Its tutorial (M7) comes next, then the picture tool and four mini games in 0.2.0. The design is in [design/public-app.md](design/public-app.md) and [design/ui-layout.md](design/ui-layout.md), and the history so far in [CHANGELOG.md](CHANGELOG.md).
 
 ## What is in it
 
-- **The learner page** (`dev/03-learner/`; the address above shows a page pointing to it until the main app arrives): the whole loom in 2D, with ten lessons (the last prints the cards at true size, to punch and lace); a picture-to-cards helper (draw, open an image, or take a preset; read it directly or as damask, and see where the threads would float loose); a note about the machine; and **Parts in 3D**, the ghosted loom with its five core units in place, each opened alone with a click.
+- **The app** (the address above): punch the cards, turn the loom and watch it weave, in the section of the head, from the side, from the front, or in 3D (the whole loom ghosted, or one of its five core units alone), one view at a time, two side by side or four; follow any thread from its hole to the cloth; share the loom as a link, save the cloth as a picture, print the cards at true size. With the keyboard, the machine's sounds, and in English, Español, Français, Deutsch, Italiano, Português (Brasil), 简体中文, 繁體中文, 日本語 or 한국어.
+- **The prototype learner page** (`dev/03-learner/`): the whole loom in 2D, with ten lessons (the last prints the cards at true size, to punch and lace); a picture-to-cards helper (draw, open an image, or take a preset; read it directly or as damask, and see where the threads would float loose); a note about the machine; and **Parts in 3D**, the ghosted loom with its five core units in place, each opened alone with a click.
 - **The developer pages** (`dev/`), one per stage of the work:
   - `dev/01-section/`: one cross-row of the head in a side section, drawn to scale from Posselt (1887); punch eight-hole cards and watch them select the hooks.
   - `dev/02-loom/`: the whole loom in 2D: a head of 8 to 64 hooks and a tie-up, the cards in the chain or on the bench, and any cell of the cloth followed back through the front view and the head to its hole. "Copy link" opens the same loom elsewhere.
@@ -44,7 +45,7 @@ cd jacquard-loom-simulator
 python3 -m http.server 8000
 ```
 
-Then open <http://localhost:8000/dev/> (the developer pages, the learner page among them). Opening `index.html` straight from disk does not work, because browsers do not load JavaScript modules from `file://`.
+Then open <http://localhost:8000/> (the app) or <http://localhost:8000/dev/> (the developer pages). Opening `index.html` straight from disk does not work, because browsers do not load JavaScript modules from `file://`.
 
 ## For developers
 
@@ -65,11 +66,12 @@ Start with **[docs/development.md](docs/development.md)**: requirements, page op
 
 | Folder | Contents |
 |---|---|
-| `index.html`, `css/`, `js/` | The main app (being built) and the code shared with the prototypes: `js/sim/` the machine, the picture reader, the trace and the links (pure logic); `js/view2d/` the 2D drawings; `js/scene/` the 3D units (three.js); `js/app/` the app's store, components and the prototypes' shells; `js/ui/` the interface's components and theme; `js/l10n/` the ten languages; `js/teach/` the lessons; `js/game/` the name game; `js/accept/` the acceptance checks |
+| `index.html`, `css/`, `js/` | The main app and the code shared with the prototypes: `js/sim/` the machine, the picture reader, the trace and the links (pure logic); `js/view2d/` the 2D drawings; `js/scene/` the 3D units (three.js); `js/app/` the app's store, components, frame, keyboard and sounds, and the prototypes' shells; `js/ui/` the interface's components and theme; `js/l10n/` the ten languages; `js/teach/` the lessons; `js/game/` the name game; `js/accept/` the acceptance checks |
 | `dev/` | The developer pages, one per stage |
 | `params/` | `machine.json`: every dimension and angle, each with a source and a confidence |
 | `blender/scripts/` | Headless build scripts (params → parts → `.glb`) |
 | `assets/` | The generated `.glb` models (Git LFS, always rebuildable) |
+| `audio/` | The machine's sounds (placeholders for now, `pnpm sounds`) |
 | `tests/` | `node --test` tests, including acceptance tests on the `.glb` |
 | `research/` | Sources, notes, data and reference images, with [REPORT.md](research/REPORT.md) as the entry point |
 | `design/` | The plan, the decision records, each stage's notes, and the public app's design |

@@ -17,6 +17,8 @@ import { Store } from "./store.js";
 /** @typedef {"mine" | "tutorial" | "game"} LoomId */
 /** @typedef {"whole" | "needles" | "crooks"} SectionView */
 /** @typedef {"front" | "back"} Face */
+/** @typedef {"learn" | "weave"} Workspace the workspaces of release 0.1.0 (Create and Play come in 0.2.0) */
+/** @typedef {import("../sim/link.js").StageView} StageView */
 
 /**
  * One loom and how it is shown.
@@ -42,6 +44,8 @@ import { Store } from "./store.js";
  * @property {LoomId} current the loom the views show
  * @property {SectionView} sectionView how close the section looks
  * @property {Locale} locale
+ * @property {Workspace} workspace
+ * @property {StageView[]} views the stage's views: one, two or four
  */
 
 /** @typedef {Store<AppState>} AppStore */
@@ -71,7 +75,7 @@ export const tieKey = (t) => (t.kind === "point" ? "p" : `s${t.repeats}`);
  * @returns {LoomState}
  */
 export function loomState(deck, tie = STRAIGHT) {
-  return { loom: new Loom(deck, tie), rev: 0, selected: 0, follow: null, crossRow: 0, warp: WARP, weft: WEFT, face: "front", bits: false, playing: false, speed: 10, status: { msg: msg("status.start"), warn: false } };
+  return { loom: new Loom(deck, tie), rev: 0, selected: 0, follow: null, crossRow: 0, warp: WARP, weft: WEFT, face: "front", bits: false, playing: false, speed: 12, status: { msg: msg("status.start"), warn: false } };
 }
 
 /**
@@ -85,6 +89,8 @@ export function appState(o = {}) {
     current: "mine",
     sectionView: "whole",
     locale: "en",
+    workspace: "weave",
+    views: ["section"],
     ...o,
   };
 }
@@ -155,6 +161,23 @@ export function touch(store, id = cur(store)) {
 export const setCurrent = (store, id) => store.set({ current: id });
 /** @param {AppStore} store @param {SectionView} v */
 export const setSectionView = (store, v) => store.set({ sectionView: v });
+
+/**
+ * Open a workspace. Learn works on the tutorial's loom, Weave on the learner's (design/ui-layout.md
+ * §2, rule 3).
+ * @param {AppStore} store
+ * @param {Workspace} w
+ */
+export const setWorkspace = (store, w) => store.set({ workspace: w, current: w === "learn" ? "tutorial" : "mine" });
+
+/**
+ * The stage's views: one, two or four.
+ * @param {AppStore} store
+ * @param {StageView[]} views
+ */
+export function setViews(store, views) {
+  if (views.join() !== store.state.views.join()) store.set({ views });
+}
 
 // ---- turning the loom --------------------------------------------------------------------------
 

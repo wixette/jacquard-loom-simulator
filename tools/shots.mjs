@@ -35,7 +35,29 @@ const LOADED_3D = "document.querySelector('canvas') && !document.querySelector('
 const WEAVE = "await click('#fwd', 6 * 5 + 2);";
 
 /** @type {Shot[]} */
+/** In the main app: weave a few picks and follow a hook, as a learner would. */
+const APP = "for (let i = 0; i < 26; i++) { document.querySelector('.transport [data-act=fwd]')?.click(); await sleep(30); } document.querySelector('svg.section .hook.caught')?.dispatchEvent(new MouseEvent('click', { bubbles: true })); await sleep(900);";
+/** The app is ready when its 3D views (if any) have loaded. */
+const APP_READY = "document.querySelector('.app') && !document.querySelector('.view-note')";
+
 const SHOTS = [
+  { name: "app-1366", path: "index.html", ready: APP_READY, setup: APP, size: [1366, 768] },
+  { name: "app-1920-two", path: "index.html", ready: APP_READY, setup: `${APP} await sleep(1500);`, size: [1920, 1080] },
+  { name: "app-1920-four", path: "index.html#v=2&view=section,front,side,3d", ready: APP_READY, setup: `${APP} await sleep(1500);`, size: [1920, 1080] },
+  { name: "app-1366-learn", path: "index.html", ready: APP_READY, setup: `document.getElementById('ws-learn')?.click(); await sleep(300); ${APP}`, size: [1366, 768] },
+  { name: "app-setup", path: "index.html", ready: APP_READY, setup: `${APP} document.querySelector('.setup-chip').click(); await sleep(300);`, size: [1366, 768] },
+  { name: "app-colours", path: "index.html", ready: APP_READY, setup: `${APP} document.querySelector('.panel.right [aria-haspopup="dialog"]').click(); await sleep(300);`, size: [1366, 768] },
+  { name: "app-64", path: "index.html", ready: APP_READY, setup: `document.querySelector('.setup-chip').click(); await sleep(200); const h = document.getElementById('setup-hooks'); h.value = '64'; h.dispatchEvent(new Event('change')); await sleep(300); document.querySelector('.chain').scrollLeft = 400; await sleep(200);`, size: [1366, 768] },
+  { name: "app-about", path: "index.html", ready: APP_READY, setup: `document.querySelector('.topbar .btn.icon-only').click(); await sleep(300);`, size: [1366, 768] },
+  { name: "app-phone-full", path: "index.html", ready: APP_READY, setup: `${APP} const g = document.querySelector('.grab'); g.dispatchEvent(new PointerEvent('pointerdown', { clientY: 400, bubbles: true })); g.dispatchEvent(new PointerEvent('pointerup', { clientY: 400, bubbles: true })); await sleep(400);`, size: [390, 844] },
+  { name: "app-phone-peek", path: "index.html", ready: APP_READY, setup: `${APP} const g = document.querySelector('.grab'); g.dispatchEvent(new PointerEvent('pointerdown', { clientY: 400, bubbles: true })); g.dispatchEvent(new PointerEvent('pointerup', { clientY: 480, bubbles: true })); await sleep(400);`, size: [390, 844] },
+  { name: "app-unit-note", path: "index.html#v=2&view=section,u1", ready: APP_READY, setup: `${APP} await sleep(1500); document.querySelector('.unit-note summary').click(); await sleep(300);`, size: [1366, 768] },
+  { name: "app-ja", path: "index.html?lang=ja", ready: APP_READY, setup: APP, size: [1366, 768] },
+  { name: "app-de", path: "index.html?lang=de", ready: APP_READY, setup: APP, size: [1366, 768] },
+  { name: "app-tablet", path: "index.html", ready: APP_READY, setup: APP, size: [820, 1180] },
+  { name: "app-phone", path: "index.html", ready: APP_READY, setup: APP, size: [390, 844] },
+  { name: "app-phone-cloth", path: "index.html", ready: APP_READY, setup: `${APP} document.getElementById('sheet-cloth')?.click(); await sleep(400);`, size: [390, 844] },
+  { name: "app-landscape", path: "index.html", ready: APP_READY, setup: APP, size: [844, 390] },
   { name: "learner", path: "dev/03-learner/", setup: WEAVE },
   { name: "learner-follow", path: "dev/03-learner/", setup: `${WEAVE} await tap("svg.section .hook.caught");` },
   { name: "learner-3d", path: "dev/03-learner/?view=3d", ready: LOADED_3D, setup: "await sleep(1500);" },
@@ -56,7 +78,7 @@ const SHOTS = [
     name: `foundations-${lang}`,
     path: `dev/07-foundations/?lang=${lang}`,
     ready: "!document.querySelector('.view-note')",
-    setup: "for (let i = 0; i < 9; i++) { document.querySelector('.transport .joined .btn:last-child')?.click(); await sleep(40); } document.querySelector('svg.section .hook.caught')?.dispatchEvent(new MouseEvent('click', { bubbles: true })); await sleep(800);",
+    setup: "for (let i = 0; i < 9; i++) { document.querySelector('.transport [data-act=fwd]')?.click(); await sleep(40); } document.querySelector('svg.section .hook.caught')?.dispatchEvent(new MouseEvent('click', { bubbles: true })); await sleep(800);",
   })),
   { name: "learner-phone", path: "dev/03-learner/", setup: WEAVE, size: [390, 844] },
 ];

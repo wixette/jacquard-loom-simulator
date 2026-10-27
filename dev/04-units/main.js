@@ -68,13 +68,13 @@ hookSelect.addEventListener("change", () => {
 });
 
 // The unit list.
-$("unit-list").innerHTML = UNITS.map((u) => `<li><button type="button" data-unit="${u.id}"><span class="code">${u.code}</span><span>${u.title}</span></button></li>`).join("");
+$("unit-list").innerHTML = UNITS.map((u) => `<li><button type="button" data-unit="${u.id}"><span class="code">${u.code}</span><span>${t(u.title)}</span></button></li>`).join("");
 /** @param {UnitId} id */
 function showUnit(id) {
   view.show(id);
   const spec = /** @type {import("../../js/scene/units.js").UnitSpec} */ (UNITS.find((u) => u.id === id));
   for (const b of document.querySelectorAll("[data-unit]")) b.classList.toggle("on", /** @type {HTMLElement} */ (b).dataset.unit === id);
-  $("unit-idea").textContent = spec.idea;
+  $("unit-idea").textContent = t(spec.idea);
 }
 $("unit-list").addEventListener("click", (e) => {
   const b = /** @type {Element} */ (e.target).closest("[data-unit]");
