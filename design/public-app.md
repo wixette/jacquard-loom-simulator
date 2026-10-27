@@ -61,7 +61,7 @@ The weaving tasks (parts 3 and 4) come before the tools (part 5), so the learner
   | The cylinder swinging out and turning to the next card | the card chain's wooden knock |
   | Refused (the chain has run out) | a dull stop |
 
-  Each play varies a little in pitch and loudness; playing fast, the sounds of a pick shorten, and above a speed only the batten sounds. A tutorial step setting the loom up is silent.
+  Each play varies a little in pitch and loudness, and is heard on the motion that makes it; playing fast, every sound still plays, cut short with a fade to fit within half a pick, near its own pitch, the batten loudest. A tutorial step setting the loom up is silent.
 - **Languages:** the sibling project's ten (English, Español, Français, Deutsch, Italiano, Português (Brasil), 简体中文, 繁體中文, 日本語, 한국어), with its machinery: one module per language holding every string of the page, the tutorial, the games and the part names, English the reference and the fallback, and a test that every language has every key (docs/conventions.md, *Code*). Part names are each language's own weaving terms (in French, Lyon's: griffe, crochet, aiguille, carton).
 - **Phones and Chromebooks:** the same app on every screen (ui-layout.md §5); the 3D view starts in its lighter quality on weak devices.
 - **Sharing:** every cloth can be saved as a picture and reopened by a link.

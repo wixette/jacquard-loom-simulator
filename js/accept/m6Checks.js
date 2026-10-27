@@ -437,6 +437,18 @@ async function sounds({ store, shell }) {
     act.reset(store);
     await openLink(store, "#v=2&h=8&c=x.aa-55&l=1&p=1&s=3");
     if (heard.length) bad.push(`back, a reset and a link sound ${heard.join()}`);
+    // playing at the fastest speed, every sound of a pick is still heard
+    act.loadPreset(store, "plain");
+    act.lace(store, true);
+    act.reset(store);
+    act.setSpeed(store, 60);
+    heard = [];
+    act.play(store);
+    await sleep(1600);
+    act.pause(store);
+    act.setSpeed(store, 12);
+    const fast = ["lift", "turn", "shuttle", "beat", "fall", "press"].filter((n) => !heard.includes(n));
+    if (fast.length) bad.push(`at 60 picks a minute ${fast.join(", ")} not heard`);
     act.loadPreset(store, "blank");
     act.lace(store, false);
     heard = [];
@@ -461,7 +473,7 @@ async function sounds({ store, shell }) {
       bad.push(`${file} does not load`);
     }
   }
-  return result("S-9", "Each motion of a pick passed going forward sounds its own sound, once, as it happens; back, a reset and a link are silent; a refusal sounds; every file loads, heard from where it starts", bad.length === 0, bad.slice(0, 4).join("; ") || `lift, turn, shuttle, beat, fall, press; silent back, reset and link; the refusal heard; started past ${starts.join(", ")}`);
+  return result("S-9", "Each motion of a pick passed going forward sounds its own sound, once, as it happens, at every speed; back, a reset and a link are silent; a refusal sounds; every file loads, heard from where it starts", bad.length === 0, bad.slice(0, 4).join("; ") || `lift, turn, shuttle, beat, fall, press, stepped and at 60 picks a minute; silent back, reset and link; the refusal heard; started past ${starts.join(", ")}`);
 }
 
 /**

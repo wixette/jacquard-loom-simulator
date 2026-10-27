@@ -3,7 +3,7 @@
 
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { SOUND_AT } from "../../js/app/sound.js";
+import { SOUND_AT, voice } from "../../js/app/sound.js";
 import { BATTEN_STRIKE, battenSwing, shuttleAcross } from "../../js/sim/cycle.js";
 import { STOPS } from "../../js/sim/loom.js";
 import { P } from "../../js/sim/params.js";
@@ -23,5 +23,27 @@ describe("the machine's sounds, in time", () => {
     assert.equal(at.beat, BATTEN_STRIKE);
     assert.equal(battenSwing(BATTEN_STRIKE), 1, "the batten is at its strike");
     assert.equal(at.press, P.cylinderBack[1], "the cylinder is back on the needles");
+  });
+});
+
+describe("the machine's sounds, at every speed", () => {
+  const names = SOUND_AT.map(([n]) => n);
+  it("stepping, or playing up to 30 picks a minute, every sound plays whole, at its own pitch", () => {
+    for (const n of names) {
+      assert.deepEqual(voice(n, 60, false), { rate: 1, gain: 1, limit: null });
+      for (const speed of [6, 12, 30]) assert.deepEqual(voice(n, speed, true), { rate: 1, gain: 1, limit: null });
+    }
+  });
+  it("faster, every sound still plays, near its own pitch, over within half a pick, the batten loudest", () => {
+    for (const speed of [31, 45, 60]) {
+      const pick = 60 / speed;
+      for (const n of names) {
+        const v = voice(n, speed, true);
+        assert.ok(v.gain > 0.5, `${n} at ${speed}: silent`);
+        assert.ok(v.rate <= 1.1, `${n} at ${speed}: pitched up by ${v.rate}`);
+        assert.ok(v.limit !== null && v.limit <= pick / 2 + 1e-9, `${n} at ${speed}: longer than half a pick`);
+        if (n !== "beat") assert.ok(v.gain < voice("beat", speed, true).gain, `${n} as loud as the batten at ${speed}`);
+      }
+    }
   });
 });

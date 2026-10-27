@@ -9,8 +9,8 @@
 // - shed closed (the griffe falling): a softer thud;
 // - next card pressed: the cylinder's clack against the needles;
 // and a dull stop when the loom refuses. Going back, or jumping (a reset, a link, a tutorial step
-// setting the loom up), is silent. Playing fast the sounds shorten, and above FAST picks a minute
-// only the batten sounds.
+// setting the loom up), is silent. Every sound plays at every speed: above EASY picks a minute
+// each is shaped to fit (voice): cut short with a fade, a little quieter but for the batten.
 // Sound starts after the learner's first press or key, as browsers require. Web Audio: decoded
 // once, played with no delay (from where each sound starts in its file), overlapping, each a
 // little different in pitch and loudness.
@@ -49,8 +49,26 @@ export const SOUND_AT = /** @type {const} */ ([
   ["fall", P.stops[4]], // the griffe lands: shed closed
   ["press", P.cylinderBack[1]], // the cylinder presses the next card on the needles: before the next pick
 ]);
-/** Faster than this (picks a minute), only the batten sounds. */
-const FAST = 30;
+/** Up to this speed (picks a minute) every sound plays whole; faster, each is shaped to fit (voice). */
+const EASY = 30;
+/** The fastest the loom plays (the speed slider's end). */
+const FASTEST = 60;
+
+/**
+ * How a sound is played at a speed: every sound at every speed, at its own pitch (sped up by a
+ * tenth at most), cut short with a fade when the loom is fast, so that it is over within half a
+ * pick and never smears into its own next pick, and, when fast, the batten loudest and the rest
+ * a little quieter, so that the busier mix is no louder. Stepping, every sound plays whole.
+ * @param {SoundName} name
+ * @param {number} speed picks a minute
+ * @param {boolean} playing
+ * @returns {{ rate: number; gain: number; limit: number | null }} limit: seconds, or null for the whole sound
+ */
+export function voice(name, speed, playing) {
+  if (!playing || speed <= EASY) return { rate: 1, gain: 1, limit: null };
+  const busy = Math.min(1, (speed - EASY) / (FASTEST - EASY));
+  return { rate: 1 + 0.1 * busy, gain: name === "beat" ? 1 : 1 - 0.35 * busy, limit: Math.max(0.12, (0.5 * 60) / speed) };
+}
 /** The files are levelled to full scale: play them at this. */
 const LEVEL = 0.5;
 /** Where the learner's choice is remembered. */
@@ -95,12 +113,11 @@ export class Sound {
         if (ls.status !== before.ls.status && ls.status.warn) this.play("refuse");
         // the same loom, moved on by at most one pick: sound the stops passed
         if (ls.loom !== before.ls.loom || at <= before.at || at - before.at > 1 + 1e-9) return;
-        const fast = ls.speed > FAST && ls.playing;
-        const rate = ls.playing ? Math.min(1.5, Math.max(1, ls.speed / 20)) : 1;
+
         for (let p = Math.floor(before.at); p <= Math.floor(at); p++) {
           for (const [name, when] of SOUND_AT) {
             const x = p + when;
-            if (x > before.at + 1e-9 && x <= at + 1e-9 && (!fast || name === "beat")) this.play(name, rate);
+            if (x > before.at + 1e-9 && x <= at + 1e-9) this.play(name, voice(name, ls.speed, ls.playing));
           }
         }
       },
@@ -142,22 +159,33 @@ export class Sound {
   }
 
   /**
-   * Play a sound now, at a speed (above 1: shorter and higher).
+   * Play a sound now, as voice() shapes it (whole, at its own pitch, if not given).
    * @param {SoundName} name
-   * @param {number} [rate]
+   * @param {{ rate: number; gain: number; limit: number | null }} [v]
    */
-  play(name, rate = 1) {
+  play(name, v = { rate: 1, gain: 1, limit: null }) {
     const { ctx, out } = this;
     const buffer = this.buffers[name];
     if (this.muted || !ctx || !out || !buffer || ctx.state !== "running") return;
     const src = ctx.createBufferSource();
     src.buffer = buffer;
     // a little different each time: ±4% in pitch, ±12% in loudness
-    src.playbackRate.value = rate * (0.96 + Math.random() * 0.08);
+    const rate = v.rate * (0.96 + Math.random() * 0.08);
+    src.playbackRate.value = rate;
     const gain = ctx.createGain();
-    gain.gain.value = 0.88 + Math.random() * 0.24;
+    const level = v.gain * (0.88 + Math.random() * 0.24);
+    gain.gain.value = level;
     src.connect(gain).connect(out);
-    src.start(0, this.starts[name] ?? 0);
+    const from = this.starts[name] ?? 0;
+    src.start(0, from);
+    // cut short with a 50 ms fade where it would run past its limit
+    const length = (buffer.duration - from) / rate;
+    if (v.limit !== null && length > v.limit) {
+      const end = ctx.currentTime + v.limit;
+      gain.gain.setValueAtTime(level, end - 0.05);
+      gain.gain.linearRampToValueAtTime(0.0001, end);
+      src.stop(end + 0.01);
+    }
   }
 }
 
