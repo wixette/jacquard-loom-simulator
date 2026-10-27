@@ -210,6 +210,7 @@ export default {
   "colours.tip": "Die Farben von Kette und Schuss",
   "colours.reset": "Zurücksetzen",
   "colours.title": "Farben des Gewebes",
+  "colours.sample": "Ein Stück Köper in diesen Farben",
   "colours.warpHint": "die Fäden längs durch den Webstuhl, von den Platinen gehoben",
   "colours.weftHint": "der Faden, den der Schützen hinüberträgt",
   "colours.swap": "Die Farben von Kette und Schuss tauschen",

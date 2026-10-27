@@ -210,6 +210,7 @@ export default {
   "colours.tip": "經紗和緯紗的顏色",
   "colours.reset": "恢復預設",
   "colours.title": "織物顏色",
+  "colours.sample": "用這兩種顏色織的一小塊斜紋",
   "colours.warpHint": "沿織機縱向的經紗，由豎鉤提起",
   "colours.weftHint": "梭子橫向帶過的緯紗",
   "colours.swap": "交換經紗和緯紗的顏色",

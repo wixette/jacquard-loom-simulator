@@ -210,6 +210,7 @@ export default {
   "colours.tip": "As cores do urdume e da trama",
   "colours.reset": "Redefinir",
   "colours.title": "Cores do tecido",
+  "colours.sample": "Um pedaço de sarja nestas cores",
   "colours.warpHint": "os fios ao longo do tear, erguidos pelos ganchos",
   "colours.weftHint": "o fio que a lançadeira leva de lado a lado",
   "colours.swap": "Trocar as cores do urdume e da trama",

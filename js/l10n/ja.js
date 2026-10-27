@@ -210,6 +210,7 @@ export default {
   "colours.tip": "経糸と緯糸の色を決めます",
   "colours.reset": "リセット",
   "colours.title": "織物の色",
+  "colours.sample": "この色で織った綾織の小片",
   "colours.warpHint": "織機の縦方向の糸。竪針が引き上げます",
   "colours.weftHint": "杼が横に運ぶ糸",
   "colours.swap": "経糸と緯糸の色を入れ替える",

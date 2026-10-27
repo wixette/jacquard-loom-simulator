@@ -180,16 +180,21 @@ async function settings({ store }) {
     // a non-modal popover: it follows its button when the layout moves, its button and a press
     // elsewhere and Esc shut it
     const pop = () => /** @type {HTMLElement | null} */ ($(".colours-pop"));
-    const work = /** @type {HTMLElement} */ ($(".work"));
-    const was = pop()?.getBoundingClientRect().left ?? 0;
-    work.style.setProperty("--right", "440px");
+    /** Whether the panel hangs from its button: just under it, their right edges together. */
+    const hung = () => {
+      const [a, p] = [palette?.getBoundingClientRect(), pop()?.getBoundingClientRect()];
+      return !!a && !!p && Math.abs(p.right - a.right) <= 2 && Math.abs(p.top - a.bottom - 6) <= 2;
+    };
+    if (!hung()) bad.push("the panel does not hang from its button");
+    // the button moved (as a resize moves it): the panel follows
+    if (palette) palette.style.marginRight = "120px";
     window.dispatchEvent(new Event("resize"));
     await frames();
     await frames();
-    const moved = pop()?.getBoundingClientRect().left ?? 0;
-    if (Math.abs(was - moved - 100) > 2) bad.push(`the panel did not follow its button (${Math.round(was)} → ${Math.round(moved)})`);
-    work.style.removeProperty("--right");
+    if (!hung()) bad.push("the panel did not follow its button");
+    if (palette) palette.style.marginRight = "";
     window.dispatchEvent(new Event("resize"));
+    await frames();
     palette?.click();
     if (pop()) bad.push("its button does not shut it");
     palette?.click();

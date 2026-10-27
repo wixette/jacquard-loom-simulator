@@ -211,6 +211,7 @@ export default {
   "colours.tip": "Los colores de la urdimbre y de la trama",
   "colours.reset": "Restablecer",
   "colours.title": "Colores del tejido",
+  "colours.sample": "Un trozo de sarga en estos colores",
   "colours.warpHint": "los hilos a lo largo del telar, que levantan los ganchos",
   "colours.weftHint": "el hilo que la lanzadera lleva de lado a lado",
   "colours.swap": "Intercambiar los colores de la urdimbre y la trama",

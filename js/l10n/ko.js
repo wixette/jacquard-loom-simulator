@@ -210,6 +210,7 @@ export default {
   "colours.tip": "날실과 씨실의 색을 정합니다",
   "colours.reset": "초기화",
   "colours.title": "직물 색",
+  "colours.sample": "이 색으로 짠 능직 한 조각",
   "colours.warpHint": "직기를 따라 세로로 걸린 날실, 후크가 들어 올립니다",
   "colours.weftHint": "북이 가로로 실어 나르는 씨실",
   "colours.swap": "날실과 씨실의 색을 서로 바꾸기",

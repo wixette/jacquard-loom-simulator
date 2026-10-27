@@ -210,6 +210,7 @@ export default {
   "colours.tip": "经纱和纬纱的颜色",
   "colours.reset": "恢复默认",
   "colours.title": "织物颜色",
+  "colours.sample": "用这两种颜色织的一小块斜纹",
   "colours.warpHint": "沿织机纵向的经纱，由竖钩提起",
   "colours.weftHint": "梭子横向带过的纬纱",
   "colours.swap": "交换经纱和纬纱的颜色",

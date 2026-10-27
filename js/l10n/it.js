@@ -210,6 +210,7 @@ export default {
   "colours.tip": "I colori dell'ordito e della trama",
   "colours.reset": "Ripristina",
   "colours.title": "Colori del tessuto",
+  "colours.sample": "Un pezzo di saia in questi colori",
   "colours.warpHint": "i fili lungo il telaio, alzati dagli uncini",
   "colours.weftHint": "il filo che la navetta porta da parte a parte",
   "colours.swap": "Scambia i colori dell'ordito e della trama",

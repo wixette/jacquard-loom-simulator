@@ -106,6 +106,24 @@ function pairSwatch(warp, weft) {
 }
 
 /**
+ * A small piece of 2/2 twill in two colours: 12 ends and 6 picks, the warp where it lies over
+ * the weft.
+ * @param {string} warp
+ * @param {string} weft
+ * @returns {SVGSVGElement}
+ */
+function twillSample(warp, weft) {
+  const svg = document.createElementNS(SVGNS, "svg");
+  svg.setAttribute("viewBox", "0 0 12 6");
+  svg.setAttribute("preserveAspectRatio", "none");
+  svg.setAttribute("aria-hidden", "true");
+  let cells = `<rect width="12" height="6" fill="${weft}"/>`;
+  for (let p = 0; p < 6; p++) for (let e = 0; e < 12; e++) if ((e + p) % 4 < 2) cells += `<rect x="${e}" y="${5 - p}" width="1" height="1" fill="${warp}"/>`;
+  svg.innerHTML = cells;
+  return svg;
+}
+
+/**
  * A view's name on its chip: a 2D drawing by its short name, a 3D model as "3D · its name".
  * @param {StageView} v
  */
@@ -265,10 +283,8 @@ export function createShell(store, root) {
    * @param {HTMLElement[]} rows
    * @param {string} [cls]
    * @param {() => void} [onShut] what to undo when it shuts
-   * @param {HTMLElement | null} [clear] what it should keep in view, if the window has room
-   *   beside it (the cloth, while its colours are chosen)
    */
-  function popover(anchor, id, name, rows, cls = "", onShut = () => {}, clear = null) {
+  function popover(anchor, id, name, rows, cls = "", onShut = () => {}) {
     const old = /** @type {HTMLElement | null} */ (document.querySelector(".popover"));
     old?.dispatchEvent(new Event("shut"));
     if (old?.dataset.for === id) return;
@@ -281,8 +297,10 @@ export function createShell(store, root) {
       const b = pop.getBoundingClientRect();
       const below = r.bottom + 6 + b.height <= window.innerHeight - 8;
       pop.style.top = `${below ? r.bottom + 6 : Math.max(8, r.top - 6 - b.height)}px`;
-      const beside = clear ? clear.getBoundingClientRect().left - b.width - 6 : -1;
-      pop.style.left = `${beside >= 8 ? beside : Math.max(8, Math.min(window.innerWidth - b.width - 8, r.left))}px`;
+      // hung from its button: from the button's left edge, or its right edge on the window's right
+      // half, as the menus open (js/ui/components.js)
+      const left = r.left + r.width / 2 > window.innerWidth / 2 ? r.right - b.width : r.left;
+      pop.style.left = `${Math.max(8, Math.min(window.innerWidth - b.width - 8, left))}px`;
     };
     let frame = 0;
     const follow = () => {
@@ -376,9 +394,13 @@ export function createShell(store, root) {
     }
     const again = el("button", { type: "button", class: "btn", text: t("colours.reset") });
     again.addEventListener("click", () => act.setColours(store, { warp: act.WARP, weft: act.WEFT }));
+    // a few rows of twill in the two colours: the cloth as the colours change, which the panel
+    // would otherwise hide
+    const sample = el("span", { class: "colour-sample", role: "img", "aria-label": t("colours.sample") });
     // the panel follows the colours however they change: the picker, the swap, a pair, Reset
     const show = () => {
       const s = ls();
+      sample.replaceChildren(twillSample(s.warp, s.weft));
       for (const r of rows) {
         r.swatch.style.background = s[r.thread];
         r.hex.textContent = s[r.thread].toUpperCase();
@@ -396,7 +418,7 @@ export function createShell(store, root) {
       "colours",
       t("colours.tip"),
       [
-        el("h3", { class: "popover-title", text: t("colours.title") }),
+        el("div", { class: "popover-head" }, [el("h3", { class: "popover-title", text: t("colours.title") }), sample]),
         el("div", { class: "colour-threads" }, [rows[0].line, swap, rows[1].line]),
         picker.element,
         el("p", { class: "popover-sub", text: t("colours.pairs") }),
@@ -405,7 +427,6 @@ export function createShell(store, root) {
       ],
       "colours-pop",
       unwatch,
-      anchor.closest(".panel"),
     );
     show();
   }

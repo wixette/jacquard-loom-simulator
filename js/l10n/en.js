@@ -228,6 +228,7 @@ export default {
   "colours.tip": "The colours of the warp and the weft",
   "colours.reset": "Reset",
   "colours.title": "Cloth colours",
+  "colours.sample": "A piece of twill in these colours",
   "colours.warpHint": "the threads along the loom, lifted by the hooks",
   "colours.weftHint": "the thread the shuttle carries across",
   "colours.swap": "Swap the warp's and the weft's colours",

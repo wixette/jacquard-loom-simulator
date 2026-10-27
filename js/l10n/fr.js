@@ -210,6 +210,7 @@ export default {
   "colours.tip": "Les couleurs de la chaîne et de la trame",
   "colours.reset": "Rétablir",
   "colours.title": "Couleurs du tissu",
+  "colours.sample": "Un morceau de sergé dans ces couleurs",
   "colours.warpHint": "les fils dans la longueur du métier, que lèvent les crochets",
   "colours.weftHint": "le fil que la navette porte d'un bord à l'autre",
   "colours.swap": "Échanger les couleurs de la chaîne et de la trame",
