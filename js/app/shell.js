@@ -6,7 +6,6 @@
 // on the left and the sheet beside it. The frame is built again when the screen changes kind or
 // the workspace changes; its own texts follow the language without a rebuild.
 
-import pkg from "../../package.json" with { type: "json" };
 import { LOCALE_NAMES, LOCALE_SHORT, LOCALES, say as words, t, tn } from "../l10n/l10n.js";
 import { HOOK_COUNTS, PRESETS } from "../sim/deck.js";
 import { encodeLink, LONG_LINK, STAGE_VIEWS } from "../sim/link.js";
@@ -14,6 +13,7 @@ import { tieLabel } from "../sim/tieup.js";
 import { printDocument } from "../teach/printCards.js";
 import { applyIcons, el, icon, setTip, showMenu, tabs } from "../ui/components.js";
 import { wireEdge } from "../ui/edge.js";
+import { showAbout } from "./about.js";
 import { wireKeys } from "./keys.js";
 import { Sound } from "./sound.js";
 import { place } from "./components/component.js";
@@ -262,19 +262,6 @@ export function createShell(store, root) {
     popover(anchor, "colours", t("colours.tip"), [el("label", { for: "colour-warp", text: t("setup.warp") }), warp, el("label", { for: "colour-weft", text: t("setup.weft") }), weft, el("span"), again]);
   }
 
-  function aboutDialog() {
-    const d = el("dialog", { class: "about" }, [
-      el("h2", { text: t("about.title") }),
-      el("p", { text: t("about.what") }),
-      el("p", { text: t("about.version", { version: pkg.version }) }),
-      el("p", {}, [el("a", { href: "https://github.com/wixette/jacquard-loom-simulator", target: "_blank", rel: "noopener", text: t("about.source") })]),
-      el("form", { method: "dialog" }, [el("button", { class: "btn tonal", text: t("about.close") })]),
-    ]);
-    document.body.appendChild(d);
-    d.addEventListener("close", () => d.remove());
-    d.showModal();
-  }
-
   function topbar() {
     const list = el("nav", { class: "workspaces tabs", role: "tablist", "aria-label": t("ws.name") });
     for (const w of WORKSPACES) {
@@ -291,7 +278,7 @@ export function createShell(store, root) {
     lang.dataset.l10nTip = "bar.language";
     lang.addEventListener("click", () => languageMenu(lang));
     follow((s) => [s.locale], () => lang.replaceChildren(icon("translate"), el("span", { text: LOCALE_SHORT[store.state.locale] })));
-    return el("header", { class: "topbar" }, [brand(), list, el("span", { class: "spacer" }), share, lang, iconButton("info", "bar.about", aboutDialog)]);
+    return el("header", { class: "topbar" }, [brand(), list, el("span", { class: "spacer" }), share, lang, iconButton("info", "bar.about", showAbout)]);
   }
 
   function appbar() {
@@ -302,7 +289,7 @@ export function createShell(store, root) {
     const menu = iconButton("menu", "bar.menu", () =>
       showMenu(menu, [
         { label: t("bar.language"), run: () => languageMenu(menu) },
-        { label: t("bar.about"), run: aboutDialog },
+        { label: t("bar.about"), run: showAbout },
       ]),
     );
     const share = iconButton("share", "bar.share.tip", () => shareMenu(share));
@@ -559,6 +546,48 @@ export function createShell(store, root) {
     return [caption, player];
   }
 
+  /**
+   * The sheet's grab: dragged up it gives the sheet more of the screen (peek, half, full), dragged
+   * down less; a tap opens it fully, or back to half.
+   */
+  function grab() {
+    const SIZES = /** @type {const} */ (["peek", "half", "full"]);
+    const b = el("button", { type: "button", class: "grab" }, [el("span")]);
+    b.dataset.l10nTip = "sheet.grab";
+    b.dataset.l10nName = "sheet.grab";
+    const now = () => SIZES.indexOf(/** @type {any} */ (root.dataset.sheet ?? "half"));
+    const to = (/** @type {number} */ i) => {
+      root.dataset.sheet = SIZES[Math.max(0, Math.min(2, i))];
+      b.setAttribute("aria-expanded", String(root.dataset.sheet === "full"));
+    };
+    to(now());
+    /** @type {number | null} */
+    let y0 = null;
+    b.addEventListener("pointerdown", (e) => {
+      y0 = e.clientY;
+      try {
+        b.setPointerCapture(e.pointerId);
+      } catch {
+        // the drag works without capture
+      }
+    });
+    b.addEventListener("pointerup", (e) => {
+      if (y0 === null) return;
+      const dy = e.clientY - y0;
+      y0 = null;
+      if (dy < -24) to(now() + (dy < -200 ? 2 : 1));
+      else if (dy > 24) to(now() - (dy > 200 ? 2 : 1));
+      else to(now() === 2 ? 1 : 2);
+    });
+    b.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowUp") to(now() + 1);
+      else if (e.key === "ArrowDown") to(now() - 1);
+      else return;
+      e.preventDefault();
+    });
+    return b;
+  }
+
   /** A phone's sheet: the program, the output and (in Learn) the guide, by tab. */
   function sheet() {
     const ids = [...(store.state.workspace === "learn" ? ["guide"] : []), "cards", "cloth"];
@@ -594,7 +623,7 @@ export function createShell(store, root) {
     };
     const select = tabs(list, (tab) => show(tab.slice("sheet-".length)));
     select(`sheet-${ids[0]}`);
-    return el("section", { class: "sheet" }, [el("div", { class: "grab" }), list, body]);
+    return el("section", { class: "sheet" }, [grab(), list, body]);
   }
 
   // ---- building the frame ------------------------------------------------------------------------
@@ -607,6 +636,7 @@ export function createShell(store, root) {
     document.querySelector(".popover")?.remove();
     mode = modeOf();
     root.className = `app ${mode}`;
+    if (mode !== "phone") delete root.dataset.sheet;
     root.replaceChildren();
     edges = {};
     if (mode === "desktop") {
