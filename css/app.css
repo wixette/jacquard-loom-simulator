@@ -299,3 +299,77 @@ dialog::backdrop { background: var(--md-scrim); }
 .cp-hex-row { display: flex; align-items: center; gap: 10px; font-size: 12px; color: var(--md-on-surface-variant); }
 .cp-hex { width: 96px; padding: 5px 8px; border: 1px solid var(--md-outline-variant); border-radius: var(--radius-s); background: var(--md-surface-high); color: var(--md-on-surface); font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: 12.5px; text-transform: uppercase; }
 .cp-hex:focus { outline: 2px solid var(--md-primary); outline-offset: -1px; }
+
+/* ---- Create: the picture on point paper, and how it is read (js/app/components/picture.js) ---- */
+.picture-slot { flex: 1 1 auto; min-height: 0; overflow-y: auto; }
+/* Design: the picture at its own height (scrolling if the panel is short), the cards under it with the room left */
+.panel.left.on-design > .picture-slot { flex: 0 1 auto; }
+.panel.left.on-design > .chain-slot { flex: 1 1 0; min-height: 120px; }
+.panel.left.on-design > .panel-head ~ .panel-head { border-top: 1px solid var(--md-outline-variant); }
+.panel-head .weave-it { height: 32px; padding: 0 14px; gap: 6px; font-size: 13px; }
+.panel.left.on-picture > .guide { flex: 0 1 auto; max-height: 55%; }
+.pic-box { display: flex; flex-direction: column; gap: 10px; padding: 10px 12px 14px; }
+.pic-tools { display: flex; align-items: center; gap: 4px; }
+.pic-tools .spacer { flex: 1; }
+.pic-tools .btn.icon-only { width: 34px; height: 34px; }
+.pic-tools .icon { width: 20px; height: 20px; }
+.pic-grid { display: block; width: 100%; aspect-ratio: 1; border-radius: var(--radius-s); cursor: crosshair; touch-action: none; box-shadow: 0 0 0 1px var(--md-outline-variant); }
+.pic-field { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; color: var(--md-on-surface-variant); }
+.pic-threshold { display: flex; flex-direction: column; gap: 4px; }
+.pic-threshold .pic-field { display: flex; }
+.pic-threshold input { flex: 1; accent-color: var(--md-primary); }
+.pic-hint { margin: 0; font-size: 12px; line-height: 1.4; color: var(--md-on-surface-variant); }
+/* what an image becomes, before the file dialog */
+.popover.image-pop { display: flex; flex-direction: column; align-items: stretch; gap: 8px; width: min(340px, calc(100vw - 16px)); }
+.image-pop p { margin: 0 2px; font-size: 13px; line-height: 1.45; color: var(--md-on-surface); }
+.image-pop p.muted { font-size: 12px; color: var(--md-on-surface-variant); }
+.image-pop .popover-foot .btn { gap: 6px; }
+.pic-note { margin: 0; font-size: 12px; color: var(--md-on-surface-variant); }
+.pic-note:empty { display: none; }
+.pic-reading { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; }
+.pic-label { font-size: 12px; color: var(--md-on-surface-variant); }
+.pic-options { display: flex; flex-wrap: wrap; gap: 10px; }
+.weave-it-row { flex: none; padding: 10px 12px; border-bottom: 1px solid var(--md-outline-variant); }
+.weave-it-row .btn { width: 100%; justify-content: center; gap: 6px; }
+/* the cloth as a view on the stage: centred, as large as the pane holds it */
+/* centred by its margins, not by flex alignment, so a cloth taller than its pane scrolls to its top (its newest rows) */
+.cloth-box.large { width: 100%; height: 100%; display: flex; padding: 56px 12px 12px; overflow: auto; }
+.cloth-box.large > canvas { margin: auto; flex: none; }
+
+/* ---- Play: the games (js/app/components/games.js) ------------------------------------------- */
+.games-slot { flex: 1 1 auto; min-height: 0; overflow-y: auto; }
+.games-box { display: flex; flex-direction: column; min-height: 100%; }
+.game-tabs { flex: none; display: flex; padding: 0 4px; border-bottom: 1px solid var(--md-outline-variant); }
+.game-tabs .tab { flex: 1 1 0; padding: 10px 4px; font-size: 12.5px; white-space: nowrap; }
+.game-body { display: flex; flex-direction: column; gap: 10px; padding: 12px 14px 16px; }
+.game-title { margin: 0; font-size: 16px; }
+.game-text { margin: 0; font-size: 13px; color: var(--md-on-surface-variant); user-select: text; -webkit-user-select: text; }
+.game-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.game-label { font-size: 12px; color: var(--md-on-surface-variant); }
+.game-input { width: 100%; padding: 8px 10px; border: 1px solid var(--md-outline-variant); border-radius: var(--radius-s); background: var(--md-surface-high); color: var(--md-on-surface); font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: 15px; resize: vertical; }
+.game-input:focus { outline: 2px solid var(--md-primary); outline-offset: -1px; }
+.game-row .game-input { flex: 1; width: auto; }
+.game-result { margin: 0; font-size: 13.5px; font-weight: 600; }
+.game-result.right { color: var(--lift); }
+.game-result.wrong { color: var(--attention); }
+.game-result:empty { display: none; }
+.game-score { margin: 0; font-size: 12px; color: var(--md-on-surface-variant); }
+.byte-rows { border-collapse: collapse; font-size: 12.5px; }
+.byte-rows th { font-weight: 600; color: var(--md-on-surface-variant); text-align: left; padding: 2px 10px 4px 0; }
+.byte-rows td { padding: 1px 10px 1px 0; font-variant-numeric: tabular-nums; }
+.byte-rows td.bits { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; letter-spacing: 0.08em; }
+.guess-cards { display: flex; flex-direction: column; gap: 3px; }
+.guess-card { display: flex; align-items: center; gap: 8px; padding: 2px 8px; border-radius: 4px; background: var(--paste-dim); color: var(--paste-ink); font-size: 14px; }
+.guess-card .num { width: 14px; font-size: 11px; font-weight: 650; }
+.guess-card .holes { letter-spacing: 0.15em; }
+.guess-choices { display: flex; gap: 8px; flex-wrap: wrap; }
+.guess-choice { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 6px; border: 2px solid var(--md-outline-variant); border-radius: var(--radius-s); background: var(--md-surface-high); color: var(--md-on-surface); font-size: 12px; cursor: pointer; }
+.guess-choice:hover { border-color: var(--md-outline); }
+.guess-choice.right { border-color: var(--lift); }
+.guess-choice.wrong { border-color: var(--attention); }
+.guess-choice[aria-disabled="true"] { cursor: default; }
+.drawboy-figure { margin: 0; display: flex; align-items: center; gap: 10px; font-size: 12px; color: var(--md-on-surface-variant); }
+.cords { display: grid; grid-template-columns: repeat(8, 1fr); gap: 4px; }
+.cord { height: 52px; border: 1px solid var(--md-outline-variant); border-radius: 6px; background: var(--md-surface-high); color: var(--md-on-surface); font-weight: 650; cursor: pointer; }
+.cord[aria-pressed="true"] { background: var(--lift); color: var(--md-surface); border-color: transparent; transform: translateY(-6px); }
+.machine-slot { flex: 1 1 auto; min-height: 0; display: flex; }

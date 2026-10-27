@@ -45,11 +45,19 @@ const README_SHOTS = [
   { name: "readme-app", path: "index.html#v=2&view=section,3d", ready: APP_READY, setup: `${APP} await sleep(2500);`, size: [1920, 1080] },
   { name: "readme-learn", path: "index.html#v=2&w=learn&step=how-griffe", ready: APP_READY, setup: "await sleep(1200);", size: [1440, 900] },
   { name: "readme-units", path: "index.html#v=2&h=8&c=x.cc-66-33-99&p=5&s=2&f=1&view=u1", ready: APP_READY, setup: "await sleep(2500); document.querySelector('.unit-note summary').click(); await sleep(400);", size: [1440, 900] },
+  { name: "readme-create", path: "index.html#v=2&w=create", ready: APP_READY, setup: "await sleep(800);", size: [1440, 900] },
+  { name: "readme-play", path: "index.html#v=2&w=play&game=name&text=Ada", ready: APP_READY, setup: "await sleep(600); [...document.querySelectorAll('.game-body .btn.filled')][0]?.click(); await sleep(1200);", size: [1440, 900] },
   { name: "readme-phone", path: "index.html#v=2&w=learn&step=weave-twill", ready: APP_READY, setup: "await sleep(1000); document.querySelector('.predict input')?.click(); await sleep(400);", size: [390, 844] },
 ];
 
 const SHOTS = [
   ...README_SHOTS,
+  { name: "create-tall", path: "index.html#v=2&w=create", ready: APP_READY, setup: "await sleep(600); const z = document.querySelector('.pic-size'); z.value = '32'; z.dispatchEvent(new Event('change')); await sleep(300); const p = document.querySelectorAll('.pic-reading select')[0]; p.value = '3'; p.dispatchEvent(new Event('change')); await sleep(800);", size: [1366, 768] },
+  { name: "design-open-image", path: "index.html#v=2&w=create", ready: APP_READY, setup: "await sleep(600); document.querySelector('.pic-tools [aria-haspopup=dialog]').click(); await sleep(300);", size: [1366, 768] },
+  { name: "design-image-loaded", path: "index.html#v=2&w=create", ready: APP_READY, setup: "await sleep(600); const c = document.createElement('canvas'); c.width = 300; c.height = 150; const g = c.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, 300, 150); g.fillStyle = '#222'; g.beginPath(); g.arc(75, 75, 60, 0, 7); g.fill(); g.fillStyle = '#888'; g.fillRect(170, 20, 110, 110); const blob = await new Promise((r) => c.toBlob(r)); const dt = new DataTransfer(); dt.items.add(new File([blob], 'circle-and-square.png', { type: 'image/png' })); const f = document.querySelector('.pic-file'); f.files = dt.files; f.dispatchEvent(new Event('change')); await sleep(800);", size: [1366, 768] },
+  ...["fr", "de"].map((lang) => ({ name: `design-${lang}`, path: `index.html?lang=${lang}#v=2&w=create`, ready: APP_READY, setup: "await sleep(800);", size: /** @type {[number, number]} */ ([1366, 768]) })),
+  { name: "games-de", path: "index.html?lang=de#v=2&w=play", ready: APP_READY, setup: "await sleep(800);", size: [1366, 768] },
+  { name: "games-long", path: "index.html#v=2&w=play&game=name&text=THE%20JACQUARD%20LOOM%20WOVE%20PICTURES%20FROM%20A%20CHAIN%20OF%20PUNCHED%20CARDS%2C%20AND%20ITS%20IDEA%20LED%20TO%20COMPUTERS", ready: APP_READY, setup: "await sleep(800); [...document.querySelectorAll('.game-body .btn.filled')][0].click(); await sleep(1500);", size: [1366, 768] },
   { name: "app-1366", path: "index.html#v=2", ready: APP_READY, setup: APP, size: [1366, 768] },
   { name: "app-1280", path: "index.html#v=2", ready: APP_READY, setup: APP, size: [1280, 800] },
   { name: "app-1600", path: "index.html#v=2", ready: APP_READY, setup: `${APP} await sleep(1500);`, size: [1600, 1000] },

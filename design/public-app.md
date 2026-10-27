@@ -1,7 +1,7 @@
 # The public app: design
 
 - **Status:** agreed on 2026-10-26; revised on 2026-10-27 for the main app at `index.html`, which replaces the prototype learner page. The developer pages (`dev/`) are prototypes; the lessons of M2 and M4 are not carried over as lessons, only as material for the tutorial (§1).
-- **Built so far:** the main app's frame and Weave (M6, [notes](m6-notes.md)); the tutorial's parts 1 to 3 (M7, [notes](m7-notes.md)); the name game's prototype, [`dev/06-name-game/`](../dev/06-name-game/) ([notes](name-game-notes.md)).
+- **Built so far:** the main app's frame and Weave (M6, [notes](m6-notes.md)); the tutorial's parts 1 to 3 (M7, [notes](m7-notes.md)); Create and the tutorial's parts 4 and 5 (M8, [notes](m8-notes.md)); Play, the four games (M9, [notes](m9-notes.md)); the tutorial's part 6 (M10, [notes](m10-notes.md)); the name game's prototype, [`dev/06-name-game/`](../dev/06-name-game/) ([notes](name-game-notes.md)).
 - **Layout:** how the many views and panels are organized on desktop and phone: [ui-layout.md](ui-layout.md). The look (a dark theme), the languages and the components are shared with the sibling project, the [Stepped Reckoner](https://github.com/wixette/leibniz-stepped-reckoner) ([docs/ui-design.md](../docs/ui-design.md)).
 - **Releases:** §4.
 
@@ -42,7 +42,7 @@ The weaving tasks (parts 3 and 4) come before the tools (part 5), so the learner
 
 - **Font:** Unscii 8 × 16 (public domain; the "full" variant, which is GPL, is not used); Terminus 8 × 16 (SIL Open Font License) is the alternative, with its licence file. The IBM VGA font is not used: its artwork's status is unclear.
 - **Real cloth or a quick one.** Read directly, one pixel per thread, eight characters need 64 hooks, but letters on a blank ground leave long loose threads (the picture tool's lesson again). As damask, 4 × 4 threads of satin per pixel, eight characters need 256 hooks: the real 400 head of the whole-loom view. The game says so: "your name, on a real 400 head: 64 cards a line".
-- **Several lines** are stacked with the first line woven last, so the cloth reads from the top.
+- **Several lines** are stacked with the first line woven last, so the cloth reads from the top. A text wraps at the spaces into lines of 8 characters (a word longer than a line is cut), up to 16 lines, with two blank pixel rows between lines: a name, or a short message (0.2.0; the prototype took 4 lines typed).
 - **The link carries the text, not the cards** (a 256-hook damask deck would make a very long link).
 
 ## 3. Making it attractive

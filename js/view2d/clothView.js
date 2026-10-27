@@ -11,6 +11,7 @@ import { hookOfEnd } from "../sim/tieup.js";
 import { token } from "../ui/theme.js";
 /** @import { Snapshot } from "../sim/loom.js" */
 /** @import { Trace } from "../sim/trace.js" */
+/** @import { Float } from "../sim/design.js" */
 
 /**
  * @typedef {object} ClothCell
@@ -47,8 +48,11 @@ function shade(hex, k) {
   return `rgb(${ch[0]},${ch[1]},${ch[2]})`; // not a theme colour: a shade of the learner's own colour
 }
 
-/** At most this many rows are drawn, the newest. */
-const MAX_ROWS = 400;
+/** At most this many rows are drawn, the newest: a looped chain weaves for ever; the longest open one, the name game's 16 lines as damask, is 1,144. */
+const MAX_ROWS = 1200;
+/** The largest square, in CSS pixels: in the panel, and as a view on the stage. */
+const CELL = 22;
+const LARGE_CELL = 33;
 
 /** @type {number | null} */
 let scrollbar = null;
@@ -109,7 +113,9 @@ export class ClothView {
 
   /**
    * @param {Snapshot} snap
-   * @param {{ face: "front" | "back", warp: string, weft: string, bits: boolean, trace: Trace | null }} o
+   * @param {{ face: "front" | "back", warp: string, weft: string, bits: boolean, trace: Trace | null, floats?: Float[], large?: boolean }} o
+   *   floats: the loose threads to mark (on the front's ends and picks); large: the cloth as a
+   *   view on the stage, its squares up to 1.5 times the panel's
    */
   render(snap, o) {
     // The newest rows only, when the cloth gets long (a looped chain can weave for ever).
@@ -122,7 +128,10 @@ export class ClothView {
     // left beside a scrollbar that comes and goes made the cloth fit, then overflow, then fit
     // again at every redraw, so it blinked as it grew past its box.
     const width = Math.max(200, steadyWidth(this.host) - 4);
-    const cell = Math.max(3, Math.min(22, Math.floor((width - this.left - 6) / ends)));
+    const across = Math.floor((width - this.left - 6) / ends);
+    // The squares are sized by the width only, so they keep their size as the cloth grows, and
+    // rows past the host's height scroll, in the panel and on the stage alike.
+    const cell = Math.max(3, Math.min(o.large ? LARGE_CELL : CELL, across));
     this.cell = cell;
     const rows = Math.max(cells.length, 1);
     const w = this.left + ends * cell + 6;
@@ -141,34 +150,49 @@ export class ClothView {
     const weftLight = shade(o.weft, 0.35);
     const tr = o.trace;
     const followEnd = (/** @type {number} */ e) => tr !== null && hookOfEnd(snap.tie, snap.deck.hooks, e) === tr.hook + 1;
+    // Each square is one of two tiles, the warp over (shaded across) or the weft over (shaded
+    // down), drawn once and laid as patterns, a rectangle for each run of squares alike. (A gradient made for each square took ~0.4 s for a cloth of
+    // 1,000 rows on 256 ends, at every moment of the loom.)
+    const gap = cell > 5 ? 1 : 0;
+    const tile = (/** @type {boolean} */ warpOver) => {
+      const px = Math.max(1, Math.round(cell * dpr));
+      const c = document.createElement("canvas");
+      c.width = px;
+      c.height = px;
+      const tg = /** @type {CanvasRenderingContext2D} */ (c.getContext("2d"));
+      tg.scale(px / cell, px / cell);
+      const grad = warpOver ? tg.createLinearGradient(0, 0, cell, 0) : tg.createLinearGradient(0, 0, 0, cell);
+      grad.addColorStop(0, warpOver ? warpDark : weftDark);
+      grad.addColorStop(0.5, warpOver ? warpLight : weftLight);
+      grad.addColorStop(1, warpOver ? warpDark : weftDark);
+      tg.fillStyle = grad;
+      tg.fillRect(0, 0, cell - gap, cell - gap);
+      const pattern = /** @type {CanvasPattern} */ (g.createPattern(c, "repeat"));
+      pattern.setTransform(new DOMMatrix([cell / px, 0, 0, cell / px, this.left, this.top]));
+      return pattern;
+    };
+    const warpTile = tile(true);
+    const weftTile = tile(false);
     cells.forEach((row, r) => {
       const y = this.top + (rows - 1 - r) * cell;
-      row.forEach((c, j) => {
-        const x = this.left + j * cell;
-        g.globalAlpha = c.pending ? 0.55 : 1;
-        if (c.warpOver) {
-          const grad = g.createLinearGradient(x, 0, x + cell, 0);
-          grad.addColorStop(0, warpDark);
-          grad.addColorStop(0.5, warpLight);
-          grad.addColorStop(1, warpDark);
-          g.fillStyle = grad;
-        } else {
-          const grad = g.createLinearGradient(0, y, 0, y + cell);
-          grad.addColorStop(0, weftDark);
-          grad.addColorStop(0.5, weftLight);
-          grad.addColorStop(1, weftDark);
-          g.fillStyle = grad;
-        }
-        g.fillRect(x, y, cell - (cell > 5 ? 1 : 0), cell - (cell > 5 ? 1 : 0));
-        if (o.bits && cell >= 12) {
-          g.globalAlpha = 1;
+      g.globalAlpha = row[0]?.pending ? 0.55 : 1;
+      for (let j = 0; j < row.length; ) {
+        let k = j;
+        while (k < row.length && row[k].warpOver === row[j].warpOver) k++;
+        g.fillStyle = row[j].warpOver ? warpTile : weftTile;
+        g.fillRect(this.left + j * cell, y, (k - j) * cell, cell);
+        j = k;
+      }
+      g.globalAlpha = 1;
+      if (o.bits && cell >= 12) {
+        g.font = `${Math.round(cell * 0.6)}px ui-monospace, Menlo, monospace`;
+        g.textAlign = "center";
+        g.textBaseline = "middle";
+        row.forEach((c, j) => {
           g.fillStyle = c.warpOver ? "rgba(255,255,255,0.85)" : "rgba(60,40,10,0.7)"; // not a theme colour: the bits are read on the learner's own colours
-          g.font = `${Math.round(cell * 0.6)}px ui-monospace, Menlo, monospace`;
-          g.textAlign = "center";
-          g.textBaseline = "middle";
-          g.fillText(c.bit ? "1" : "0", x + cell / 2, y + cell / 2 + 1);
-        }
-      });
+          g.fillText(c.bit ? "1" : "0", this.left + j * cell + cell / 2, y + cell / 2 + 1);
+        });
+      }
       g.globalAlpha = 1;
       if (cell >= 8 && (cells.length <= 40 || (r + 1) % 5 === 0)) {
         g.fillStyle = token("--label", "#c9d0d9");
@@ -201,11 +225,41 @@ export class ClothView {
         g.strokeRect(this.left + j * cell - 1, this.top + (rows - 1 - tp) * cell - 1, cell + 1, cell + 1);
       }
     }
+    if (o.floats?.length) {
+      // the loose threads: a line along each float longer than the limit, in the fault's colour
+      // (on the back the same threads, seen from behind: left and right swapped)
+      const col = (/** @type {number} */ e) => (o.face === "front" ? e : ends - 1 - e);
+      g.strokeStyle = token("--fault", "#ff5449");
+      g.globalAlpha = 0.85;
+      g.lineWidth = Math.max(1.5, Math.min(4, cell * 0.16));
+      g.lineCap = "round";
+      g.beginPath();
+      for (const f of o.floats) {
+        const pick = f.pick - skipped;
+        if (f.kind === "weft") {
+          if (pick < 0 || pick >= rows) continue;
+          const y = this.top + (rows - 1 - pick) * cell + cell / 2;
+          const [a, b] = [col(f.end), col(f.end + f.length - 1)].sort((m, n) => m - n);
+          g.moveTo(this.left + a * cell + cell * 0.2, y);
+          g.lineTo(this.left + (b + 1) * cell - cell * 0.2, y);
+        } else {
+          const top = Math.min(rows - 1, pick + f.length - 1);
+          const from = Math.max(0, pick);
+          if (top < from) continue;
+          const x = this.left + col(f.end) * cell + cell / 2;
+          g.moveTo(x, this.top + (rows - 1 - from) * cell + cell * 0.8);
+          g.lineTo(x, this.top + (rows - 1 - top) * cell + cell * 0.2);
+        }
+      }
+      g.stroke();
+      g.globalAlpha = 1;
+    }
     if (cells.length === 0) {
       g.fillStyle = token("--label", "#c9d0d9");
       g.font = `12px ${token("--font", "system-ui, sans-serif")}`;
-      g.textAlign = "left";
-      g.fillText(t("cloth.none"), this.left, this.top + 12);
+      // in the panel at its top left, as a list says it is empty; on the stage, in the middle
+      g.textAlign = o.large ? "center" : "left";
+      g.fillText(t("cloth.none"), o.large ? w / 2 : this.left, this.top + 12);
     }
     this.canvas.setAttribute("aria-label", tn("cloth.name", snap.cloth.length, { face: t(o.face === "front" ? "cloth.front" : "cloth.back"), ends }));
   }

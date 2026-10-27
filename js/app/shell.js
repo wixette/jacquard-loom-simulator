@@ -13,7 +13,7 @@ import { encodeLink, LONG_LINK, STAGE_VIEWS } from "../sim/link.js";
 import { linkOf } from "./links.js";
 import { tieLabel } from "../sim/tieup.js";
 import { printDocument } from "../teach/printCards.js";
-import { applyIcons, applyL10n, el, icon, setText, setTip, showMenu, tabs } from "../ui/components.js";
+import { applyIcons, applyL10n, el, icon, setText, setTip, showMenu, showPopover, tabs } from "../ui/components.js";
 import { colourPicker } from "../ui/colourPicker.js";
 import { wireEdge } from "../ui/edge.js";
 import { showAbout } from "./about.js";
@@ -24,8 +24,12 @@ import { benchPanel, chainPanel, clothPanel, statusPanel, tracePanel, transportP
 import { frontView, sectionView, sideView, UNIT_VIEWS, unitsView } from "./components/views.js";
 import { chooseLanguage } from "./language.js";
 import { leaveLearn, openLearn, watchDone } from "./learn.js";
+import { openCreate, watchPicture } from "./create.js";
+import { picturePanel } from "./components/picture.js";
+import { gamesPanel } from "./components/games.js";
+import { openPlay } from "./play.js";
 import { guidePanel } from "./components/guide.js";
-import { allowedAt, shownAt } from "../teach/tutorial.js";
+import { allowedAt, shownAt, STEPS } from "../teach/tutorial.js";
 import { arrange, choose, is3d, placeKey, SPLIT } from "./arrange.js";
 import * as act from "./looms.js";
 import { TIES, tieKey } from "./looms.js";
@@ -47,8 +51,11 @@ export function modeOf() {
   return /** @type {Mode} */ ("phone");
 }
 
+/** The views in the order of the view menu: the 2D drawings, the 3D models, then the cloth. */
+const MENU_VIEWS = /** @type {const} */ (["section", "side", "front", "3d", "u1", "u2", "u3", "u4", "u5", "cloth"]);
+
 /** The workspaces of this release, in the order the bar shows them. */
-const WORKSPACES = /** @type {const} */ (["learn", "weave"]);
+const WORKSPACES = /** @type {const} */ (["learn", "weave", "create", "play"]);
 
 /**
  * A view's component.
@@ -58,10 +65,11 @@ const WORKSPACES = /** @type {const} */ (["learn", "weave"]);
  * @returns {Component}
  */
 function viewComponent(store, v, onMode) {
+  if (v === "cloth") return clothPanel(store, { large: true });
   if (v === "section") return sectionView(store);
   if (v === "side") return sideView(store);
   if (v === "front") return frontView(store);
-  return unitsView(store, { unit: UNIT_VIEWS[v].unit, onMode });
+  return unitsView(store, { unit: UNIT_VIEWS[/** @type {keyof typeof UNIT_VIEWS} */ (v)].unit, onMode });
 }
 
 /** The side panels' sizes (px): the smallest, the largest and the default (design/ui-layout.md §4). */
@@ -271,68 +279,6 @@ export function createShell(store, root) {
     act.say(store, w ? { key: "share.printed", n: deck.cards.length } : { key: "share.blocked" }, !w);
   }
 
-  /**
-   * A small dialog by its anchor, as a non-modal popover does it: one at a time; pressing the
-   * anchor again, pressing elsewhere or Esc shuts it; it follows its anchor when the window is
-   * resized or the page scrolls, kept inside the window (under the anchor if it fits, else over
-   * it); and it shuts if its anchor goes (the frame rebuilt for another screen).
-   * @param {HTMLElement} anchor
-   * @param {string} id
-   * @param {string} name
-   * @param {HTMLElement[]} rows
-   * @param {string} [cls]
-   * @param {() => void} [onShut] what to undo when it shuts
-   */
-  function popover(anchor, id, name, rows, cls = "", onShut = () => {}) {
-    const old = /** @type {HTMLElement | null} */ (document.querySelector(".popover"));
-    old?.dispatchEvent(new Event("shut"));
-    if (old?.dataset.for === id) return;
-    const pop = el("div", { class: `popover ${cls}`.trim(), role: "dialog", "aria-label": name }, rows);
-    pop.dataset.for = id;
-    document.body.appendChild(pop);
-    const place = () => {
-      if (!anchor.isConnected) return shut();
-      const r = anchor.getBoundingClientRect();
-      const b = pop.getBoundingClientRect();
-      const below = r.bottom + 6 + b.height <= window.innerHeight - 8;
-      pop.style.top = `${below ? r.bottom + 6 : Math.max(8, r.top - 6 - b.height)}px`;
-      // hung from its button: from the button's left edge, or its right edge on the window's right
-      // half, as the menus open (js/ui/components.js)
-      const left = r.left + r.width / 2 > window.innerWidth / 2 ? r.right - b.width : r.left;
-      pop.style.left = `${Math.max(8, Math.min(window.innerWidth - b.width - 8, left))}px`;
-    };
-    let frame = 0;
-    const follow = () => {
-      cancelAnimationFrame(frame);
-      frame = requestAnimationFrame(place);
-    };
-    const shut = () => {
-      cancelAnimationFrame(frame);
-      pop.remove();
-      document.removeEventListener("pointerdown", away);
-      document.removeEventListener("keydown", esc);
-      window.removeEventListener("resize", follow);
-      window.removeEventListener("scroll", follow, true);
-      onShut();
-    };
-    const away = (/** @type {PointerEvent} */ e) => {
-      if (!pop.contains(/** @type {Node} */ (e.target)) && !anchor.contains(/** @type {Node} */ (e.target))) shut();
-    };
-    const esc = (/** @type {KeyboardEvent} */ e) => {
-      if (e.key !== "Escape") return;
-      shut();
-      if (anchor.isConnected) anchor.focus();
-    };
-    pop.addEventListener("shut", shut, { once: true });
-    // listening first, so that a popover whose anchor has already gone shuts all it set up
-    document.addEventListener("pointerdown", away);
-    document.addEventListener("keydown", esc);
-    window.addEventListener("resize", follow);
-    window.addEventListener("scroll", follow, true);
-    place();
-    /** @type {HTMLElement | null} */ (pop.querySelector("select, input, button"))?.focus();
-  }
-
   /** The head and its tie-up, from the chip over the cards. @param {HTMLElement} anchor */
   function setupPopover(anchor) {
     const s = ls();
@@ -344,7 +290,7 @@ export function createShell(store, root) {
     for (const [key, ti] of Object.entries(TIES)) tie.add(new Option(words(tieLabel(ti)), key));
     tie.value = tieKey(s.loom.tie);
     tie.addEventListener("change", () => act.setTie(store, TIES[tie.value]));
-    popover(anchor, "setup", t("setup.tip"), [el("label", { for: "setup-hooks", text: t("setup.hooks") }), hooks, el("label", { for: "setup-tie", text: t("setup.tie") }), tie]);
+    showPopover(anchor, "setup", t("setup.tip"), [el("label", { for: "setup-hooks", text: t("setup.hooks") }), hooks, el("label", { for: "setup-tie", text: t("setup.tie") }), tie]);
   }
 
   /**
@@ -416,7 +362,7 @@ export function createShell(store, root) {
       }
     };
     const unwatch = store.watch((st) => [st.looms[st.current].warp, st.looms[st.current].weft], show);
-    popover(
+    showPopover(
       anchor,
       "colours",
       t("colours.tip"),
@@ -435,12 +381,15 @@ export function createShell(store, root) {
   }
 
   /**
-   * Open a workspace: Learn at the tutorial's place, Weave as the learner left it.
+   * Open a workspace: Learn at the tutorial's place, Weave as the learner left it, Create with
+   * the learner's picture.
    * @param {Workspace} w
    */
   function goWorkspace(w) {
     if (w === store.state.workspace) return;
     if (w === "learn") openLearn(store);
+    else if (w === "create") openCreate(store);
+    else if (w === "play") openPlay(store);
     else leaveLearn(store);
   }
 
@@ -460,7 +409,7 @@ export function createShell(store, root) {
   /** Grey the controls the step on show locks, on the tutorial's loom. */
   function greyLocked() {
     const s = store.state;
-    const free = s.current === "tutorial" ? allowedAt(s.learn.step) : null;
+    const free = s.current === "tutorial" ? allowedAt(s.learn.step) : s.current === "create" || s.current === "game" ? ["colours", "picture"] : null;
     for (const e of /** @type {NodeListOf<HTMLElement>} */ (root.querySelectorAll("[data-control]"))) {
       const locked = free !== null && !free.includes(/** @type {Control} */ (e.dataset.control));
       e.classList.toggle("locked", locked);
@@ -589,28 +538,81 @@ export function createShell(store, root) {
    * alone where the step does not use the cards (the story).
    */
   function programPanel() {
+    if (store.state.workspace === "create") return picturesPanel();
+    if (store.state.workspace === "play") {
+      const slot = el("div", { class: "games-slot" });
+      const panel = el("aside", { class: "panel left" }, [rail("left"), el("div", { class: "panel-head" }, [label("h2", "game.title")]), slot]);
+      put(gamesPanel(store), slot);
+      return panel;
+    }
     const bench = controls(el("div", { class: "bench-slot" }), "punch");
     const chain = controls(el("div", { class: "chain-slot" }), "punch");
     const head = el("div", { class: "panel-head" }, [label("h2", "cards.title"), ...cardTools()]);
     const learn = store.state.workspace === "learn";
     const setup = setupRow();
-    const panel = el("aside", { class: "panel left" }, [rail("left"), ...(learn ? [guide()] : []), head, setup, bench, chain]);
+    // in Learn, a step on a picture has the picture tool under the guide, in place of the cards
+    const picture = el("div", { class: "picture-slot", hidden: true });
+    const panel = el("aside", { class: "panel left" }, [rail("left"), ...(learn ? [guide(), picture] : []), head, setup, bench, chain]);
     put(benchPanel(store), bench);
     put(chainPanel(store), chain);
+    if (learn) put(picturePanel(store, { loom: "tutorial" }), picture);
     // in Learn the guide has the room: the bench shows only for a step that punches cards, the
     // head and tie-up only for one that changes them
     if (learn)
       follow((s) => [s.learn.step], () => {
         const i = store.state.learn.step;
-        panel.classList.toggle("guide-only", !shownAt(i).cards);
-        bench.hidden = !allowedAt(i).includes("punch");
-        setup.hidden = !allowedAt(i).includes("setup");
+        const onPicture = !!STEPS[i].picture;
+        panel.classList.toggle("guide-only", !shownAt(i).cards && !onPicture);
+        panel.classList.toggle("on-picture", onPicture);
+        picture.hidden = !onPicture;
+        for (const e of [head, chain]) e.hidden = onPicture;
+        bench.hidden = onPicture || !allowedAt(i).includes("punch");
+        setup.hidden = onPicture || !allowedAt(i).includes("setup");
       });
     return panel;
   }
 
-  /** The output: the cloth, and the thread followed below it. */
+  /**
+   * Design's left panel: the picture and how it is read (js/app/components/picture.js), and
+   * under it the cards it makes, with Weave it, as Learn stacks its guide over the cards.
+   */
+  function picturesPanel() {
+    const slot = el("div", { class: "picture-slot" });
+    const chain = el("div", { class: "chain-slot" });
+    const panel = el("aside", { class: "panel left on-design" }, [
+      rail("left"),
+      el("div", { class: "panel-head" }, [label("h2", "pic.title")]),
+      slot,
+      el("div", { class: "panel-head" }, [label("h2", "pic.cards"), weaveIt()]),
+      chain,
+    ]);
+    put(picturePanel(store, { loom: "create" }), slot);
+    put(chainPanel(store), chain);
+    return panel;
+  }
+
+  /** "Weave it": the picture's cards on the learner's own loom, in Weave. */
+  function weaveIt() {
+    const b = el("button", { type: "button", class: "btn filled weave-it" }, [icon("open_in_new"), label("span", "pic.weaveIt")]);
+    b.dataset.l10nTip = "pic.weaveIt.tip";
+    b.setAttribute("data-tip-describes", "");
+    b.addEventListener("click", () => act.weavePicture(store, "create"));
+    follow((s) => [s.looms.create.rev], () => b.setAttribute("aria-disabled", String(store.state.looms.create.loom.deck.cards.length === 0)));
+    return b;
+  }
+
+  /** The output: the cloth, and the thread followed below it; in Design and Games, the machine. */
   function outputPanel() {
+    // in Design and Games, the machine beside the cloth on the stage, small: the head in
+    // section, on the workspace's own loom
+    if (store.state.workspace === "play" || store.state.workspace === "create") {
+      const machine = el("div", { class: "machine-slot" });
+      const trace = el("div", { class: "trace-slot" });
+      const panel = el("aside", { class: "panel right" }, [rail("right"), el("div", { class: "panel-head" }, [label("h2", "game.machine")]), machine, trace]);
+      put(sectionView(store), machine);
+      put(tracePanel(store), trace);
+      return panel;
+    }
     const cloth = el("div", { class: "cloth-slot" });
     const trace = el("div", { class: "trace-slot" });
     const panel = el("aside", { class: "panel right" }, [rail("right"), el("div", { class: "panel-head" }, [label("h2", "cloth.title"), ...clothTools()]), cloth, trace]);
@@ -622,7 +624,7 @@ export function createShell(store, root) {
   /** The guide: the tutorial's step (js/app/components/guide.js). */
   function guide() {
     const host = el("div", { class: "guide" });
-    put(guidePanel(store, { onWeave: () => goWorkspace("weave") }), host);
+    put(guidePanel(store, { onGo: (w) => goWorkspace(w) }), host);
     return host;
   }
 
@@ -635,19 +637,19 @@ export function createShell(store, root) {
     const host = el("div", { class: "pane-host" });
     const chip = el("button", { type: "button", class: "chip view-chip", "aria-haspopup": "menu" }, [el("span", { class: "view-name" }), icon("keyboard_arrow_down")]);
     follow((s) => [s.locale], () => (/** @type {HTMLElement} */ (chip.firstChild).textContent = viewName(v)));
-    // One flat list in two groups, the 2D drawings and the 3D models; a view on show in another
+    // One flat list: the 2D drawings, the 3D models, then the cloth; a view on show in another
     // pane says where, and choosing it swaps the two (js/app/arrange.js).
     chip.addEventListener("click", () => {
       const views = store.state.views;
       showMenu(
         chip,
-        STAGE_VIEWS.map((x) => {
+        MENU_VIEWS.map((x) => {
           const at = views.indexOf(x);
           const name = viewName(x, true);
           return {
             label: at >= 0 && at !== i ? `${name} · ${t(placeKey(at, views.length))}` : name,
             checked: x === v,
-            divider: x === "section" ? t("view.group.2d") : x === "3d" ? t("view.group.3d") : undefined,
+            divider: x === "section" ? t("view.group.2d") : x === "cloth" ? true : x === "3d" ? t("view.group.3d") : undefined,
             run: () => act.setViews(store, choose(store.state.views, i, x)),
           };
         }),
@@ -655,6 +657,7 @@ export function createShell(store, root) {
     });
     const tools = el("div", { class: "pane-tools" }, mode === "desktop" ? [chip] : []);
     if (v === "section") tools.append(...sectionTools());
+    if (v === "cloth") tools.append(...clothTools());
     /** @type {((unit: "machine" | UnitId) => void) | undefined} */
     let onMode;
     if (v in UNIT_VIEWS) {
@@ -852,7 +855,8 @@ export function createShell(store, root) {
 
   /** A phone's sheet: the program, the output and (in Learn) the guide, by tab. */
   function sheet() {
-    const ids = [...(store.state.workspace === "learn" ? ["guide"] : []), "cards", "cloth"];
+    const ws = store.state.workspace;
+    const ids = ws === "create" ? ["picture", "cards"] : ws === "play" ? ["game"] : [...(ws === "learn" ? ["guide"] : []), "cards", "cloth"];
     const list = el("div", { class: "tabs", role: "tablist" });
     const body = el("div", { class: "sheet-body" });
     for (const id of ids) list.appendChild(label("button", `sheet.${id}`, { type: "button", role: "tab", class: "tab", id: `sheet-${id}` }));
@@ -865,8 +869,30 @@ export function createShell(store, root) {
       }
       const before = placed.length;
       body.replaceChildren();
-      if (id === "guide") body.appendChild(guide());
-      if (id === "cards") {
+      if (id === "guide") {
+        body.appendChild(guide());
+        // a step on a picture brings the picture tool under it
+        const picture = el("div", { class: "picture-slot" });
+        body.appendChild(picture);
+        put(picturePanel(store, { loom: "tutorial" }), picture);
+        follow((s) => [s.learn.step], () => (picture.hidden = !STEPS[store.state.learn.step].picture));
+      }
+      if (id === "game") {
+        const slot = el("div", { class: "games-slot" });
+        body.append(slot);
+        put(gamesPanel(store), slot);
+      }
+      if (id === "picture") {
+        const slot = el("div", { class: "picture-slot" });
+        body.append(slot);
+        put(picturePanel(store, { loom: "create" }), slot);
+      }
+      if (id === "cards" && ws === "create") {
+        const chain = el("div", { class: "chain-slot" });
+        body.append(el("div", { class: "panel-head" }, [label("h2", "pic.cards")]), el("div", { class: "weave-it-row" }, [weaveIt()]), chain);
+        put(chainPanel(store), chain);
+      }
+      if (id === "cards" && ws !== "create" && ws !== "play") {
         const bench = el("div", { class: "bench-slot" });
         const chain = el("div", { class: "chain-slot" });
         body.append(el("div", { class: "panel-head" }, [label("h2", "cards.title"), ...cardTools()]), setupRow(), bench, chain);
@@ -929,6 +955,7 @@ export function createShell(store, root) {
   build();
   wireKeys(store);
   watchDone(store);
+  watchPicture(store);
   window.addEventListener("resize", () => {
     if (modeOf() !== mode) build();
   });

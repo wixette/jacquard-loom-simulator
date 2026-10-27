@@ -5,7 +5,9 @@
 import { say, t, tn } from "../../l10n/l10n.js";
 import { STOP_KEYS, STOPS } from "../../sim/loom.js";
 import { endCount } from "../../sim/tieup.js";
+import { findFloats } from "../../sim/design.js";
 import { traceOf } from "../../sim/trace.js";
+import { STEPS } from "../../teach/tutorial.js";
 import { el, icon, setText, setTip } from "../../ui/components.js";
 import { BenchCard, ChainList } from "../../view2d/chainEditor.js";
 import { ClothView } from "../../view2d/clothView.js";
@@ -14,7 +16,7 @@ import { loomOf, shown } from "./component.js";
 /** @import { AppStore, LoomId } from "../looms.js" */
 /** @import { Component } from "./component.js" */
 
-/** @typedef {{ loom?: LoomId }} PanelOptions the loom it shows, if not the current one */
+/** @typedef {{ loom?: LoomId; large?: boolean }} PanelOptions the loom it shows, if not the current one; large: a view on the stage, its squares larger */
 
 /**
  * The woven cloth, first pick at the bottom; a click on a cell follows its thread.
@@ -29,23 +31,32 @@ export function clothPanel(store, o = {}) {
   let box;
   /** @type {ClothView} */
   let view;
+  /** What was drawn last: while the loom plays it moves every frame, and the cloth is drawn again only when it changes. */
+  let drawn = "";
   return {
     name: "comp.cloth",
     mount(h) {
       host = h;
-      box = el("div", { class: "cloth-box" });
+      box = el("div", { class: o.large ? "cloth-box large" : "cloth-box" });
       h.appendChild(box);
       view = new ClothView(box, { onCell: (pick, end) => followCloth(store, pick, end, o.loom) });
     },
     watch(s) {
       const ls = loomOf(s, o.loom);
-      return [ls.loom, ls.rev, ls.follow, ls.face, ls.warp, ls.weft, ls.bits, s.locale];
+      return [ls.loom, ls.rev, ls.follow, ls.face, ls.warp, ls.weft, ls.bits, s.locale, s.workspace, s.learn.step];
     },
     update(s) {
       if (!shown(host)) return;
       const ls = loomOf(s, o.loom);
       const snap = ls.loom.snapshot();
-      view.render(snap, { face: ls.face, warp: ls.warp, weft: ls.weft, bits: ls.bits, trace: ls.follow ? traceOf(snap, ls.follow) : null });
+      // between moments only the cloth's rows, and the row in the shed, change what is drawn
+      const now = [snap.cloth.length, snap.pendingRow !== null, ls.follow?.hook, ls.follow?.end, ls.follow?.pick, ls.face, ls.warp, ls.weft, ls.bits, s.locale, s.workspace, s.learn.step, host.clientWidth].join();
+      if (ls.playing && now === drawn) return;
+      drawn = now;
+      // a picture's cloth shows its loose threads (Create, and the tutorial's picture steps)
+      const id = o.loom ?? s.current;
+      const marks = id === "create" || (id === "tutorial" && s.workspace === "learn" && !!STEPS[s.learn.step].picture);
+      view.render(snap, { face: ls.face, warp: ls.warp, weft: ls.weft, bits: ls.bits, trace: ls.follow ? traceOf(snap, ls.follow) : null, floats: marks ? findFloats(snap.cloth).floats : undefined, large: o.large });
     },
     unmount() {
       box.remove();
@@ -222,8 +233,9 @@ export function transportPanel(store, o = {}) {
         if (i === here) li.setAttribute("aria-current", "step");
         else li.removeAttribute("aria-current");
       }
+      // an open chain woven to its end: no pick past it to name
       const card = snap.cardIndex === null ? t("where.noCard") : t("where.card", { card: snap.cardIndex + 1 });
-      setText(where, tn("where", snap.cloth.length, { pick: snap.pick + 1, card, percent: Math.round(snap.phi * 100), ends: endCount(snap.tie, snap.deck.hooks) }));
+      setText(where, snap.cardIndex === null && snap.cloth.length > 0 && snap.phi === 0 ? tn("where.end", snap.cloth.length, { ends: endCount(snap.tie, snap.deck.hooks) }) : tn("where", snap.cloth.length, { pick: snap.pick + 1, card, percent: Math.round(snap.phi * 100), ends: endCount(snap.tie, snap.deck.hooks) }));
     },
     unmount() {
       box.remove();

@@ -42,7 +42,7 @@ The learner's loom: its head and tie-up, its cards, the moment it is at, and how
 | `sv` | `whole`, `needles`, `crooks` | `whole` | How close the section looks |
 | `face` | `front`, `back` | `front` | The face of the cloth shown |
 | `bits` | `0`, `1` | `0` | The 0/1 overlay on the cloth |
-| `view` | one, two or four of `section`, `side`, `front`, `3d`, `u1` … `u5`, joined by `,` | the screen's: `section,3d` where the stage is wide enough for two, else `section` | The stage's views, in order: one fills the stage, two stand side by side, four make the quad view. `3d` is the whole loom, `u1` to `u5` its units alone. A link written with the one view `section` leaves it out. |
+| `view` | one, two or four of `section`, `side`, `front`, `cloth` (0.2.0), `3d`, `u1` … `u5`, joined by `,` | the screen's: `section,3d` where the stage is wide enough for two, else `section` | The stage's views, in order: one fills the stage, two stand side by side, four make the quad view. `3d` is the whole loom, `u1` to `u5` its units alone. A link written with the one view `section` leaves it out. |
 
 **A deck** (`c`) is written in one of three encodings, named by its first letter and a dot. Every reader reads all three; which one a writer chooses is not part of the contract (today: readable hex up to 80 characters, so a teacher can read a small deck, and otherwise the shorter of the other two).
 
@@ -70,9 +70,40 @@ The steps' names in 0.1.0, frozen with it (js/teach/tutorial.js, `STEPS`; a rena
 | 2. How it works | `how-whole-loom`, `how-units`, `how-section`, `how-needles`, `how-griffe`, `how-one-row`, `how-program`, `how-loop`, `how-not-a-computer` |
 | 3. Weave | `weave-punch`, `weave-plain`, `weave-twill`, `weave-satin`, `weave-satin-by-two`, `weave-tie-up`, `weave-picture`, `weave-next` |
 
-## Later link types
+The steps added in 0.2.0, frozen with it:
 
-`create` (a picture and how it is read) and `play` (a game: the name game's text and mode, a message woven one byte a card, a puzzle) are designed with their workspaces, in M8 and M9, as new fields of this format. Until then a link with `w=create` or `w=play` opens that workspace, or Weave if the release has not got it.
+| Part | Steps |
+|---|---|
+| 4. Challenge | `debug-swapped`, `debug-hole`, `debug-tie-up`, `debug-loop` |
+| 5. Your tools | `tools-picture`, `tools-loose`, `tools-follow`, `tools-setup`, `tools-share`, `tools-create`, `tools-games` |
+| 6. What came next | `next-babbage`, `next-lovelace`, `next-hollerith`, `next-three-cards`, `next-computer` |
+
+## Create: a picture (0.2.0)
+
+Create's picture and how it is read (design/m8-notes.md). The cards are not in the link: the picture and its reading make them again. The cloth's colours (`wc`, `fc`), its face and bits, and the views are read as in Weave.
+
+| Field | Values | Default | Meaning |
+|---|---|---|---|
+| `pw` | 8, 16, 24, 32 | required with `pic` | The picture's width, in squares; it is as tall as it is wide |
+| `pic` | a deck (as `c`), of `pw` cards on `pw` hooks | none | The picture's rows, top row first, each written as a card: a hole is a dark square |
+| `rd` | `direct`, `damask` | `direct` | How it is read: square by square, or as damask |
+| `k` | 2 … 6 | `4` | With `rd=damask`: the damask's block, in threads |
+| `pp` | 1 … 3 | `1` | With `rd=direct`: picks woven for each row of squares |
+
+A `pic` that is not square (more or fewer rows than `pw`) is refused, and so is a `pw` without `pic`.
+
+## Play: a game (0.2.0)
+
+The game Play opens on (design/m9-notes.md), and what it needs; each game starts as a newcomer's would.
+
+| Field | Values | Default | Meaning |
+|---|---|---|---|
+| `game` | `name`, `byte`, `guess`, `drawboy` | `name` | The game. A name this release does not know opens the name game |
+| `text` | up to 144 characters | the game's own | With `game=name`: the text to weave, its lines joined by a line break |
+| `mode` | `damask`, `direct` | `damask` | With `game=name`: how the name is read, as damask or square by square (`direct`), as Design reads a picture |
+| `seed` | 1 … 1,000,000,000 | `1` | With `game=guess`: the puzzle |
+
+**One byte per card's secret** carries the message as cards only, in `h=8` and `c` (as in Weave), so the friend it is sent to reads it from the holes or the cloth: the link never holds the text.
 
 ## Examples
 
@@ -84,4 +115,8 @@ Each is decoded by `tests/sim/link.test.js` as stated here.
 | `#v=2&w=weave&h=16&c=x.a5a5-5a5a&p=3&s=2&f=5` | A 16-hook head with two cards (holes 1, 3, 6, 8, 9, 11, 14, 16, then the others), laced into a loop, straight tie; pick 4 with the shuttle across; following hook 5 |
 | `#v=2&h=8&c=x.18-18-18-18-99-5a-3c-18&l=0&view=section,3d` | The research's arrow on one cross-row, an open chain, the section beside the loom in 3D |
 | `#v=2&w=learn&step=weave-twill` | The tutorial at the step named `weave-twill` |
+| `#v=2&w=create&pw=8&pic=x.18-3c-5a-99-18-18-18-18&rd=damask&k=3` | Create, with the research's arrow read as damask in blocks of three threads |
+| `#v=2&w=play&game=name&text=Ada&mode=direct` | The name game, weaving "Ada" square by square |
+| `#v=2&w=play&game=guess&seed=7` | Guess the cloth, puzzle 7 |
+| `#v=2&w=play&game=byte&h=8&c=x.48-69` | One byte per card: a secret of two cards (it reads "Hi") |
 | `#v=1&h=8&d=ff` | Refused: a link of the prototype's format |

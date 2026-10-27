@@ -13,6 +13,7 @@
 
 import { msg } from "../l10n/l10n.js";
 import { HOOK_COUNTS } from "./deck.js";
+import { PICTURE_SIZES } from "./picture.js";
 import { endCount, hookOfEnd } from "./tieup.js";
 /** @import { Msg } from "../l10n/l10n.js" */
 /** @import { Tie } from "./tieup.js" */
@@ -25,7 +26,7 @@ export const WORKSPACES = /** @type {const} */ (["weave", "learn", "create", "pl
 /** @typedef {(typeof WORKSPACES)[number]} Workspace */
 
 /** The stage's views a link may name. */
-export const STAGE_VIEWS = /** @type {const} */ (["section", "side", "front", "3d", "u1", "u2", "u3", "u4", "u5"]);
+export const STAGE_VIEWS = /** @type {const} */ (["section", "side", "front", "3d", "u1", "u2", "u3", "u4", "u5", "cloth"]);
 /** @typedef {(typeof STAGE_VIEWS)[number]} StageView */
 
 /** The locales a link may name (js/l10n/l10n.js, LOCALES; repeated so this module stays pure). */
@@ -56,6 +57,19 @@ export const LONG_LINK = 2000;
  * @property {"front" | "back"} face
  * @property {boolean} bits
  * @property {StageView[]} views one, two or four
+ * @property {LinkPicture | null} picture Create's picture and how it is read, or null
+ * @property {LinkGame | null} game the game Play opens on, and its own fields, or null
+ */
+
+/**
+ * A game in a link (Play): which, and what it needs (the name game's text and reading, the
+ * guessing game's puzzle); one byte a card carries its message as cards (deck), a secret.
+ * @typedef {{ name: "name" | "byte" | "guess" | "drawboy"; text: string; mode: "damask" | "direct"; seed: number }} LinkGame
+ */
+
+/**
+ * A picture in a link (Create): square, top row first, true = dark; and its reading.
+ * @typedef {{ rows: boolean[][]; mode: "direct" | "damask"; k: number; perRow: number }} LinkPicture
  */
 
 /** @type {AppLink} */
@@ -75,7 +89,14 @@ export const DEFAULT_LINK = {
   face: "front",
   bits: false,
   views: ["section"],
+  picture: null,
+  game: null,
 };
+
+/** The games a link can open, and the longest name text it carries. */
+export const LINK_GAMES = /** @type {const} */ (["name", "byte", "guess", "drawboy"]);
+// the name game takes 16 lines of 8 characters, and the spaces and line breaks between them
+const MAX_TEXT = 144;
 
 // ---- decks: x. (hex), b. (packed), z. (compressed) -----------------------------------------------
 
@@ -245,6 +266,23 @@ export async function encodeLink(link) {
   if (l.face !== d.face) q.set("face", l.face);
   if (l.bits) q.set("bits", "1");
   if (l.views.join() !== d.views.join()) q.set("view", l.views.join(","));
+  if (l.game) {
+    q.set("game", l.game.name);
+    if (l.game.name === "name") {
+      q.set("text", l.game.text);
+      if (l.game.mode !== "damask") q.set("mode", l.game.mode);
+    }
+    if (l.game.name === "guess") q.set("seed", String(l.game.seed));
+  }
+  if (l.picture) {
+    // the picture as a deck of rows, each row a card as wide as the picture (0.2.0)
+    const n = l.picture.rows.length;
+    q.set("pw", String(n));
+    q.set("pic", await encodeDeck(l.picture.rows, n));
+    if (l.picture.mode !== "direct") q.set("rd", l.picture.mode);
+    if (l.picture.mode === "damask" && l.picture.k !== 4) q.set("k", String(l.picture.k));
+    if (l.picture.mode === "direct" && l.picture.perRow !== 1) q.set("pp", String(l.picture.perRow));
+  }
   // URLSearchParams writes "," as %2C; a link reads better with it as it is.
   return q.toString().replace(/%2C/g, ",");
 }
@@ -320,6 +358,35 @@ export async function decodeLink(fragment) {
     if (bits !== "0" && bits !== "1") return noBecause("link.value", { field: "bits", value: bits });
     l.bits = bits === "1";
   }
+
+  // A game (Play, 0.2.0): which, and its own fields; a game not known yet opens the first.
+  const game = q.get("game");
+  if (game !== null) {
+    const name = /** @type {LinkGame["name"]} */ ((/** @type {readonly string[]} */ (LINK_GAMES)).includes(game) ? game : "name");
+    const text = q.get("text") ?? "";
+    if (text.length > MAX_TEXT) return noBecause("link.textLong", { most: MAX_TEXT });
+    const mode = q.get("mode") ?? "damask";
+    if (mode !== "damask" && mode !== "direct") return noBecause("link.value", { field: "mode", value: mode });
+    const seed = q.has("seed") ? int(q.get("seed"), 1, 1_000_000_000) : 1;
+    if (seed === null) return noBecause("link.range");
+    l.game = { name, text, mode, seed };
+  }
+
+  // A picture (Create, 0.2.0): its rows, as wide as they are many, and how it is read.
+  const pic = q.get("pic");
+  if (pic !== null) {
+    const n = int(q.get("pw"), 8, 32);
+    if (n === null || !(/** @type {readonly number[]} */ (PICTURE_SIZES)).includes(n)) return noBecause("link.pictureSize", { pw: q.get("pw") ?? "" });
+    const rows = await decodeDeck(pic, n);
+    if (!rows.ok) return no(rows.reason);
+    if (rows.cards.length !== n) return noBecause("link.pictureSquare", { n, rows: rows.cards.length });
+    const rd = q.get("rd") ?? "direct";
+    if (rd !== "direct" && rd !== "damask") return noBecause("link.value", { field: "rd", value: rd });
+    const k = q.has("k") ? int(q.get("k"), 2, 6) : 4;
+    const pp = q.has("pp") ? int(q.get("pp"), 1, 3) : 1;
+    if (k === null || pp === null) return noBecause("link.range");
+    l.picture = { rows: rows.cards, mode: rd, k, perRow: pp };
+  } else if (q.has("pw")) return noBecause("link.pictureOnly");
 
   // The loom.
   const c = q.get("c");

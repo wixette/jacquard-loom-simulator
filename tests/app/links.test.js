@@ -89,3 +89,51 @@ describe("a link that cannot be read", () => {
     assert.equal(b.state.looms.mine.status.warn, false);
   });
 });
+
+describe("a Create link (0.2.0)", () => {
+  it("is the picture and how it is read, and opens it on Create's loom, the learner's untouched", async () => {
+    const a = store();
+    const { presetPicture } = await import("../../js/sim/picture.js");
+    act.setPicture(a, { rows: presetPicture("letter"), mode: "damask", k: 3 }, "create");
+    act.setWorkspace(a, "create");
+    const fragment = await encodeLink(linkOf(a));
+    const b = store();
+    const mine = b.state.looms.mine.loom;
+    assert.equal(await openLink(b, `#${fragment}`), true);
+    assert.equal(b.state.workspace, "create");
+    assert.deepEqual(b.state.pictures.create.rows, presetPicture("letter"));
+    assert.equal(b.state.pictures.create.mode, "damask");
+    assert.equal(b.state.looms.create.loom.deck.cards.length, 48);
+    assert.deepEqual(b.state.views, ["cloth"]);
+    assert.equal(b.state.looms.mine.loom, mine);
+  });
+});
+
+describe("a Play link (0.2.0)", () => {
+  it("one byte a card: the sender's message reaches the friend as cards, a secret to read", async () => {
+    const { openPlay, setMessage } = await import("../../js/app/play.js");
+    const a = store();
+    openPlay(a, "byte");
+    setMessage(a, "Hi!");
+    const fragment = await encodeLink(linkOf(a));
+    assert.doesNotMatch(fragment, /Hi/, "the words are not in the link");
+    const b = store();
+    await openLink(b, `#${fragment}`);
+    assert.equal(b.state.workspace, "play");
+    assert.equal(b.state.play.game, "byte");
+    assert.equal(b.state.play.byte.secret, true);
+    const { readMessage } = await import("../../js/game/byteGame.js");
+    assert.equal(readMessage(b.state.looms.game.loom.deck.cards), "Hi!");
+  });
+  it("guess the cloth: the same puzzle for the friend", async () => {
+    const { openPlay, nextPuzzle } = await import("../../js/app/play.js");
+    const a = store();
+    openPlay(a, "guess");
+    nextPuzzle(a);
+    nextPuzzle(a);
+    const b = store();
+    await openLink(b, `#${await encodeLink(linkOf(a))}`);
+    assert.equal(b.state.play.guess.seed, 3);
+    assert.deepEqual(b.state.looms.game.loom.deck, a.state.looms.game.loom.deck);
+  });
+});

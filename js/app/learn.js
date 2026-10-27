@@ -3,7 +3,8 @@
 // counts as done; the place and the steps done are remembered on this device, so leaving Learn
 // and coming back resumes it. The steps themselves are in js/teach/tutorial.js.
 
-import { loomAt, shownAt, stepIndex, STEPS } from "../teach/tutorial.js";
+import { loomAt, pictureAt, shownAt, stepIndex, STEPS } from "../teach/tutorial.js";
+import { WORKSPACES } from "../sim/link.js";
 import * as act from "./looms.js";
 /** @import { AppStore } from "./looms.js" */
 
@@ -11,8 +12,6 @@ const KEY = "jacquard.tutorial";
 /** The workspace last used on this device (design/ui-layout.md §3: the app opens where it was left). */
 const WORKSPACE = "jacquard.workspace";
 
-/** Weave's views, kept while Learn shows the steps' own, to give back on leaving. @type {WeakMap<AppStore, import("../sim/link.js").StageView[]>} */
-const weaveViews = new WeakMap();
 
 /**
  * The workspace the app opens on, without a link: the one last used on this device, or Learn
@@ -21,7 +20,8 @@ const weaveViews = new WeakMap();
  */
 export function openingWorkspace() {
   try {
-    return localStorage.getItem(WORKSPACE) === "weave" ? "weave" : "learn";
+    const w = localStorage.getItem(WORKSPACE);
+    return w !== null && /** @type {readonly string[]} */ (WORKSPACES).includes(w) ? /** @type {import("./looms.js").Workspace} */ (w) : "learn";
   } catch {
     return "learn";
   }
@@ -78,7 +78,10 @@ export function goTo(store, i) {
   const n = Math.max(0, Math.min(STEPS.length - 1, i));
   const { loom, follow } = loomAt(n);
   // the step and its loom in one update: the step done is never judged on the other's loom
-  act.setLoom(store, loom, follow === null ? null : { hook: follow, end: null, pick: null }, "tutorial", { learn: { ...store.state.learn, step: n } });
+  // a step on a picture gives the picture tool its picture, in the same update
+  const picture = pictureAt(n);
+  const pictures = picture ? { pictures: { ...store.state.pictures, tutorial: picture } } : {};
+  act.setLoom(store, loom, follow === null ? null : { hook: follow, end: null, pick: null }, "tutorial", { learn: { ...store.state.learn, step: n }, ...pictures });
   act.setViews(store, shownAt(n).views);
   act.setSectionView(store, "whole");
   remember(store);
@@ -93,7 +96,6 @@ export function goTo(store, i) {
 export function openLearn(store, name = null) {
   const r = remembered();
   act.setLearn(store, { done: [...new Set([...store.state.learn.done, ...r.done])] });
-  if (store.state.workspace !== "learn") weaveViews.set(store, store.state.views);
   act.setWorkspace(store, "learn");
   const at = name ?? r.step;
   const i = at === null ? 0 : stepIndex(at);
@@ -105,11 +107,7 @@ export function openLearn(store, name = null) {
  * Leave Learn for Weave, keeping the tutorial's place: Weave's loom and views as they were.
  * @param {AppStore} store
  */
-export function leaveLearn(store) {
-  act.setWorkspace(store, "weave");
-  const views = weaveViews.get(store);
-  if (views) act.setViews(store, views);
-}
+export const leaveLearn = (store) => act.setWorkspace(store, "weave");
 
 /**
  * Answer the step's question (predict, then weave): a choice, 1-based.

@@ -4,8 +4,10 @@
 
 import { chooseLanguage, initialLanguage } from "./app/language.js";
 import { openLearn, openingWorkspace, watchWorkspace } from "./app/learn.js";
+import { openCreate } from "./app/create.js";
 import { openLink } from "./app/links.js";
 import { appState, setViews } from "./app/looms.js";
+import { openPlay, rememberedGame, watchGame } from "./app/play.js";
 import { createShell, openingViews } from "./app/shell.js";
 import { Store } from "./app/store.js";
 
@@ -15,15 +17,21 @@ setViews(store, openingViews());
 // Without a link, the app opens where it was left on this device; a newcomer, on Learn. A link
 // that cannot be read opens Weave, whose status line says why.
 const linked = await openLink(store, location.hash);
-if (!linked && location.hash.length <= 1 && openingWorkspace() === "learn") openLearn(store);
+if (!linked && location.hash.length <= 1) {
+  const w = openingWorkspace();
+  if (w === "learn") openLearn(store);
+  else if (w === "create") openCreate(store);
+  else if (w === "play") openPlay(store, rememberedGame());
+}
 watchWorkspace(store);
+watchGame(store);
 const shell = createShell(store, /** @type {HTMLElement} */ (document.getElementById("app")));
 window.addEventListener("hashchange", () => openLink(store, location.hash));
 
-// With ?selftest, M6's and M7's checks run on the app (design/m6-notes.md, design/m7-notes.md).
+// With ?selftest, M6's to M9's checks run on the app (design/m6-notes.md to design/m9-notes.md).
 if (new URLSearchParams(location.search).has("selftest")) {
-  const [{ runM6Checks }, { runM7Checks }, { showSelftest }] = await Promise.all([import("./accept/m6Checks.js"), import("./accept/m7Checks.js"), import("./accept/selftestPanel.js")]);
+  const [{ runM6Checks }, { runM7Checks }, { runM8Checks }, { runM9Checks }, { showSelftest }] = await Promise.all([import("./accept/m6Checks.js"), import("./accept/m7Checks.js"), import("./accept/m8Checks.js"), import("./accept/m9Checks.js"), import("./accept/selftestPanel.js")]);
   const t0 = performance.now();
-  const results = [...(await runM6Checks({ store, shell })), ...(await runM7Checks({ store, shell }))];
+  const results = [...(await runM6Checks({ store, shell })), ...(await runM7Checks({ store, shell })), ...(await runM8Checks({ store, shell })), ...(await runM9Checks({ store, shell }))];
   showSelftest(document.body, results, performance.now() - t0);
 }

@@ -10,7 +10,9 @@
 // Back, or opening a step from a link, gives the same loom every time.
 
 import { msg } from "../l10n/l10n.js";
-import { cardFromString, cardToString, makeDeck, PRESETS, setLoop } from "../sim/deck.js";
+import { cardFromString, cardToString, makeDeck, PRESETS, resizeDeck, setLoop } from "../sim/deck.js";
+import { findFloats } from "../sim/design.js";
+import { presetPicture, readPicture } from "../sim/picture.js";
 import { Loom, STOPS } from "../sim/loom.js";
 import { STRAIGHT } from "../sim/tieup.js";
 /** @import { Msg } from "../l10n/l10n.js" */
@@ -21,9 +23,9 @@ import { STRAIGHT } from "../sim/tieup.js";
 /**
  * The controls that change the cards or the loom. A step locks those its task does not ask
  * for; the transport, the views, the cloth's face and following a thread are always free.
- * @typedef {"punch" | "cards" | "loop" | "setup" | "colours"} Control
+ * @typedef {"punch" | "cards" | "loop" | "setup" | "colours" | "picture"} Control
  */
-export const CONTROLS = /** @type {const} */ (["punch", "cards", "loop", "setup", "colours"]);
+export const CONTROLS = /** @type {const} */ (["punch", "cards", "loop", "setup", "colours", "picture"]);
 
 /**
  * What a task line offers as buttons, each working the real control (which glows): the
@@ -39,6 +41,25 @@ export const CONTROLS = /** @type {const} */ (["punch", "cards", "loop", "setup"
  * @property {boolean} loop
  * @property {Tie} [tie]
  * @property {number} [follow] a hook to follow (0-based)
+ * @property {number} [woven] rows already woven
+ */
+
+/**
+ * A picture for a step to start from (the picture tool, part 5): a ready-made picture and how
+ * it is read, woven to the end on the tutorial's loom.
+ * @typedef {object} PictureSetup
+ * @property {import("../sim/picture.js").PictureName} name
+ * @property {"direct" | "damask"} mode
+ */
+
+/**
+ * The cloth a challenge should weave (part 4): the cards that weave it, and how many rows of it
+ * the learner's cloth must match.
+ * @typedef {object} Target
+ * @property {string[]} cards
+ * @property {boolean} loop
+ * @property {Tie} [tie]
+ * @property {number} rows
  */
 
 /**
@@ -71,7 +92,7 @@ export const CONTROLS = /** @type {const} */ (["punch", "cards", "loop", "setup"
 /**
  * @typedef {object} Step
  * @property {string} id its name, in links and in the learner's progress: never changed
- * @property {1 | 2 | 3} part
+ * @property {1 | 2 | 3 | 4 | 5 | 6} part
  * @property {Picture} [image]
  * @property {StageView[]} [views] the stage's views (carried on to the steps after)
  * @property {boolean} [cards] whether the cards show under the step (carried on)
@@ -81,10 +102,16 @@ export const CONTROLS = /** @type {const} */ (["punch", "cards", "loop", "setup"
  * @property {Task} [task]
  * @property {boolean} [done] it has a text for when its task is done (tut.<name>.done)
  * @property {Record<string, Msg>} [params] the values of its texts' placeholders
+ * @property {boolean} [picture] it works on a picture: the picture tool under the guide, and its
+ *   cloth's loose threads marked
+ * @property {PictureSetup} [startPicture] a picture of its own to weave, in place of a loom setup
+ * @property {Target} [target] the cloth it should weave, shown beside its text (a challenge)
+ * @property {Control[]} [allow] controls it frees without a task (a task's own allow wins)
+ * @property {"weave" | "create" | "play"} [go] a button to that workspace, under its text
  */
 
 /** The parts, by number: their names and what each teaches are tut.part<n>, .goal, .recap. */
-export const PARTS = /** @type {const} */ ([1, 2, 3]);
+export const PARTS = /** @type {const} */ ([1, 2, 3, 4, 5, 6]);
 
 const EPS = 1e-9;
 const TWILL = PRESETS.twill.rows;
@@ -103,6 +130,47 @@ function punchAs(l, i, holes) {
 const weave = (l, rows) => l.moveTo(rows, 0);
 /** @param {boolean[]} row */
 const bits = (row) => row.map((b) => (b ? "O" : ".")).join("");
+
+/**
+ * A challenge's target, woven: its rows, first pick first.
+ * @param {Target} t
+ * @returns {boolean[][]}
+ */
+export function targetCloth(t) {
+  const l = new Loom(deckOf({ hooks: t.cards[0].length, cards: t.cards, loop: t.loop }), t.tie ?? STRAIGHT);
+  l.moveTo(t.rows, 0);
+  return l.cloth;
+}
+
+/**
+ * Whether a loom has woven a challenge's target: its first rows the target's.
+ * @param {Loom} l
+ * @param {Target} t
+ */
+const wovenAs = (l, t) => {
+  const want = targetCloth(t);
+  return l.cloth.length >= t.rows && want.every((row, p) => bits(l.cloth[p]) === bits(row));
+};
+
+/**
+ * A challenge's task: weave the target, from the start, with whatever controls the fault needs.
+ * Its solution puts the target's own cards on the loom (any fix that weaves the target counts).
+ * @param {Target} t
+ * @param {Control[]} allow
+ * @returns {Task}
+ */
+const challenge = (t, allow) => ({
+  ask: ["play"],
+  allow,
+  check: (l) => wovenAs(l, t),
+  solve: (l) => {
+    if (t.tie) l.setTie(t.tie);
+    l.setDeck(deckOf({ hooks: l.deck.hooks, cards: t.cards, loop: t.loop }));
+    l.reset();
+    weave(l, t.rows);
+  },
+  wrong: (l) => weave(l, t.rows),
+});
 
 /** @type {Step[]} */
 export const STEPS = [
@@ -258,7 +326,97 @@ export const STEPS = [
     done: true,
     task: { ask: ["play"], check: (l) => woven(l, 8), solve: (l) => weave(l, 8), wrong: (l) => weave(l, 4) },
   },
-  { id: "weave-next", part: 3 },
+  { id: "weave-next", part: 3, go: "weave" },
+
+  // ---- 4. Challenge: debugging, from the cloth back to the program ----------------------------
+  {
+    id: "debug-swapped",
+    part: 4,
+    views: ["section"],
+    cards: true,
+    setup: { hooks: 8, cards: [TWILL[0], TWILL[2], TWILL[1], TWILL[3]], loop: true },
+    target: { cards: TWILL, loop: true, rows: 8 },
+    done: true,
+    task: challenge({ cards: TWILL, loop: true, rows: 8 }, ["cards", "punch"]),
+  },
+  {
+    id: "debug-hole",
+    part: 4,
+    setup: { hooks: 8, cards: SATIN.map((c, i) => (i === 4 ? "........" : c)), loop: true },
+    target: { cards: SATIN, loop: true, rows: 8 },
+    done: true,
+    task: challenge({ cards: SATIN, loop: true, rows: 8 }, ["punch"]),
+  },
+  {
+    id: "debug-tie-up",
+    part: 4,
+    views: ["front"],
+    params: { tie: msg("tie.straightN", { n: 2 }) },
+    setup: { hooks: 8, cards: TWILL, loop: true, tie: { kind: "point" } },
+    target: { cards: TWILL, loop: true, tie: { kind: "straight", repeats: 2 }, rows: 4 },
+    done: true,
+    task: challenge({ cards: TWILL, loop: true, tie: { kind: "straight", repeats: 2 }, rows: 4 }, ["setup"]),
+  },
+  {
+    id: "debug-loop",
+    part: 4,
+    views: ["section"],
+    setup: { hooks: 8, cards: [...TWILL, TWILL[3]], loop: true },
+    target: { cards: TWILL, loop: true, rows: 12 },
+    done: true,
+    task: challenge({ cards: TWILL, loop: true, rows: 12 }, ["cards"]),
+  },
+
+  // ---- 5. Your tools --------------------------------------------------------------------------
+  { id: "tools-picture", part: 5, views: ["cloth"], cards: false, picture: true, startPicture: { name: "heart", mode: "direct" }, allow: ["picture"] },
+  {
+    id: "tools-loose",
+    part: 5,
+    picture: true,
+    predict: { choices: 3, answer: 1 },
+    done: true,
+    task: {
+      ask: [],
+      allow: ["picture"],
+      // the cloth holds together: no thread loose over more than eight others
+      check: (l) => l.cloth.length > 0 && findFloats(l.cloth).floats.length === 0,
+      solve: (l) => {
+        const r = readPicture({ rows: presetPicture("heart"), mode: "damask", k: 4, perRow: 1, invert: false });
+        if (!r.ok) return;
+        l.deck = r.cards.deck;
+        l.reset();
+        weave(l, r.cards.deck.cards.length);
+      },
+      wrong: () => {},
+    },
+  },
+  { id: "tools-follow", part: 5, views: ["front"], cards: true, setup: { hooks: 8, cards: TWILL, loop: true, tie: { kind: "straight", repeats: 2 }, woven: 8 } },
+  {
+    id: "tools-setup",
+    part: 5,
+    views: ["section"],
+    done: true,
+    task: {
+      ask: ["setup"],
+      allow: ["setup"],
+      check: (l) => l.deck.hooks === 16,
+      solve: (l) => {
+        l.deck = resizeDeck(l.deck, 16);
+        l.reset();
+      },
+      wrong: (l) => l.setTie({ kind: "straight", repeats: 3 }),
+    },
+  },
+  { id: "tools-share", part: 5 },
+  { id: "tools-create", part: 5, go: "create" },
+  { id: "tools-games", part: 5, go: "play" },
+
+  // ---- 6. What came next ------------------------------------------------------------------------
+  { id: "next-babbage", part: 6, views: ["u2"], cards: false },
+  { id: "next-lovelace", part: 6 },
+  { id: "next-hollerith", part: 6 },
+  { id: "next-three-cards", part: 6, predict: { choices: 3, answer: 3 }, done: true },
+  { id: "next-computer", part: 6, views: ["3d"], go: "weave" },
 ];
 
 /**
@@ -318,22 +476,42 @@ export function shownAt(i) {
  */
 export function loomAt(i) {
   let k = i;
-  while (k > 0 && !STEPS[k].setup) k--;
+  while (k > 0 && !STEPS[k].setup && !STEPS[k].startPicture) k--;
+  const pic = STEPS[k].startPicture ? pictureAt(k) : null;
+  const read = pic ? readPicture(pic) : null;
   const s = STEPS[k].setup ?? { hooks: 8, cards: TWILL, loop: true };
-  const loom = new Loom(deckOf(s), s.tie ?? STRAIGHT);
+  const loom = read?.ok ? new Loom(read.cards.deck) : new Loom(deckOf(s), s.tie ?? STRAIGHT);
+  if (read?.ok) loom.moveTo(read.cards.deck.cards.length, 0);
+  else if (s.woven) loom.moveTo(s.woven, 0);
   for (let j = k; j < i; j++) {
     const task = STEPS[j].task;
     if (task && !task.check(loom)) task.solve(loom);
   }
-  return { loom, follow: s.follow ?? null };
+  return { loom, follow: pic ? null : (s.follow ?? null) };
 }
+
+/**
+ * The picture a step works on: the last one a step set up, at or before it (null: none).
+ * @param {number} i
+ * @returns {import("../sim/picture.js").PictureSpec | null}
+ */
+export function pictureAt(i) {
+  for (let k = i; k >= 0; k--) {
+    const p = STEPS[k].startPicture;
+    if (p) return { rows: presetPicture(p.name), mode: p.mode, k: 4, perRow: 1, invert: false };
+    if (STEPS[k].setup) return null;
+  }
+  return null;
+}
+
+
 
 /**
  * The controls a step leaves free, of those that change the cards or the loom.
  * @param {number} i
  * @returns {Control[]}
  */
-export const allowedAt = (i) => STEPS[i].task?.allow ?? [];
+export const allowedAt = (i) => STEPS[i].task?.allow ?? STEPS[i].allow ?? [];
 
 /**
  * Run the tutorial with a scripted learner (the tests, and the page's ?selftest): every task

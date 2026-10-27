@@ -59,6 +59,27 @@ describe("the examples of design/links.md", () => {
     assert.equal(l.deck, null);
   });
 
+  it("a picture for Create, read as damask (0.2.0)", async () => {
+    const l = await read("#v=2&w=create&pw=8&pic=x.18-3c-5a-99-18-18-18-18&rd=damask&k=3");
+    assert.equal(l.workspace, "create");
+    assert.equal(l.picture?.rows.length, 8);
+    assert.deepEqual(l.picture?.rows[0].map(Number), [0, 0, 0, 1, 1, 0, 0, 0]);
+    assert.equal(l.picture?.mode, "damask");
+    assert.equal(l.picture?.k, 3);
+  });
+
+  it("the name game, the guessing game's puzzle, a byte game's secret (0.2.0)", async () => {
+    const name = await read("#v=2&w=play&game=name&text=Ada&mode=direct");
+    assert.deepEqual(name.game, { name: "name", text: "Ada", mode: "direct", seed: 1 });
+    const guess = await read("#v=2&w=play&game=guess&seed=7");
+    assert.equal(guess.game?.name, "guess");
+    assert.equal(guess.game?.seed, 7);
+    const secret = await read("#v=2&w=play&game=byte&h=8&c=x.48-69");
+    assert.equal(secret.game?.name, "byte");
+    assert.equal(secret.game?.text, "");
+    assert.deepEqual(secret.deck?.cards.map((c) => c.reduce((n, x) => (n << 1) | Number(x), 0)), [0x48, 0x69]);
+  });
+
   it("a link of the prototype's format is refused, and says so", async () => {
     const r = await decodeLink("#v=1&h=8&d=ff");
     assert.ok(!r.ok);
@@ -385,5 +406,61 @@ describe("Learn: a step, by its name (design/links.md, Learn)", () => {
       "weave-punch", "weave-plain", "weave-twill", "weave-satin", "weave-satin-by-two", "weave-tie-up", "weave-picture", "weave-next",
     ];
     for (const name of frozen) assert.ok(stepIndex(name) >= 0, `${name} no longer opens a step: keep it as an alias`);
+  });
+});
+
+describe("Create: a picture (design/links.md, Create; 0.2.0)", () => {
+  /** @param {string} rows @returns {boolean[][]} */
+  const pic = (rows) => rows.split("/").map(card);
+  it("a picture's rows, top first, as a deck as wide as it is, and its reading", async () => {
+    const rows = pic(["00011000", "00111100", "01011010", "10011001", "00011000", "00011000", "00011000", "00011000"].join("/"));
+    const l = await read("#v=2&w=create&pw=8&pic=x.18-3c-5a-99-18-18-18-18&rd=damask&k=3");
+    assert.equal(l.workspace, "create");
+    assert.deepEqual(l.picture, { rows, mode: "damask", k: 3, perRow: 1 });
+    assert.deepEqual((await read("#v=2&w=create&pw=8&pic=x.18-3c-5a-99-18-18-18-18&pp=2")).picture, { rows, mode: "direct", k: 4, perRow: 2 });
+  });
+  it("round-trips, with only what differs written", async () => {
+    const rows = [...Array(16)].map((_, y) => [...Array(16)].map((_, x) => (x * y) % 3 === 0));
+    for (const p of [
+      { rows, mode: /** @type {const} */ ("direct"), k: 4, perRow: 1 },
+      { rows, mode: /** @type {const} */ ("damask"), k: 2, perRow: 1 },
+      { rows, mode: /** @type {const} */ ("direct"), k: 4, perRow: 3 },
+    ]) {
+      const fragment = await encodeLink({ workspace: "create", picture: p, views: ["cloth"] });
+      assert.deepEqual((await read(fragment)).picture, p);
+    }
+    assert.doesNotMatch(await encodeLink({ workspace: "create", picture: { rows, mode: "direct", k: 4, perRow: 1 } }), /rd=|k=|pp=/);
+  });
+  it("a picture that is not one of the sizes, not square, or a width with no picture, is refused", async () => {
+    for (const f of ["#v=2&w=create&pw=12&pic=x.fff", "#v=2&w=create&pw=8&pic=x.ff-ff", "#v=2&w=create&pw=8", "#v=2&w=create&pw=8&pic=x.18-3c-5a-99-18-18-18-18&rd=satin", "#v=2&w=create&pw=8&pic=x.18-3c-5a-99-18-18-18-18&k=7", "#v=2&w=create&pw=8&pic=x.18-3c-5a-99-18-18-18-18&pp=4"]) {
+      const r = await decodeLink(f);
+      assert.ok(!r.ok, f);
+    }
+  });
+  it("the cloth, large, is a view a link can name", async () => {
+    assert.deepEqual((await read("#v=2&view=cloth,section")).views, ["cloth", "section"]);
+  });
+});
+
+describe("Play: a game (design/links.md, Play; 0.2.0)", () => {
+  it("the name game's text and reading; the guessing game's puzzle; a game not known yet opens the first", async () => {
+    assert.deepEqual((await read("#v=2&w=play&game=name&text=Ada%0ALovelace&mode=direct")).game, { name: "name", text: "Ada\nLovelace", mode: "direct", seed: 1 });
+    assert.deepEqual((await read("#v=2&w=play&game=guess&seed=77")).game, { name: "guess", text: "", mode: "damask", seed: 77 });
+    assert.equal((await read("#v=2&w=play&game=chess")).game?.name, "name");
+  });
+  it("one byte a card carries its message as cards, so the friend has to read them", async () => {
+    const l = await read("#v=2&w=play&game=byte&h=8&c=x.48-69");
+    assert.equal(l.game?.name, "byte");
+    assert.deepEqual(l.deck?.cards.map((c) => c.map(Number).join("")), ["01001000", "01101001"]);
+  });
+  it("round-trips, writing only what each game needs", async () => {
+    for (const g of [{ name: /** @type {const} */ ("name"), text: "Jacquard", mode: /** @type {const} */ ("damask"), seed: 1 }, { name: /** @type {const} */ ("guess"), text: "", mode: /** @type {const} */ ("damask"), seed: 123456 }, { name: /** @type {const} */ ("drawboy"), text: "", mode: /** @type {const} */ ("damask"), seed: 1 }]) {
+      const f = await encodeLink({ workspace: "play", game: g });
+      assert.deepEqual((await read(f)).game, g);
+    }
+    assert.equal(await encodeLink({ workspace: "play", game: { name: "drawboy", text: "x", mode: "direct", seed: 9 } }), "v=2&w=play&game=drawboy");
+  });
+  it("a text too long, a reading or a seed out of range is refused", async () => {
+    for (const f of [`#v=2&w=play&game=name&text=${"x".repeat(145)}`, "#v=2&w=play&game=name&text=Ada&mode=fast", "#v=2&w=play&game=guess&seed=0"]) assert.ok(!(await decodeLink(f)).ok, f);
   });
 });

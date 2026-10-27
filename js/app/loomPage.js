@@ -147,7 +147,7 @@ export function createLoomPage(options = {}) {
       li.classList.toggle("here", i === atStop);
     }
     const card = snap.cardIndex === null ? t("where.noCard") : t("where.card", { card: snap.cardIndex + 1 });
-    $("where").textContent = tn("where", snap.cloth.length, { pick: snap.pick + 1, card, percent: Math.round(snap.phi * 100), ends: endCount(snap.tie, snap.deck.hooks) });
+    $("where").textContent = snap.cardIndex === null && snap.cloth.length > 0 && snap.phi === 0 ? tn("where.end", snap.cloth.length, { ends: endCount(snap.tie, snap.deck.hooks) }) : tn("where", snap.cloth.length, { pick: snap.pick + 1, card, percent: Math.round(snap.phi * 100), ends: endCount(snap.tie, snap.deck.hooks) });
     options.onDraw?.(snap);
   }
   store.watch((s) => [s.looms.mine, s.sectionView], sync);

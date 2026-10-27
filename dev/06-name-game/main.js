@@ -187,7 +187,8 @@ async function selftest() {
     textBox.dispatchEvent(new Event("input"));
     /** @type {HTMLElement} */ (document.querySelector(`[data-mode="${m}"]`)).click();
   };
-  for (const [t, m, cards] of /** @type {[string, Mode, number][]} */ ([["JACQUARD", "damask", 64], ["Ada\nLovelace", "direct", 32]])) {
+  // two lines of 16 pixel rows, and the gap of 2 between them
+  for (const [t, m, cards] of /** @type {[string, Mode, number][]} */ ([["JACQUARD", "damask", 64], ["Ada\nLovelace", "direct", 34]])) {
     use(t, m);
     /** @type {HTMLElement} */ ($("all")).click();
     if (loom.cloth.length !== cards) bad.push(`${JSON.stringify(t)}: ${loom.cloth.length} rows woven, not ${cards}`);
