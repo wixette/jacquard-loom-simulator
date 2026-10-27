@@ -1,7 +1,7 @@
 # Links: the format
 
-- **Status:** draft, 2026-10-27, for review before release 0.1.0. From 0.1.0 it is a contract ([docs/ui-design.md](../docs/ui-design.md), P8): a later release may add fields, values and link types, and must read every link an earlier release wrote, as that release meant it; it never renames, drops or reads a field differently.
-- **Code:** `js/sim/link.js` (no DOM), pinned by `tests/sim/link.test.js`, which decodes every example below.
+- **Status:** agreed on 2026-10-27, for release 0.1.0. From 0.1.0 it is a contract ([docs/ui-design.md](../docs/ui-design.md), P8): a later release may add fields, values and link types, and must read every link an earlier release wrote, as that release meant it; it never renames, drops or reads a field differently.
+- **Code:** `js/sim/link.js` (no DOM), pinned by `tests/sim/link.test.js`: it decodes every example below, reads every value each table allows and refuses those just outside, checks what a writer leaves out and how it writes a deck, round-trips every link type, and opens every step of the tutorial by its name. A change to the format adds tests; it never changes or drops one.
 - **Replaces** the prototype's format (`v=1`, 0.0.1), which is not kept: a `v=1` link is refused with a reason.
 
 ## Why links matter
