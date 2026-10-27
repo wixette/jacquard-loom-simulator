@@ -40,7 +40,16 @@ const APP = "for (let i = 0; i < 26; i++) { document.querySelector('.transport [
 /** The app is ready when its 3D views (if any) have loaded. */
 const APP_READY = "document.querySelector('.app') && !document.querySelector('.view-note')";
 
+/** In the README (pnpm shots --only readme- --out screenshots): the app as a newcomer meets it. */
+const README_SHOTS = [
+  { name: "readme-app", path: "index.html#v=2&view=section,3d", ready: APP_READY, setup: `${APP} await sleep(2500);`, size: [1920, 1080] },
+  { name: "readme-learn", path: "index.html#v=2&w=learn&step=how-griffe", ready: APP_READY, setup: "await sleep(1200);", size: [1440, 900] },
+  { name: "readme-units", path: "index.html#v=2&h=8&c=x.cc-66-33-99&p=5&s=2&f=1&view=u1", ready: APP_READY, setup: "await sleep(2500); document.querySelector('.unit-note summary').click(); await sleep(400);", size: [1440, 900] },
+  { name: "readme-phone", path: "index.html#v=2&w=learn&step=weave-twill", ready: APP_READY, setup: "await sleep(1000); document.querySelector('.predict input')?.click(); await sleep(400);", size: [390, 844] },
+];
+
 const SHOTS = [
+  ...README_SHOTS,
   { name: "app-1366", path: "index.html#v=2", ready: APP_READY, setup: APP, size: [1366, 768] },
   { name: "app-1280", path: "index.html#v=2", ready: APP_READY, setup: APP, size: [1280, 800] },
   { name: "app-1600", path: "index.html#v=2", ready: APP_READY, setup: `${APP} await sleep(1500);`, size: [1600, 1000] },
