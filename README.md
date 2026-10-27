@@ -124,7 +124,7 @@ and the tutorial share a sheet below it, dragged up or down.
 ready-made one, or open an image (it is read in your browser and never uploaded). Then choose
 how the loom reads it: square by square, one square to a thread, or as damask, two satins
 woven in blocks, the way figured silk holds together. The cloth is drawn large, its long loose
-threads marked in red; **Weave it** puts the cards on your loom in Weave, and Share sends the
+threads marked in red; **Open in Weave** puts the cards on your loom in Weave, and Share sends the
 picture as a link.
 
 **Games** has four games on a loom of their own:

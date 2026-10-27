@@ -242,8 +242,9 @@ export class ClothView {
     if (cells.length === 0) {
       g.fillStyle = token("--label", "#c9d0d9");
       g.font = `12px ${token("--font", "system-ui, sans-serif")}`;
-      g.textAlign = "left";
-      g.fillText(t("cloth.none"), this.left, this.top + 12);
+      // in the panel at its top left, as a list says it is empty; on the stage, in the middle
+      g.textAlign = o.large ? "center" : "left";
+      g.fillText(t("cloth.none"), o.large ? w / 2 : this.left, this.top + 12);
     }
     this.canvas.setAttribute("aria-label", tn("cloth.name", snap.cloth.length, { face: t(o.face === "front" ? "cloth.front" : "cloth.back"), ends }));
   }

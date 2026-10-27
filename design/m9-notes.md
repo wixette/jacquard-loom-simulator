@@ -16,7 +16,7 @@
 
 | Game | What the player does | What it shows |
 |---|---|---|
-| The name game | types up to three short lines; chooses real cloth (damask) or quick (square by square); Weave it all | the cards, the cloth, and the cloth read back into letters |
+| The name game | types up to three short lines; chooses real cloth (damask) or quick (square by square); Weave to the end | the cards, the cloth, and the cloth read back into letters |
 | One byte per card | types a message of up to 32 ASCII characters | a card a character, each row's bits, code and letter; Share sends a friend the cards only, to read back |
 | Guess the cloth | picks which of three cloths a small looped deck weaves | the wrong ones are the deck misread (reversed, mirrored, inverted, shifted), and a wrong pick says which |
 | Draw boy against Jacquard | pulls the cords for each row and throws the shuttle, eight rows; then lets the cards do it | the cords pulled against the fewest needed, the rows woven wrong; then the same figure from eight cards |
