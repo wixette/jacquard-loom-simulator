@@ -149,6 +149,8 @@ export default {
   "where.noCard": "no card",
   "where.one": "Pick {pick} ({card}) · {percent} % through · {n} row woven · {ends} warp ends",
   "where.other": "Pick {pick} ({card}) · {percent} % through · {n} rows woven · {ends} warp ends",
+  "where.end.one": "The chain woven to its end · {n} row woven · {ends} warp ends",
+  "where.end.other": "The chain woven to its end · {n} rows woven · {ends} warp ends",
 
   // ---- the status line -----------------------------------------------------------------------
   "status.start": "The first card is pressed against the needles. Press Step ▸ to turn the loom to the next moment, or Play.",

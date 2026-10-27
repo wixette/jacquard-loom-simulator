@@ -137,6 +137,8 @@ export default {
   "where.noCard": "ningún cartón",
   "where.one": "Pasada {pick} ({card}) · {percent} % · {n} fila tejida · {ends} hilos de urdimbre",
   "where.other": "Pasada {pick} ({card}) · {percent} % · {n} filas tejidas · {ends} hilos de urdimbre",
+  "where.end.one": "Cadena tejida hasta el final · {n} fila tejida · {ends} hilos de urdimbre",
+  "where.end.other": "Cadena tejida hasta el final · {n} filas tejidas · {ends} hilos de urdimbre",
   "status.start": "El primer cartón está apretado contra las agujas. Pulsa Paso ▸ para llevar el telar al momento siguiente, o Reproducir.",
   "status.step": "Paso: {what}",
   "status.reset": "Reiniciado: de vuelta al primer cartón, sin tejido.",

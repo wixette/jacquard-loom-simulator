@@ -136,6 +136,8 @@ export default {
   "where.noCard": "문지 없음",
   "where.one": "픽 {pick} ({card}) · {percent} % · {n}줄 짬 · 날실 {ends}가닥",
   "where.other": "픽 {pick} ({card}) · {percent} % · {n}줄 짬 · 날실 {ends}가닥",
+  "where.end.one": "문지 사슬을 끝까지 짬 · {n}줄 짬 · 날실 {ends}가닥",
+  "where.end.other": "문지 사슬을 끝까지 짬 · {n}줄 짬 · 날실 {ends}가닥",
   "status.start": "첫 문지가 니들에 눌려 있습니다. ‘한 단계 앞으로 ▸’를 눌러 직기를 다음 순간으로 돌리거나 ‘재생’을 누르세요.",
   "status.step": "한 단계 앞으로: {what}",
   "status.reset": "초기화했습니다. 첫 문지로 돌아왔고 직물은 없습니다.",

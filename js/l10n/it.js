@@ -136,6 +136,8 @@ export default {
   "where.noCard": "nessun cartone",
   "where.one": "Colpo {pick} ({card}) · {percent} % · {n} riga tessuta · {ends} fili d'ordito",
   "where.other": "Colpo {pick} ({card}) · {percent} % · {n} righe tessute · {ends} fili d'ordito",
+  "where.end.one": "Catena tessuta fino in fondo · {n} riga tessuta · {ends} fili d'ordito",
+  "where.end.other": "Catena tessuta fino in fondo · {n} righe tessute · {ends} fili d'ordito",
   "status.start": "Il primo cartone è premuto contro gli aghi. Premi Avanti ▸ per portare il telaio al momento successivo, oppure Avvia.",
   "status.step": "Avanti: {what}",
   "status.reset": "Azzerato: di nuovo al primo cartone, senza tessuto.",

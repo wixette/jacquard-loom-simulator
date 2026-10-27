@@ -136,6 +136,8 @@ export default {
   "where.noCard": "aucun carton",
   "where.one": "Duite {pick} ({card}) · {percent} % · {n} rangée tissée · {ends} fils de chaîne",
   "where.other": "Duite {pick} ({card}) · {percent} % · {n} rangées tissées · {ends} fils de chaîne",
+  "where.end.one": "Chaîne tissée jusqu'au bout · {n} rangée tissée · {ends} fils de chaîne",
+  "where.end.other": "Chaîne tissée jusqu'au bout · {n} rangées tissées · {ends} fils de chaîne",
   "status.start": "Le premier carton est pressé contre les aiguilles. Appuyez sur Pas ▸ pour mener le métier au moment suivant, ou sur Lecture.",
   "status.step": "Pas : {what}",
   "status.reset": "Remise à zéro : retour au premier carton, sans étoffe.",

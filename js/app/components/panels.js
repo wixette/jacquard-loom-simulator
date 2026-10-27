@@ -233,8 +233,9 @@ export function transportPanel(store, o = {}) {
         if (i === here) li.setAttribute("aria-current", "step");
         else li.removeAttribute("aria-current");
       }
+      // an open chain woven to its end: no pick past it to name
       const card = snap.cardIndex === null ? t("where.noCard") : t("where.card", { card: snap.cardIndex + 1 });
-      setText(where, tn("where", snap.cloth.length, { pick: snap.pick + 1, card, percent: Math.round(snap.phi * 100), ends: endCount(snap.tie, snap.deck.hooks) }));
+      setText(where, snap.cardIndex === null && snap.cloth.length > 0 && snap.phi === 0 ? tn("where.end", snap.cloth.length, { ends: endCount(snap.tie, snap.deck.hooks) }) : tn("where", snap.cloth.length, { pick: snap.pick + 1, card, percent: Math.round(snap.phi * 100), ends: endCount(snap.tie, snap.deck.hooks) }));
     },
     unmount() {
       box.remove();

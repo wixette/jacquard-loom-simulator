@@ -136,6 +136,8 @@ export default {
   "where.noCard": "keine Karte",
   "where.one": "Schuss {pick} ({card}) · {percent} % · {n} Reihe gewebt · {ends} Kettfäden",
   "where.other": "Schuss {pick} ({card}) · {percent} % · {n} Reihen gewebt · {ends} Kettfäden",
+  "where.end.one": "Kartenkette zu Ende gewebt · {n} Reihe gewebt · {ends} Kettfäden",
+  "where.end.other": "Kartenkette zu Ende gewebt · {n} Reihen gewebt · {ends} Kettfäden",
   "status.start": "Die erste Karte ist an die Nadeln gedrückt. Drücke Schritt ▸, um den Webstuhl zum nächsten Moment zu drehen, oder Abspielen.",
   "status.step": "Schritt: {what}",
   "status.reset": "Zurückgesetzt: wieder bei der ersten Karte, ohne Gewebe.",

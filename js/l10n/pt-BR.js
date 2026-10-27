@@ -136,6 +136,8 @@ export default {
   "where.noCard": "nenhum cartão",
   "where.one": "Passada {pick} ({card}) · {percent} % · {n} fileira tecida · {ends} fios de urdume",
   "where.other": "Passada {pick} ({card}) · {percent} % · {n} fileiras tecidas · {ends} fios de urdume",
+  "where.end.one": "Corrente tecida até o fim · {n} fileira tecida · {ends} fios de urdume",
+  "where.end.other": "Corrente tecida até o fim · {n} fileiras tecidas · {ends} fios de urdume",
   "status.start": "O primeiro cartão está apertado contra as agulhas. Toque em Passo ▸ para levar o tear ao próximo momento, ou em Reproduzir.",
   "status.step": "Passo: {what}",
   "status.reset": "Reiniciado: de volta ao primeiro cartão, sem tecido.",

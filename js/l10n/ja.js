@@ -136,6 +136,8 @@ export default {
   "where.noCard": "紋紙なし",
   "where.one": "ピック {pick}（{card}）· {percent} % · {n} 段織った · 経糸 {ends} 本",
   "where.other": "ピック {pick}（{card}）· {percent} % · {n} 段織った · 経糸 {ends} 本",
+  "where.end.one": "紋紙を最後まで織った · {n} 段織った · 経糸 {ends} 本",
+  "where.end.other": "紋紙を最後まで織った · {n} 段織った · 経糸 {ends} 本",
   "status.start": "最初の紋紙が横針に押し当てられています。「一歩進む ▸」で次の瞬間へ回すか、「再生」を押してください。",
   "status.step": "一歩進む：{what}",
   "status.reset": "リセットしました：最初の紋紙に戻り、織物はありません。",

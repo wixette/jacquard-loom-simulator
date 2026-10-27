@@ -136,6 +136,8 @@ export default {
   "where.noCard": "沒有紋板",
   "where.one": "第 {pick} 緯（{card}）· 進行到 {percent} % · 已織 {n} 列 · {ends} 根經紗",
   "where.other": "第 {pick} 緯（{card}）· 進行到 {percent} % · 已織 {n} 列 · {ends} 根經紗",
+  "where.end.one": "紋板鏈已織完 · 已織 {n} 列 · {ends} 根經紗",
+  "where.end.other": "紋板鏈已織完 · 已織 {n} 列 · {ends} 根經紗",
   "status.start": "第一張紋板已壓在橫針上。按「前進一步 ▸」把織機轉到下一個時刻，或按「播放」。",
   "status.step": "前進一步：{what}",
   "status.reset": "已重設：回到第一張紋板，沒有織物。",
