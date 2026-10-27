@@ -48,8 +48,8 @@ function shade(hex, k) {
   return `rgb(${ch[0]},${ch[1]},${ch[2]})`; // not a theme colour: a shade of the learner's own colour
 }
 
-/** At most this many rows are drawn, the newest. */
-const MAX_ROWS = 400;
+/** At most this many rows are drawn, the newest: a looped chain weaves for ever; the longest open one, the name game's 16 lines as damask, is 1,144. */
+const MAX_ROWS = 1200;
 /** The largest square, in CSS pixels: in the panel, and as a view on the stage. */
 const CELL = 22;
 const LARGE_CELL = 33;
@@ -150,34 +150,49 @@ export class ClothView {
     const weftLight = shade(o.weft, 0.35);
     const tr = o.trace;
     const followEnd = (/** @type {number} */ e) => tr !== null && hookOfEnd(snap.tie, snap.deck.hooks, e) === tr.hook + 1;
+    // Each square is one of two tiles, the warp over (shaded across) or the weft over (shaded
+    // down), drawn once and laid as patterns, a rectangle for each run of squares alike. (A gradient made for each square took ~0.4 s for a cloth of
+    // 1,000 rows on 256 ends, at every moment of the loom.)
+    const gap = cell > 5 ? 1 : 0;
+    const tile = (/** @type {boolean} */ warpOver) => {
+      const px = Math.max(1, Math.round(cell * dpr));
+      const c = document.createElement("canvas");
+      c.width = px;
+      c.height = px;
+      const tg = /** @type {CanvasRenderingContext2D} */ (c.getContext("2d"));
+      tg.scale(px / cell, px / cell);
+      const grad = warpOver ? tg.createLinearGradient(0, 0, cell, 0) : tg.createLinearGradient(0, 0, 0, cell);
+      grad.addColorStop(0, warpOver ? warpDark : weftDark);
+      grad.addColorStop(0.5, warpOver ? warpLight : weftLight);
+      grad.addColorStop(1, warpOver ? warpDark : weftDark);
+      tg.fillStyle = grad;
+      tg.fillRect(0, 0, cell - gap, cell - gap);
+      const pattern = /** @type {CanvasPattern} */ (g.createPattern(c, "repeat"));
+      pattern.setTransform(new DOMMatrix([cell / px, 0, 0, cell / px, this.left, this.top]));
+      return pattern;
+    };
+    const warpTile = tile(true);
+    const weftTile = tile(false);
     cells.forEach((row, r) => {
       const y = this.top + (rows - 1 - r) * cell;
-      row.forEach((c, j) => {
-        const x = this.left + j * cell;
-        g.globalAlpha = c.pending ? 0.55 : 1;
-        if (c.warpOver) {
-          const grad = g.createLinearGradient(x, 0, x + cell, 0);
-          grad.addColorStop(0, warpDark);
-          grad.addColorStop(0.5, warpLight);
-          grad.addColorStop(1, warpDark);
-          g.fillStyle = grad;
-        } else {
-          const grad = g.createLinearGradient(0, y, 0, y + cell);
-          grad.addColorStop(0, weftDark);
-          grad.addColorStop(0.5, weftLight);
-          grad.addColorStop(1, weftDark);
-          g.fillStyle = grad;
-        }
-        g.fillRect(x, y, cell - (cell > 5 ? 1 : 0), cell - (cell > 5 ? 1 : 0));
-        if (o.bits && cell >= 12) {
-          g.globalAlpha = 1;
+      g.globalAlpha = row[0]?.pending ? 0.55 : 1;
+      for (let j = 0; j < row.length; ) {
+        let k = j;
+        while (k < row.length && row[k].warpOver === row[j].warpOver) k++;
+        g.fillStyle = row[j].warpOver ? warpTile : weftTile;
+        g.fillRect(this.left + j * cell, y, (k - j) * cell, cell);
+        j = k;
+      }
+      g.globalAlpha = 1;
+      if (o.bits && cell >= 12) {
+        g.font = `${Math.round(cell * 0.6)}px ui-monospace, Menlo, monospace`;
+        g.textAlign = "center";
+        g.textBaseline = "middle";
+        row.forEach((c, j) => {
           g.fillStyle = c.warpOver ? "rgba(255,255,255,0.85)" : "rgba(60,40,10,0.7)"; // not a theme colour: the bits are read on the learner's own colours
-          g.font = `${Math.round(cell * 0.6)}px ui-monospace, Menlo, monospace`;
-          g.textAlign = "center";
-          g.textBaseline = "middle";
-          g.fillText(c.bit ? "1" : "0", x + cell / 2, y + cell / 2 + 1);
-        }
-      });
+          g.fillText(c.bit ? "1" : "0", this.left + j * cell + cell / 2, y + cell / 2 + 1);
+        });
+      }
       g.globalAlpha = 1;
       if (cell >= 8 && (cells.length <= 40 || (r + 1) % 5 === 0)) {
         g.fillStyle = token("--label", "#c9d0d9");

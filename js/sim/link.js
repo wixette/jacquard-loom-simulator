@@ -95,7 +95,8 @@ export const DEFAULT_LINK = {
 
 /** The games a link can open, and the longest name text it carries. */
 export const LINK_GAMES = /** @type {const} */ (["name", "byte", "guess", "drawboy"]);
-const MAX_TEXT = 64;
+// the name game takes 16 lines of 8 characters, and the spaces and line breaks between them
+const MAX_TEXT = 144;
 
 // ---- decks: x. (hex), b. (packed), z. (compressed) -----------------------------------------------
 

@@ -42,7 +42,7 @@ The weaving tasks (parts 3 and 4) come before the tools (part 5), so the learner
 
 - **Font:** Unscii 8 × 16 (public domain; the "full" variant, which is GPL, is not used); Terminus 8 × 16 (SIL Open Font License) is the alternative, with its licence file. The IBM VGA font is not used: its artwork's status is unclear.
 - **Real cloth or a quick one.** Read directly, one pixel per thread, eight characters need 64 hooks, but letters on a blank ground leave long loose threads (the picture tool's lesson again). As damask, 4 × 4 threads of satin per pixel, eight characters need 256 hooks: the real 400 head of the whole-loom view. The game says so: "your name, on a real 400 head: 64 cards a line".
-- **Several lines** are stacked with the first line woven last, so the cloth reads from the top.
+- **Several lines** are stacked with the first line woven last, so the cloth reads from the top. A text wraps at the spaces into lines of 8 characters (a word longer than a line is cut), up to 16 lines, with two blank pixel rows between lines: a name, or a short message (0.2.0; the prototype took 4 lines typed).
 - **The link carries the text, not the cards** (a 256-hook damask deck would make a very long link).
 
 ## 3. Making it attractive

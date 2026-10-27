@@ -134,7 +134,7 @@ picture as a link.
 
 | Game | What you do |
 |---|---|
-| **The name game** | Type your name; the loom weaves it in a pixel font, square by square or as damask, and reads the cloth back |
+| **The name game** | Type your name, or a message of up to 16 lines of 8 characters; the loom weaves it in a pixel font, square by square or as damask, and reads the cloth back |
 | **One byte per card** | Type a message: on an 8-hook head one card is one byte. Share sends a friend only the cards, to read back into text |
 | **Guess the cloth** | A few cards and three cloths: which one do they weave? The wrong ones are the cards misread |
 | **Draw boy against Jacquard** | Weave a figure as a draw boy did, pulling the cords for every row; then let the cards do it |

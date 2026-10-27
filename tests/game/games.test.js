@@ -6,8 +6,41 @@ import { describe, it } from "node:test";
 import { byteCard, messageDeck, readMessage, rowBits, rowByte } from "../../js/game/byteGame.js";
 import * as drawBoy from "../../js/game/drawBoy.js";
 import { misread, puzzle, ROWS, weaveCards } from "../../js/game/guessGame.js";
+import { checkText, decodeCloth, LINE_GAP, MAX_CHARS, MAX_LINES, planName, wrapText } from "../../js/game/nameGame.js";
 import { cardToString } from "../../js/sim/deck.js";
 import { Loom } from "../../js/sim/loom.js";
+
+describe("the name game's text wraps into lines (N-1)", () => {
+  it("breaks at the spaces, cuts a word longer than a line, and keeps the lines typed", () => {
+    assert.deepEqual(wrapText("Ada Lovelace"), ["Ada", "Lovelace"]);
+    assert.deepEqual(wrapText("THE JACQUARD LOOM"), ["THE", "JACQUARD", "LOOM"]);
+    assert.deepEqual(wrapText("a b c d e"), ["a b c d", "e"]);
+    assert.deepEqual(wrapText("ABCDEFGHIJ"), ["ABCDEFGH", "IJ"]);
+    assert.deepEqual(wrapText("Ada\n\nLovelace\n\n"), ["Ada", "", "Lovelace"]);
+    assert.ok(wrapText("abcdefg ".repeat(40)).every((l) => l.length <= MAX_CHARS));
+  });
+
+  it("takes up to MAX_LINES lines, and says how many a longer text makes", () => {
+    assert.ok(checkText("ab ".repeat(MAX_LINES).trim()).ok);
+    const r = checkText("abcdefg ".repeat(MAX_LINES + 1).trim());
+    assert.ok(!r.ok);
+    assert.equal(/** @type {any} */ (r).why.key, "name.tooManyLines");
+    assert.equal(/** @type {any} */ (r).why.params.lines, MAX_LINES + 1);
+  });
+
+  it("a long message woven reads back line by line, a gap between the lines, both ways", () => {
+    const text = "THE JACQUARD LOOM WOVE PICTURES FROM A CHAIN OF PUNCHED CARDS, AND ITS IDEA LED TO COMPUTERS";
+    for (const mode of /** @type {const} */ (["direct", "damask"])) {
+      const r = planName(text, mode);
+      assert.ok(r.ok, mode);
+      const { plan } = /** @type {any} */ (r);
+      assert.equal(plan.picture.length, plan.lines.length * 16 + (plan.lines.length - 1) * LINE_GAP);
+      const loom = new Loom(plan.deck);
+      loom.moveTo(plan.deck.cards.length, 0);
+      assert.deepEqual(decodeCloth(loom.cloth, plan), wrapText(text), mode);
+    }
+  });
+});
 
 describe("one byte per card (B-1)", () => {
   it("a character is a card of its ASCII code, the highest bit at hook 1", () => {

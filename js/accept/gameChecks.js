@@ -4,7 +4,7 @@
 // (tests/accept/game.accept.test.js and dev/06-name-game's ?selftest).
 
 import { Loom } from "../sim/loom.js";
-import { checkText, decodeCloth, DIRECT_HOOKS_MAX, glyph, GLYPH_H, GLYPH_W, MAX_CHARS, planName, REFERENCE_HOOKS } from "../game/nameGame.js";
+import { checkText, decodeCloth, DIRECT_HOOKS_MAX, glyph, GLYPH_H, GLYPH_W, LINE_GAP, MAX_CHARS, MAX_LINES, planName, REFERENCE_HOOKS } from "../game/nameGame.js";
 import { result } from "./harness.js";
 /** @import { CheckResult } from "./harness.js" */
 /** @import { NamePlan } from "../game/nameGame.js" */
@@ -43,8 +43,9 @@ function font() {
 /** @returns {CheckResult} */
 function rules() {
   const bad = [];
-  const ok = ["JACQUARD", "Ada\nLovelace", "a b", "~!@#$%^&", "12345678\nx\ny\nz"];
-  const refused = ["", "   \n  ", "Café", "ABCDEFGHI", "a\nb\nc\nd\ne", "tab\there"];
+  // a text wraps at the spaces into lines of MAX_CHARS, up to MAX_LINES of them
+  const ok = ["JACQUARD", "Ada\nLovelace", "Ada Lovelace", "ABCDEFGHI", "a b", "~!@#$%^&", "12345678\nx\ny\nz", "ab ".repeat(MAX_LINES).trim()];
+  const refused = ["", "   \n  ", "Café", "tab\there", "abcdefg ".repeat(MAX_LINES + 1).trim()];
   for (const t of ok) if (!checkText(t).ok) bad.push(`${JSON.stringify(t)} refused`);
   for (const t of refused) {
     const r = checkText(t);
@@ -55,7 +56,7 @@ function rules() {
   if (!d.ok || d.plan.deck.hooks > REFERENCE_HOOKS) bad.push("8 characters do not fit the 400 head as damask");
   const q = planName("ABCDEFGH", "direct");
   if (!q.ok || q.plan.deck.hooks !== DIRECT_HOOKS_MAX) bad.push("8 characters do not fill the 64-hook head directly");
-  return result("G-2", `Up to ${MAX_CHARS} printable ASCII characters a line, up to 4 lines, are accepted; anything else is refused with a reason; 8 characters fit the 400 head as damask (256 hooks) and the 64-hook head directly`, bad.length === 0, bad.slice(0, 3).join("; ") || `${ok.length} texts accepted, ${refused.length} refused`);
+  return result("G-2", `Printable ASCII, wrapped at the spaces into lines of ${MAX_CHARS}, up to ${MAX_LINES} lines, is accepted; anything else is refused with a reason; 8 characters fit the 400 head as damask (256 hooks) and the 64-hook head directly`, bad.length === 0, bad.slice(0, 3).join("; ") || `${ok.length} texts accepted, ${refused.length} refused`);
 }
 
 /**
@@ -65,7 +66,7 @@ function rules() {
  */
 function roundTrip(mode, id) {
   const bad = [];
-  const texts = ["JACQUARD", "Ada\nLovelace", "1801", "Hello,\nworld!", "{[(<>)]}", "a"];
+  const texts = ["JACQUARD", "Ada\nLovelace", "1801", "Hello,\nworld!", "{[(<>)]}", "a", "THE JACQUARD LOOM WOVE PICTURES FROM CARDS"];
   let cards = 0;
   let worstFloat = 0;
   for (const t of texts) {
@@ -76,7 +77,7 @@ function roundTrip(mode, id) {
     }
     const p = r.plan;
     const k = mode === "damask" ? 4 : 1;
-    if (p.deck.cards.length !== p.lines.length * GLYPH_H * k) bad.push(`${JSON.stringify(t)}: ${p.deck.cards.length} cards`);
+    if (p.deck.cards.length !== (p.lines.length * GLYPH_H + (p.lines.length - 1) * LINE_GAP) * k) bad.push(`${JSON.stringify(t)}: ${p.deck.cards.length} cards`);
     cards += p.deck.cards.length;
     // Woven through the loom's own steps (the short texts) or to the end, the cloth reads back.
     const cloth = weaveAll(p, p.deck.cards.length <= 64);

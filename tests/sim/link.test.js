@@ -461,6 +461,6 @@ describe("Play: a game (design/links.md, Play; 0.2.0)", () => {
     assert.equal(await encodeLink({ workspace: "play", game: { name: "drawboy", text: "x", mode: "direct", seed: 9 } }), "v=2&w=play&game=drawboy");
   });
   it("a text too long, a reading or a seed out of range is refused", async () => {
-    for (const f of [`#v=2&w=play&game=name&text=${"x".repeat(65)}`, "#v=2&w=play&game=name&text=Ada&mode=fast", "#v=2&w=play&game=guess&seed=0"]) assert.ok(!(await decodeLink(f)).ok, f);
+    for (const f of [`#v=2&w=play&game=name&text=${"x".repeat(145)}`, "#v=2&w=play&game=name&text=Ada&mode=fast", "#v=2&w=play&game=guess&seed=0"]) assert.ok(!(await decodeLink(f)).ok, f);
   });
 });

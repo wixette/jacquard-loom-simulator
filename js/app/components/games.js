@@ -37,7 +37,8 @@ export function gamesPanel(store) {
 
   /** The name game: a name, how it is read (as Design reads a picture), Weave to the end, and the cloth read back. */
   const nameGame = () => {
-    const text = el("textarea", { class: "game-input", rows: String(MAX_LINES), spellcheck: "false", "aria-label": t("name.label") });
+    // up to MAX_LINES lines of MAX_CHARS, with room for the spaces and line breaks between them
+    const text = el("textarea", { class: "game-input", rows: "3", maxlength: String(MAX_LINES * (MAX_CHARS + 1)), spellcheck: "false", "aria-label": t("name.label") });
     text.value = store.state.play.name.text;
     text.addEventListener("input", () => play.setName(store, { text: text.value }));
     const modes = el("div", { class: "seg", role: "group" });
@@ -54,9 +55,12 @@ export function gamesPanel(store) {
       for (const b of /** @type {HTMLElement[]} */ ([...modes.children])) b.setAttribute("aria-pressed", String(b.dataset.mode === s.play.name.mode));
       const r = planName(s.play.name.text, s.play.name.mode);
       const cloth = s.looms.game.loom.cloth;
-      setText(read, !r.ok ? "" : cloth.length < r.plan.deck.cards.length ? t("name.weaving", { rows: cloth.length, of: r.plan.deck.cards.length }) : t("name.reads", { text: decodeCloth(cloth, r.plan).join(" / ") }));
+      // the cloth read back line by line; when it is the text's lines, the text as typed (its line breaks as " / ")
+      const back = r.ok && cloth.length >= r.plan.deck.cards.length ? decodeCloth(cloth, r.plan) : [];
+      const typed = s.play.name.text.split("\n").map((l) => l.trim().replace(/ +/g, " ")).filter((l, i, all) => l !== "" || all.slice(i).some((x) => x.trim() !== "")).join(" / ");
+      setText(read, !r.ok ? "" : back.length === 0 ? t("name.weaving", { rows: cloth.length, of: r.plan.deck.cards.length }) : t("name.reads", { text: back.join("\n") === r.plan.lines.join("\n") ? typed : back.join(" / ") }));
     };
-    return [p("name.about", { most: MAX_CHARS, lines: MAX_LINES }), text, el("div", { class: "game-row" }, [el("span", { class: "game-label", text: t("pic.reading.label") }), modes]), p("name.modes"), el("div", { class: "game-row" }, [all]), read];
+    return [p("name.about", { per: MAX_CHARS, lines: MAX_LINES }), text, el("div", { class: "game-row" }, [el("span", { class: "game-label", text: t("pic.reading.label") }), modes]), p("name.modes"), el("div", { class: "game-row" }, [all]), read];
   };
 
   /** One byte a card: a message typed, its rows read back; or a friend's secret to read. */

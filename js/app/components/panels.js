@@ -31,6 +31,8 @@ export function clothPanel(store, o = {}) {
   let box;
   /** @type {ClothView} */
   let view;
+  /** What was drawn last: while the loom plays it moves every frame, and the cloth is drawn again only when it changes. */
+  let drawn = "";
   return {
     name: "comp.cloth",
     mount(h) {
@@ -47,6 +49,10 @@ export function clothPanel(store, o = {}) {
       if (!shown(host)) return;
       const ls = loomOf(s, o.loom);
       const snap = ls.loom.snapshot();
+      // between moments only the cloth's rows, and the row in the shed, change what is drawn
+      const now = [snap.cloth.length, snap.pendingRow !== null, ls.follow?.hook, ls.follow?.end, ls.follow?.pick, ls.face, ls.warp, ls.weft, ls.bits, s.locale, s.workspace, s.learn.step, host.clientWidth].join();
+      if (ls.playing && now === drawn) return;
+      drawn = now;
       // a picture's cloth shows its loose threads (Create, and the tutorial's picture steps)
       const id = o.loom ?? s.current;
       const marks = id === "create" || (id === "tutorial" && s.workspace === "learn" && !!STEPS[s.learn.step].picture);
