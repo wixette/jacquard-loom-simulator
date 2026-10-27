@@ -77,8 +77,8 @@ function remember(store) {
 export function goTo(store, i) {
   const n = Math.max(0, Math.min(STEPS.length - 1, i));
   const { loom, follow } = loomAt(n);
-  act.setLoom(store, loom, follow === null ? null : { hook: follow, end: null, pick: null }, "tutorial");
-  act.setLearn(store, { step: n });
+  // the step and its loom in one update: the step done is never judged on the other's loom
+  act.setLoom(store, loom, follow === null ? null : { hook: follow, end: null, pick: null }, "tutorial", { learn: { ...store.state.learn, step: n } });
   act.setViews(store, shownAt(n).views);
   act.setSectionView(store, "whole");
   remember(store);
