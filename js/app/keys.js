@@ -4,8 +4,9 @@
 // the focus: a text field or a list, a button (Space presses it), a tab, a menu, a panel's edge,
 // or an open dialog.
 
+import { choose } from "./arrange.js";
 import * as act from "./looms.js";
-/** @import { AppStore, StageView } from "./looms.js" */
+/** @import { AppStore } from "./looms.js" */
 
 /** The views the number keys put in the first view, in the order of the view chips. */
 const NUMBER_VIEWS = /** @type {const} */ (["section", "side", "front", "3d"]);
@@ -33,12 +34,8 @@ export function wireKeys(store) {
     else if (e.key === "ArrowRight") act.step(store, id);
     else if (e.key === "ArrowLeft") act.stepBack(store, id);
     else if (e.key >= "1" && e.key <= "4" && !e.shiftKey) {
-      const views = /** @type {StageView[]} */ ([...store.state.views]);
-      views[0] = NUMBER_VIEWS[Number(e.key) - 1];
-      // a view shown twice would be one too many: the other pane takes the first one's
-      const twice = views.indexOf(views[0], 1);
-      if (twice > 0) views[twice] = store.state.views[0];
-      act.setViews(store, views);
+      // a view on show in another pane swaps with the first's (js/app/arrange.js)
+      act.setViews(store, choose(store.state.views, 0, NUMBER_VIEWS[Number(e.key) - 1]));
     } else if (e.key === "f" || e.key === "F") {
       const under = document.elementFromPoint(at.x, at.y);
       if (!under?.closest(".pane-host, .cloth-box")) return;

@@ -25,6 +25,7 @@ import { chooseLanguage } from "./language.js";
 import { leaveLearn, openLearn, watchDone } from "./learn.js";
 import { guidePanel } from "./components/guide.js";
 import { allowedAt, placeInPart, shownAt } from "../teach/tutorial.js";
+import { arrange, choose, is3d, placeKey, SPLIT } from "./arrange.js";
 import * as act from "./looms.js";
 import { TIES, tieKey } from "./looms.js";
 /** @import { AppStore, StageView, Workspace } from "./looms.js" */
@@ -63,7 +64,6 @@ function viewComponent(store, v, onMode) {
 }
 
 /** The views each arrangement opens with, when the stage is split. */
-const SPLIT = /** @type {Record<1 | 2 | 4, StageView[]>} */ ({ 1: ["section"], 2: ["section", "3d"], 4: ["section", "front", "side", "3d"] });
 
 /** The side panels' sizes (px): the smallest, the largest and the default (design/ui-layout.md §4). */
 const PANEL = { left: { min: 260, max: 480, size: 320 }, right: { min: 280, max: 520, size: 340 } };
@@ -72,6 +72,12 @@ const STAGE_MIN = 560;
 
 /** The narrowest stage that holds two views side by side (each about as wide as a laptop's one). */
 const TWO_VIEWS = 1040;
+
+/**
+ * A view's name on its chip: a 2D drawing by its short name, a 3D model as "3D · its name".
+ * @param {StageView} v
+ */
+const viewName = (v) => (is3d(v) ? t("view.in3d", { name: t(`view.${v}`) }) : t(`view.${v}`));
 
 /**
  * The views Weave opens with when no link names them: two where the stage holds them, else one.
@@ -486,22 +492,26 @@ export function createShell(store, root) {
    */
   function pane(i, v) {
     const host = el("div", { class: "pane-host" });
-    const chip = el("button", { type: "button", class: "chip view-chip", "aria-haspopup": "menu" }, [label("span", `view.${v}`), icon("keyboard_arrow_down")]);
-    chip.addEventListener("click", () =>
+    const chip = el("button", { type: "button", class: "chip view-chip", "aria-haspopup": "menu" }, [el("span", { class: "view-name" }), icon("keyboard_arrow_down")]);
+    follow((s) => [s.locale], () => (/** @type {HTMLElement} */ (chip.firstChild).textContent = viewName(v)));
+    // One flat list in two groups, the 2D drawings and the 3D models; a view on show in another
+    // pane says where, and choosing it swaps the two (js/app/arrange.js).
+    chip.addEventListener("click", () => {
+      const views = store.state.views;
       showMenu(
         chip,
-        STAGE_VIEWS.map((x) => ({
-          label: t(`view.${x}`),
-          checked: x === v,
-          divider: x === "u1" ? true : undefined,
-          run: () => {
-            const views = [...store.state.views];
-            views[i] = x;
-            act.setViews(store, views);
-          },
-        })),
-      ),
-    );
+        STAGE_VIEWS.map((x) => {
+          const at = views.indexOf(x);
+          const name = is3d(x) ? t(`view.${x}`) : t(`comp.${x}`);
+          return {
+            label: at >= 0 && at !== i ? `${name} · ${t(placeKey(at, views.length))}` : name,
+            checked: x === v,
+            divider: x === "section" ? t("view.group.2d") : x === "3d" ? t("view.group.3d") : undefined,
+            run: () => act.setViews(store, choose(store.state.views, i, x)),
+          };
+        }),
+      );
+    });
     const tools = el("div", { class: "pane-tools" }, mode === "desktop" ? [chip] : []);
     if (v === "section") tools.append(...sectionTools());
     /** @type {((unit: "machine" | UnitId) => void) | undefined} */
@@ -529,8 +539,7 @@ export function createShell(store, root) {
     /** @type {"machine" | UnitId} */
     let shown = UNIT_VIEWS[v].unit;
     const write = () => {
-      const code = Object.values(UNIT_VIEWS).find((u) => u.unit === shown)?.code;
-      title.textContent = code ? `${code} · ${t(`unit.${shown}`)}` : t(`unit.${shown}`);
+      title.textContent = t(`unit.${shown}`);
       idea.textContent = t(`unit.${shown}.idea`);
     };
     follow((s) => [s.locale], write);
@@ -544,7 +553,8 @@ export function createShell(store, root) {
 
   /** The section's tools: how close it looks, and which cross-row it cuts. */
   function sectionTools() {
-    const zoom = el("div", { class: "chip-row", role: "group" });
+    // how close the section looks: a zoom on the same drawing, so a tool of the view, not a view
+    const zoom = el("div", { class: "chip-row zoom", role: "group", "data-l10n-name": "section.zoom", "data-l10n-tip": "section.zoom" }, [el("span", { class: "chip zoom-mark", "aria-hidden": "true" }, [icon("zoom_in")])]);
     for (const z of /** @type {const} */ (["whole", "needles", "crooks"])) {
       const b = label("button", `section.${z}`, { type: "button", class: "chip" });
       b.addEventListener("click", () => act.setSectionView(store, z));
@@ -554,7 +564,7 @@ export function createShell(store, root) {
     cross.addEventListener("change", () => act.setCrossRow(store, Number(cross.value)));
     const crossChip = el("label", { class: "chip" }, [cross]);
     follow((s) => [s.sectionView, s.looms[s.current].crossRow, s.looms[s.current].rev, s.locale], () => {
-      for (const b of zoom.children) b.setAttribute("aria-pressed", String(/** @type {HTMLElement} */ (b).dataset.l10n === `section.${store.state.sectionView}`));
+      for (const b of zoom.querySelectorAll("button")) b.setAttribute("aria-pressed", String(/** @type {HTMLElement} */ (b).dataset.l10n === `section.${store.state.sectionView}`));
       const n = ls().loom.deck.hooks / 8;
       cross.replaceChildren(...[...Array(n).keys()].map((c) => new Option(t("section.crossRow", { row: c + 1, from: c * 8 + 1, to: c * 8 + 8 }), String(c))));
       cross.value = String(ls().crossRow);
@@ -571,7 +581,7 @@ export function createShell(store, root) {
       const b = el("button", { type: "button", class: "chip" }, [icon(name)]);
       b.dataset.l10nTip = tip;
       b.dataset.n = String(n);
-      b.addEventListener("click", () => act.setViews(store, store.state.views.length === n ? store.state.views : SPLIT[n]));
+      b.addEventListener("click", () => act.setViews(store, arrange(store.state.views, n)));
       arrangement.appendChild(b);
     }
     const chipFollow = el("button", { type: "button", class: "chip follow-chip" });
@@ -600,10 +610,14 @@ export function createShell(store, root) {
     const st = el("main", { class: "stage" });
     const chips = el("div", { class: "view-chips", role: "group", "data-l10n-name": "stage.views" });
     for (const v of STAGE_VIEWS.filter((x) => !x.startsWith("u"))) {
-      const b = label("button", `view.${v}`, { type: "button", class: "chip" });
+      const b = el("button", { type: "button", class: "chip" });
+      b.dataset.view = v;
       b.addEventListener("click", () => act.setViews(store, [v]));
       chips.appendChild(b);
     }
+    follow((s) => [s.locale], () => {
+      for (const b of /** @type {HTMLElement[]} */ ([...chips.children])) b.textContent = viewName(/** @type {StageView} */ (b.dataset.view));
+    });
     const one = el("div", { class: "panes", style: "display: contents" });
     let mine = { placed: /** @type {Placed[]} */ ([]), unwatch: /** @type {(() => void)[]} */ ([]) };
     follow((s) => [s.views[0]], () => {
@@ -611,7 +625,7 @@ export function createShell(store, root) {
       const made = remake(mine, () => [pane(0, v)]);
       one.replaceChildren(...made.nodes);
       mine = made.mine;
-      for (const b of chips.children) b.setAttribute("aria-pressed", String(/** @type {HTMLElement} */ (b).dataset.l10n === `view.${v}`));
+      for (const b of chips.children) b.setAttribute("aria-pressed", String(/** @type {HTMLElement} */ (b).dataset.view === v));
       relabel();
     });
     st.append(chips, one);

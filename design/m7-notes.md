@@ -1,6 +1,6 @@
 # M7 notes: the tutorial, parts 1 to 3
 
-- **Status:** built 2026-10-27, on the branch `m7-tutorial`. The last milestone of release 0.1.0 ([public-app.md](public-app.md) §4). The spec below passes in `pnpm test` (T-1 to T-4) and on the app with `?selftest` (L-1 to L-7), with M6's checks.
+- **Status:** built 2026-10-27, on the branch `m7-tutorial`. The last milestone of release 0.1.0 ([public-app.md](public-app.md) §4). The spec below passes in `pnpm test` (T-1 to T-4) and on the app with `?selftest` (L-1 to L-9), with M6's checks.
 - **Page:** [`index.html`](../index.html): the Learn workspace, which M6 left with a sample step.
 - **The steps:** [`js/teach/tutorial.js`](../js/teach/tutorial.js); their texts in [`js/l10n/en.js`](../js/l10n/en.js) (`tut.*`, `learn.*`, `img.*`) and the nine other languages.
 
@@ -55,6 +55,12 @@
 9. **The history follows the research, not the legends** (research REPORT §6, notes-history-and-machines.md §6): no patent of 1801, no card count for the portrait ("many thousands"), "in about 1804–1805", Bouchon, Falcon and Vaucanson before Jacquard, Lovelace's own words. T-3 keeps the English that way. Two changes from public-app.md's plan: part 1 has four screens, not two or three (the portrait earns its own); and the closed chain is not called "the first loop in the history of programming", since Falcon's cards of 1728 were already an endless chain and barrel organs repeated long before: the step says a loop repeats instructions without writing them out again, and credits Falcon.
 10. **The pictures are the research's freely licensed ones,** scaled and re-encoded (720 px on the long side, for a panel about 320 px wide on a screen of twice its pixels); each step shows its credit under its picture, REUSE.toml records each file's licence, and About names the licences.
 
+## After the review (2026-10-27, on `release/v0.1.0`)
+
+11. **A newcomer opens on Learn,** at the first step with the whole loom in 3D; after that the app opens on the workspace last used on the device (local storage), so a learner who went on to Weave opens there, and one who went back to the tutorial opens at their step (design/ui-layout.md §3). The author's first idea was a flag set once Weave is visited; the last workspace used covers that and also the learner who returns to finish the tutorial.
+12. **The step stacks from the top:** the card, Back and Next right under it, the cards with the height left. Pinned to the panel's foot, Back and Next sat far from the text on a tall window, and the cards were squeezed.
+13. **The view menu, flat in two groups,** without the units' codes; **no view twice** (choosing one on show swaps the panes), **one 3D model in the four-view grid**, and going to two or four keeps the views on show; the four-view grid is the two-view pair on top, the front and side below (design/ui-layout.md §4). The two views on a wide window stay as they were: chosen once, when Weave opens.
+
 ## Acceptance spec
 
 | ID | Statement | Kind |
@@ -70,7 +76,9 @@
 | L-5 | The parts a step points at glow in the section, their labels in amber; nothing glows in Weave. | page |
 | L-6 | In every language every step speaks it, with no English left. | page |
 | L-7 | On a phone, Learn opens the sheet on the guide, at the step, with the controls under the stage. | page |
-| L-8 | M6's checks and the prototypes' still pass (`pnpm selftest`). | page |
+| L-8 | The view menu is one list in two groups, the 2D drawings and the 3D models, with no unit codes; a view on show elsewhere says where, and choosing it swaps the two; four views keep one 3D model; going to two keeps the view on show. | page |
+| L-9 | Without a link a newcomer opens on Learn, with the whole loom in 3D; after Weave, the app opens on Weave; a link decides for itself. | page |
+| L-10 | M6's checks and the prototypes' still pass (`pnpm selftest`). | page |
 
 ### Results (2026-10-27)
 
@@ -87,7 +95,9 @@
 | L-5 | how-section: the cylinder, needles, hooks and knives glowing, the labels amber; nothing glowing in Weave |
 | L-6 | 9 languages × 21 steps: no English left |
 | L-7 | 390 × 844: the sheet on the guide, at weave-plain, the controls under the stage |
-| L-8 | `pnpm selftest`: all 8 pages pass (the app's 16 checks: M6's 9 and M7's 7; the developer pages' 120) |
+| L-8 | In four views, the section chosen from the bottom left (marked "shown top left") swapped with the front; a unit chosen bottom right replaced the whole loom; two views from the selector kept it, beside the section |
+| L-9 | A newcomer: Learn, "3D · Whole loom"; after Weave: Weave; a Weave link: Weave |
+| L-10 | `pnpm selftest`: all 8 pages pass (the app's 18 checks: M6's 9 and M7's 9; the developer pages' 120) |
 
 ### Translations to check by hand
 

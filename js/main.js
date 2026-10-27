@@ -1,7 +1,9 @@
 // The main app (design/public-app.md): one store, the language, the frame (js/app/shell.js),
-// and a link, if the page was opened with one (design/links.md); with ?selftest, its checks.
+// and a link, if the page was opened with one (design/links.md), or else the workspace last
+// used (a newcomer's: Learn); with ?selftest, its checks.
 
 import { chooseLanguage, initialLanguage } from "./app/language.js";
+import { openLearn, openingWorkspace, watchWorkspace } from "./app/learn.js";
 import { openLink } from "./app/links.js";
 import { appState, setViews } from "./app/looms.js";
 import { createShell, openingViews } from "./app/shell.js";
@@ -10,7 +12,11 @@ import { Store } from "./app/store.js";
 const store = new Store(appState());
 await chooseLanguage(store, initialLanguage());
 setViews(store, openingViews());
-await openLink(store, location.hash);
+// Without a link, the app opens where it was left on this device; a newcomer, on Learn. A link
+// that cannot be read opens Weave, whose status line says why.
+const linked = await openLink(store, location.hash);
+if (!linked && location.hash.length <= 1 && openingWorkspace() === "learn") openLearn(store);
+watchWorkspace(store);
 const shell = createShell(store, /** @type {HTMLElement} */ (document.getElementById("app")));
 window.addEventListener("hashchange", () => openLink(store, location.hash));
 

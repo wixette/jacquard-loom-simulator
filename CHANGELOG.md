@@ -4,6 +4,12 @@ What changed in each release. Versions follow `package.json` and are tagged `vX.
 
 ## Unreleased
 
+**After M7's review (2026-10-27)**
+- A newcomer opens on Learn, with the whole loom in 3D; after that the app opens on the workspace last used.
+- The tutorial's step stacks from the top: Back and Next right under the text, the cards below with the room left.
+- The view menu in two groups, 2D drawings and 3D models, with the units by name (no "U1"…"U5"); a view on show is never shown twice (choosing it swaps the panes), the four-view grid holds one 3D model, and going to two or four views keeps those on show.
+- The link format agreed, with tests for every field and value.
+
 **M7, the tutorial, parts 1 to 3 (2026-10-27)** ([notes](design/m7-notes.md))
 - Learn: 21 steps in three parts. The story (the draw loom; Bouchon, Falcon and Vaucanson; Jacquard; the woven portrait), with four historical pictures and their credits; how it works (the loom in 3D, the head cut through, a light card and a heavy lift, one card one row, the chain as a program and a loop, what the loom is not); weaving by hand (punch a card, plain weave, twill, satin and why stepping by two fails, the tie-up's repeats, a picture woven bottom-up).
 - Each step on one card, with its part and place, the list of all the steps, a question to answer before weaving, and a task checked on the loom; its task line works the real controls, which glow; what the step does not use is greyed and says why.

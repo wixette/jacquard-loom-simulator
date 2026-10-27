@@ -153,14 +153,14 @@ export function frontView(store, o = {}) {
   };
 }
 
-/** The unit each 3D view of the stage shows (js/sim/link.js, STAGE_VIEWS), with its code. */
+/** The unit each 3D view of the stage shows (js/sim/link.js, STAGE_VIEWS). */
 export const UNIT_VIEWS = /** @type {const} */ ({
-  "3d": { unit: "machine", code: "" },
-  u1: { unit: "selector", code: "U1" },
-  u2: { unit: "cylinder", code: "U2" },
-  u3: { unit: "griffe", code: "U3" },
-  u4: { unit: "harness", code: "U4" },
-  u5: { unit: "shed", code: "U5" },
+  "3d": { unit: "machine" },
+  u1: { unit: "selector" },
+  u2: { unit: "cylinder" },
+  u3: { unit: "griffe" },
+  u4: { unit: "harness" },
+  u5: { unit: "shed" },
 });
 
 /**

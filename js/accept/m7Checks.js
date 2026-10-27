@@ -1,8 +1,8 @@
 // M7's checks on the app (design/m7-notes.md), run by index.html?selftest after M6's: L-1 the
 // tutorial walked step by step, L-2 a task line works the real control and a step locks what it
 // does not use, L-3 links to steps, L-4 the place kept, L-5 the parts a step points at, L-6
-// the tutorial in every language, L-7 the guide on a phone. T-1 to T-4 need no page
-// (tests/teach/tutorial.test.js).
+// the tutorial in every language, L-7 the guide on a phone, L-8 the view menu and its rules,
+// L-9 the workspace the app opens on. T-1 to T-4 need no page (tests/teach/tutorial.test.js).
 
 import { goTo, leaveLearn, openLearn } from "../app/learn.js";
 import { linkOf, openLink } from "../app/links.js";
@@ -10,6 +10,7 @@ import * as act from "../app/looms.js";
 import { LOCALES, t } from "../l10n/l10n.js";
 import { encodeLink } from "../sim/link.js";
 import { loomAt, shownAt, stepIndex, STEPS } from "../teach/tutorial.js";
+import { is3d } from "../app/arrange.js";
 import { result } from "./harness.js";
 import { englishOnly } from "./m5Checks.js";
 /** @import { AppPage } from "./m6Checks.js" */
@@ -20,6 +21,8 @@ const frames = () => new Promise((r) => requestAnimationFrame(() => requestAnima
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 /** @param {string} sel */
 const $ = (sel) => /** @type {HTMLElement | null} */ (document.querySelector(sel));
+/** @param {string} sel */
+const $$ = (sel) => /** @type {HTMLElement[]} */ ([...document.querySelectorAll(sel)]);
 /** @param {import("../l10n/l10n.js").Msg} m */
 const keyOf = (m) => ("key" in m ? m.key : null);
 const next = () => /** @type {HTMLButtonElement} */ ($(".step-nav .btn.filled"));
@@ -33,7 +36,7 @@ const waiting = () => next().getAttribute("aria-disabled") === "true";
 export async function runM7Checks(page) {
   const { store } = page;
   const out = [];
-  for (const check of [walk, tasks, links, place, glow, languages, phone]) {
+  for (const check of [walk, tasks, links, place, glow, languages, phone, viewMenu, opening]) {
     openLearn(store, STEPS[0].id);
     await frames();
     out.push(await check(page));
@@ -256,4 +259,82 @@ async function phone() {
   if (!doc.querySelector(".under-stage .player")) bad.push("no controls under the stage");
   f.remove();
   return result("L-7", "On a phone, Learn opens the sheet on the guide, at the step, with the controls under the stage", bad.length === 0, bad.slice(0, 4).join("; ") || "390 × 844: the guide tab, weave-plain");
+}
+
+/**
+ * L-8: the view menu is one flat list in two groups, the 2D drawings and the 3D models, with no
+ * unit codes; a view on show elsewhere says where, and choosing it swaps the two panes; the
+ * four-view grid keeps one 3D model; two and four keep the views on show.
+ * @param {AppPage} page
+ * @returns {Promise<CheckResult>}
+ */
+async function viewMenu({ store }) {
+  /** @type {string[]} */
+  const bad = [];
+  leaveLearn(store);
+  act.setViews(store, ["section", "3d", "front", "side"]);
+  await frames();
+  /** @type {HTMLElement} */ ($$(".stage .view-chip")[2]).click();
+  const menu = $(".menu");
+  const heads = [...(menu?.querySelectorAll(".menu-divider span") ?? [])].map((e) => e.textContent);
+  if (heads.join("|") !== [t("view.group.2d"), t("view.group.3d")].join("|")) bad.push(`groups: ${heads.join(", ")}`);
+  const items = [...(menu?.querySelectorAll("[role=menuitemradio]") ?? [])].map((e) => e.textContent ?? "");
+  if (items.length !== 9) bad.push(`${items.length} items`);
+  if (items.some((x) => /\bU[1-5]\b/.test(x))) bad.push("a unit code shows");
+  if (!items[0].includes(t("view.at.topLeft"))) bad.push(`the section does not say where it is: ${items[0]}`);
+  /** @type {HTMLElement} */ (menu?.querySelectorAll("[role=menuitemradio]")[0]).click();
+  await frames();
+  if (store.state.views.join() !== "front,3d,section,side") bad.push(`choosing the section gave ${store.state.views.join()}`);
+  /** @type {HTMLElement} */ ($$(".stage .view-chip")[3]).click();
+  /** @type {HTMLElement} */ ([...document.querySelectorAll(".menu [role=menuitemradio]")].find((e) => e.textContent === t("view.u1"))).click();
+  await frames();
+  if (store.state.views.filter(is3d).length !== 1 || store.state.views[3] !== "u1") bad.push(`a unit in four gave ${store.state.views.join()}`);
+  act.setViews(store, ["u2"]);
+  await frames();
+  /** @type {HTMLElement} */ ($('.stage-tools [data-n="2"]')).click();
+  await frames();
+  if (store.state.views.join() !== "u2,section") bad.push(`two from u2 gave ${store.state.views.join()}`);
+  if ($(".stage .view-chip")?.textContent !== t("view.in3d", { name: t("view.u2") })) bad.push(`the chip reads ${$(".stage .view-chip")?.textContent}`);
+  act.setViews(store, ["section"]);
+  return result("L-8", "The view menu: two groups, no unit codes, a view on show says where and swaps; four keeps one 3D model; two keeps the view on show", bad.length === 0, bad.slice(0, 4).join("; ") || "the section swapped from the top left; a unit replaced the whole loom; u2 kept going to two");
+}
+
+/**
+ * L-9: without a link a newcomer opens on Learn, with the whole loom in 3D; once Weave is the
+ * last workspace used, the app opens on Weave; a link decides for itself.
+ * @returns {Promise<CheckResult>}
+ */
+async function opening() {
+  /** @type {string[]} */
+  const bad = [];
+  const kept = { ws: localStorage.getItem("jacquard.workspace"), tut: localStorage.getItem("jacquard.tutorial") };
+  /** @param {string} url @returns {Promise<{ ws: string; views: string }>} */
+  const open = async (url) => {
+    const f = document.createElement("iframe");
+    f.style.cssText = "position: fixed; left: 0; top: 0; width: 1366px; height: 768px; border: 0; visibility: hidden; z-index: -1";
+    f.src = url;
+    document.body.appendChild(f);
+    await new Promise((r) => f.addEventListener("load", r, { once: true }));
+    const doc = /** @type {Document} */ (f.contentDocument);
+    for (let k = 0; k < 50 && !doc.querySelector(".app .player"); k++) await sleep(100);
+    const app = /** @type {HTMLElement} */ (doc.querySelector(".app"));
+    const views = [...doc.querySelectorAll(".stage .view-chip .view-name")].map((e) => e.textContent).join(",");
+    f.remove();
+    return { ws: app.dataset.ws ?? "", views };
+  };
+  localStorage.removeItem("jacquard.workspace");
+  localStorage.removeItem("jacquard.tutorial");
+  const first = await open("index.html");
+  if (first.ws !== "learn" || first.views !== t("view.in3d", { name: t("view.3d") })) bad.push(`a newcomer opens on ${first.ws}, ${first.views}`);
+  localStorage.setItem("jacquard.workspace", "weave");
+  const again = await open("index.html");
+  if (again.ws !== "weave") bad.push(`after Weave the app opens on ${again.ws}`);
+  localStorage.setItem("jacquard.workspace", "learn");
+  const linked = await open("index.html#v=2&w=weave");
+  if (linked.ws !== "weave") bad.push(`a Weave link opens ${linked.ws}`);
+  for (const [k, v] of Object.entries({ "jacquard.workspace": kept.ws, "jacquard.tutorial": kept.tut })) {
+    if (v === null) localStorage.removeItem(k);
+    else localStorage.setItem(k, v);
+  }
+  return result("L-9", "A newcomer opens on Learn with the whole loom in 3D; after Weave, the app opens on Weave; a link decides for itself", bad.length === 0, bad.slice(0, 4).join("; ") || "newcomer: Learn, 3D; then Weave; a Weave link: Weave");
 }
