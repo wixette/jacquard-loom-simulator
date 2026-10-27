@@ -8,7 +8,7 @@
 
 | Part | Where | What it is |
 |---|---|---|
-| The frame | `js/app/shell.js`, `css/app.css` | The top bar (the workspaces, Share, the language, About); the cards on the left, the stage in the middle with time under it, the cloth on the right; on a phone, the stage, time under it, and a sheet with the rest. Rebuilt when the screen's kind or the workspace changes; relabelled when the language does |
+| The frame | `js/app/shell.js`, `css/app.css` | The top bar (the workspaces, Share, the language, About); the cards on the left, the stage in the middle with its caption under it, the cloth on the right, the player along the whole bottom; on a phone, the stage, time under it, and a sheet with the rest. Rebuilt when the screen's kind or the workspace changes; relabelled when the language does |
 | The stage | `js/app/shell.js` | One, two or four views, each named by its own chip; the section's zoom and cross-row beside it; a 3D view's ⓘ with its unit's idea; the arrangement at the top right; the thread followed at the bottom left. Two views where the stage holds them (1040 px and up) |
 | Time | `js/app/components/panels.js`, `css/components.css` | The caption (the status line), the six moments as a stepper, and the controls: reset, step back, play (the largest), step; where the loom is; the speed (6 to 60 picks a minute, 12 to start) and the sound switch |
 | The machine's settings | `js/app/shell.js`, `js/view2d/chainEditor.js` | The head and tie-up as a chip over the cards, showing their values; the colours as a palette over the cloth; the chain's end as a switch that laces it into a loop or opens it, beside the cards' loop button |
@@ -22,7 +22,7 @@
 
 ## Decisions
 
-1. **Time sits under the stage, not along the window's bottom.** The core controls are centred under what they move, and the panels run the full height. The first draft's full-width band put them in the window's corner, and its moments looked like buttons; the chain-as-timeline strip it held is left out of 0.1.0, as the chain and the stepper already show where the loom is.
+1. **The caption sits under the stage; the player runs along the window's whole bottom, centred on it.** The player drives the cards and the cloth as much as the stage, so its band spans all three; the caption explains the stage, and stays under it at a width a sentence reads well at. The first draft's full-width band put the controls in the window's corner, and its moments looked like buttons; the second put the player under the stage, where it looked like the stage's own and left the window's bottom ragged (reviewed after the merge, 2026-10-27). The chain-as-timeline strip is left out of 0.1.0, as the chain and the stepper already show where the loom is.
 2. **The moments are a stepper, a state, not buttons:** dots on a track, no fill, border or hover on their names, `aria-current="step"` on the moment reached. On a phone they are dots only: the caption above names the moment.
 3. **Play is the largest control; reset is as large as the steps,** and leads the cluster, as stop does on a player.
 4. **Every setting sits beside what it changes.** The top bar holds only the app's own; the head and tie-up are over the cards (a card has a hole for each hook), the colours over the cloth, the loop at the chain's end as well as in the cards' toolbar.
@@ -35,7 +35,7 @@
 
 | ID | Statement | Kind |
 |---|---|---|
-| S-1 | At a laptop's and a desktop's size, a tablet's, and a phone's upright and on its side, the frame has its parts, and the page neither scrolls nor reaches past the window's right edge. | page |
+| S-1 | At a laptop's and a desktop's size, a tablet's, and a phone's upright and on its side, the frame has its parts (on a desktop, the player along the window's whole bottom, its controls centred on it), and the page neither scrolls nor reaches past the window's right edge. | page |
 | S-2 | The top bar holds only the app's own controls (the workspaces, Share, the language, About); the chip over the cards shows the head and changes it; the palette over the cloth changes its colours; the chain's end laces and opens the chain, in step with the cards' loop button. | page |
 | S-3 | The transport's buttons act; play is the largest, reset as large as the steps; the six moments are a stepper with no control in it, the moment reached its current step. | page |
 | S-4 | Space plays and pauses, ← and → step, 1–4 choose the first view, F follows the part under the pointer and Esc stops; a field that takes keys keeps them. | page |
@@ -51,7 +51,7 @@
 
 | ID | Result |
 |---|---|
-| S-1 | 5 sizes: 1366 × 768 and 1920 × 1080 desktops, an 820 × 1180 tablet, a 390 × 844 phone and the same on its side: every part there, no scrolling, nothing past the right edge |
+| S-1 | 5 sizes: 1366 × 768 and 1920 × 1080 desktops (the player along the whole bottom, its controls centred on the window), an 820 × 1180 tablet, a 390 × 844 phone and the same on its side: every part there, no scrolling, nothing past the right edge |
 | S-2 | The top bar's controls: Share, the language, About; the head 16 → 32 → 16 from its chip; the warp from the palette; the chain laced and opened from its end, the loop button agreeing |
 | S-3 | Play 3,136 px², reset and the steps 1,936 px² each; six moments, no control among them; three steps mark the third moment |
 | S-4 | Space, ←, →, 1, 2, 3, F and Esc act; the speed slider keeps its arrows |
