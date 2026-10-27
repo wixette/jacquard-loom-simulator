@@ -13,6 +13,7 @@
 
 import { msg } from "../l10n/l10n.js";
 import { HOOK_COUNTS } from "./deck.js";
+import { PICTURE_SIZES } from "./picture.js";
 import { endCount, hookOfEnd } from "./tieup.js";
 /** @import { Msg } from "../l10n/l10n.js" */
 /** @import { Tie } from "./tieup.js" */
@@ -56,6 +57,12 @@ export const LONG_LINK = 2000;
  * @property {"front" | "back"} face
  * @property {boolean} bits
  * @property {StageView[]} views one, two or four
+ * @property {LinkPicture | null} picture Create's picture and how it is read, or null
+ */
+
+/**
+ * A picture in a link (Create): square, top row first, true = dark; and its reading.
+ * @typedef {{ rows: boolean[][]; mode: "direct" | "damask"; k: number; perRow: number }} LinkPicture
  */
 
 /** @type {AppLink} */
@@ -75,6 +82,7 @@ export const DEFAULT_LINK = {
   face: "front",
   bits: false,
   views: ["section"],
+  picture: null,
 };
 
 // ---- decks: x. (hex), b. (packed), z. (compressed) -----------------------------------------------
@@ -245,6 +253,15 @@ export async function encodeLink(link) {
   if (l.face !== d.face) q.set("face", l.face);
   if (l.bits) q.set("bits", "1");
   if (l.views.join() !== d.views.join()) q.set("view", l.views.join(","));
+  if (l.picture) {
+    // the picture as a deck of rows, each row a card as wide as the picture (0.2.0)
+    const n = l.picture.rows.length;
+    q.set("pw", String(n));
+    q.set("pic", await encodeDeck(l.picture.rows, n));
+    if (l.picture.mode !== "direct") q.set("rd", l.picture.mode);
+    if (l.picture.mode === "damask" && l.picture.k !== 4) q.set("k", String(l.picture.k));
+    if (l.picture.mode === "direct" && l.picture.perRow !== 1) q.set("pp", String(l.picture.perRow));
+  }
   // URLSearchParams writes "," as %2C; a link reads better with it as it is.
   return q.toString().replace(/%2C/g, ",");
 }
@@ -320,6 +337,22 @@ export async function decodeLink(fragment) {
     if (bits !== "0" && bits !== "1") return noBecause("link.value", { field: "bits", value: bits });
     l.bits = bits === "1";
   }
+
+  // A picture (Create, 0.2.0): its rows, as wide as they are many, and how it is read.
+  const pic = q.get("pic");
+  if (pic !== null) {
+    const n = int(q.get("pw"), 8, 32);
+    if (n === null || !(/** @type {readonly number[]} */ (PICTURE_SIZES)).includes(n)) return noBecause("link.pictureSize", { pw: q.get("pw") ?? "" });
+    const rows = await decodeDeck(pic, n);
+    if (!rows.ok) return no(rows.reason);
+    if (rows.cards.length !== n) return noBecause("link.pictureSquare", { n, rows: rows.cards.length });
+    const rd = q.get("rd") ?? "direct";
+    if (rd !== "direct" && rd !== "damask") return noBecause("link.value", { field: "rd", value: rd });
+    const k = q.has("k") ? int(q.get("k"), 2, 6) : 4;
+    const pp = q.has("pp") ? int(q.get("pp"), 1, 3) : 1;
+    if (k === null || pp === null) return noBecause("link.range");
+    l.picture = { rows: rows.cards, mode: rd, k, perRow: pp };
+  } else if (q.has("pw")) return noBecause("link.pictureOnly");
 
   // The loom.
   const c = q.get("c");

@@ -387,3 +387,36 @@ describe("Learn: a step, by its name (design/links.md, Learn)", () => {
     for (const name of frozen) assert.ok(stepIndex(name) >= 0, `${name} no longer opens a step: keep it as an alias`);
   });
 });
+
+describe("Create: a picture (design/links.md, Create; 0.2.0)", () => {
+  /** @param {string} rows @returns {boolean[][]} */
+  const pic = (rows) => rows.split("/").map(card);
+  it("a picture's rows, top first, as a deck as wide as it is, and its reading", async () => {
+    const rows = pic(["00011000", "00111100", "01011010", "10011001", "00011000", "00011000", "00011000", "00011000"].join("/"));
+    const l = await read("#v=2&w=create&pw=8&pic=x.18-3c-5a-99-18-18-18-18&rd=damask&k=3");
+    assert.equal(l.workspace, "create");
+    assert.deepEqual(l.picture, { rows, mode: "damask", k: 3, perRow: 1 });
+    assert.deepEqual((await read("#v=2&w=create&pw=8&pic=x.18-3c-5a-99-18-18-18-18&pp=2")).picture, { rows, mode: "direct", k: 4, perRow: 2 });
+  });
+  it("round-trips, with only what differs written", async () => {
+    const rows = [...Array(16)].map((_, y) => [...Array(16)].map((_, x) => (x * y) % 3 === 0));
+    for (const p of [
+      { rows, mode: /** @type {const} */ ("direct"), k: 4, perRow: 1 },
+      { rows, mode: /** @type {const} */ ("damask"), k: 2, perRow: 1 },
+      { rows, mode: /** @type {const} */ ("direct"), k: 4, perRow: 3 },
+    ]) {
+      const fragment = await encodeLink({ workspace: "create", picture: p, views: ["cloth"] });
+      assert.deepEqual((await read(fragment)).picture, p);
+    }
+    assert.doesNotMatch(await encodeLink({ workspace: "create", picture: { rows, mode: "direct", k: 4, perRow: 1 } }), /rd=|k=|pp=/);
+  });
+  it("a picture that is not one of the sizes, not square, or a width with no picture, is refused", async () => {
+    for (const f of ["#v=2&w=create&pw=12&pic=x.fff", "#v=2&w=create&pw=8&pic=x.ff-ff", "#v=2&w=create&pw=8", "#v=2&w=create&pw=8&pic=x.18-3c-5a-99-18-18-18-18&rd=satin", "#v=2&w=create&pw=8&pic=x.18-3c-5a-99-18-18-18-18&k=7", "#v=2&w=create&pw=8&pic=x.18-3c-5a-99-18-18-18-18&pp=4"]) {
+      const r = await decodeLink(f);
+      assert.ok(!r.ok, f);
+    }
+  });
+  it("the cloth, large, is a view a link can name", async () => {
+    assert.deepEqual((await read("#v=2&view=cloth,section")).views, ["cloth", "section"]);
+  });
+});

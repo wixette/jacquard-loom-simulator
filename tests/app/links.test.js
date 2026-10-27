@@ -89,3 +89,22 @@ describe("a link that cannot be read", () => {
     assert.equal(b.state.looms.mine.status.warn, false);
   });
 });
+
+describe("a Create link (0.2.0)", () => {
+  it("is the picture and how it is read, and opens it on Create's loom, the learner's untouched", async () => {
+    const a = store();
+    const { presetPicture } = await import("../../js/sim/picture.js");
+    act.setPicture(a, { rows: presetPicture("letter"), mode: "damask", k: 3 }, "create");
+    act.setWorkspace(a, "create");
+    const fragment = await encodeLink(linkOf(a));
+    const b = store();
+    const mine = b.state.looms.mine.loom;
+    assert.equal(await openLink(b, `#${fragment}`), true);
+    assert.equal(b.state.workspace, "create");
+    assert.deepEqual(b.state.pictures.create.rows, presetPicture("letter"));
+    assert.equal(b.state.pictures.create.mode, "damask");
+    assert.equal(b.state.looms.create.loom.deck.cards.length, 48);
+    assert.deepEqual(b.state.views, ["cloth"]);
+    assert.equal(b.state.looms.mine.loom, mine);
+  });
+});

@@ -189,6 +189,9 @@ export default {
   "link.deck": "its cards (c) cannot be read",
   "link.tooMany": "it has {n} cards, and a chain holds at most {max}",
   "link.range": "a number in it is out of range",
+  "link.pictureSize": "a picture is 8, 16, 24 or 32 squares wide, not \"{pw}\"",
+  "link.pictureSquare": "a picture {n} squares wide should have {n} rows, not {rows}",
+  "link.pictureOnly": "it gives a picture's width (pw) but no picture (pic)",
   "link.follow": "the thread it follows does not hold together (f, fe and fp)",
 
   // ---- the loom in 3D ---------------------------------------------------------------------------
