@@ -7,10 +7,12 @@
 // The cloth reads back as the text (decodeCloth), which is how the checks know the program
 // woven is the name typed.
 
+import { msg } from "../l10n/l10n.js";
 import { findFloats, readDamask, readDirect } from "../sim/design.js";
 import { UNSCII_16 } from "./unscii16.js";
 /** @import { Deck } from "../sim/deck.js" */
 /** @import { Picture } from "../sim/design.js" */
+/** @import { Msg } from "../l10n/l10n.js" */
 
 /** A glyph's size, in pixels. */
 export const GLYPH_W = 8;
@@ -45,17 +47,18 @@ export function glyph(ch) {
 /**
  * The text as lines the game can weave, or why it cannot.
  * @param {string} text
- * @returns {{ ok: true, lines: string[] } | { ok: false, reason: string }}
+ * @returns {{ ok: true, lines: string[] } | { ok: false, reason: string, why: Msg }}
+ *   reason: in English (the prototype's page); why: the same as a message (the app's)
  */
 export function checkText(text) {
   const lines = text.replace(/\r/g, "").split("\n").map((l) => l.replace(/\s+$/, ""));
   while (lines.length && lines[lines.length - 1] === "") lines.pop();
-  if (lines.length === 0 || lines.every((l) => l === "")) return { ok: false, reason: "Type a name to weave." };
+  if (lines.length === 0 || lines.every((l) => l === "")) return { ok: false, reason: "Type a name to weave.", why: msg("name.empty") };
   const bad = [...lines.join("")].find((c) => c.charCodeAt(0) < 32 || c.charCodeAt(0) > 126);
-  if (bad) return { ok: false, reason: `"${bad}" is not in the font: use the letters, digits and signs of plain ASCII.` };
-  if (lines.length > MAX_LINES) return { ok: false, reason: `At most ${MAX_LINES} lines.` };
+  if (bad) return { ok: false, reason: `"${bad}" is not in the font: use the letters, digits and signs of plain ASCII.`, why: msg("name.notInFont", { ch: bad }) };
+  if (lines.length > MAX_LINES) return { ok: false, reason: `At most ${MAX_LINES} lines.`, why: msg("name.tooManyLines", { most: MAX_LINES }) };
   const long = lines.find((l) => l.length > MAX_CHARS);
-  if (long) return { ok: false, reason: `"${long}" is ${long.length} characters: at most ${MAX_CHARS} a line.` };
+  if (long) return { ok: false, reason: `"${long}" is ${long.length} characters: at most ${MAX_CHARS} a line.`, why: msg("name.tooLong", { line: long, most: MAX_CHARS }, long.length) };
   return { ok: true, lines };
 }
 
@@ -92,7 +95,7 @@ export function textPicture(lines) {
  * The cards that weave the text.
  * @param {string} text
  * @param {Mode} mode
- * @returns {{ ok: true, plan: NamePlan } | { ok: false, reason: string }}
+ * @returns {{ ok: true, plan: NamePlan } | { ok: false, reason: string, why: Msg }}
  */
 export function planName(text, mode) {
   const t = checkText(text);
@@ -102,9 +105,9 @@ export function planName(text, mode) {
   const width = picture[0].length * k;
   const hooks = Math.ceil(width / 8) * 8;
   const limit = mode === "damask" ? REFERENCE_HOOKS : DIRECT_HOOKS_MAX;
-  if (hooks > limit) return { ok: false, reason: `That needs ${hooks} hooks; the head has ${limit}.` };
+  if (hooks > limit) return { ok: false, reason: `That needs ${hooks} hooks; the head has ${limit}.`, why: msg("name.tooWide", { hooks, most: limit }) };
   const read = mode === "damask" ? readDamask(picture, { hooks, k }) : readDirect(picture, { hooks });
-  if (!read.ok) return read;
+  if (!read.ok) return { ...read, why: msg("name.tooWide", { hooks, most: limit }) };
   const { cards } = read.reading;
   const f = findFloats(cards.map((c) => c.slice(0, width)));
   const n = t.lines.join("").replace(/ /g, "").length;

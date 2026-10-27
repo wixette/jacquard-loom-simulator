@@ -321,3 +321,41 @@ dialog::backdrop { background: var(--md-scrim); }
 .weave-it-row .btn { width: 100%; justify-content: center; gap: 6px; }
 /* the cloth as a view on the stage: centred, as large as the pane holds it */
 .cloth-box.large { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; padding: 56px 12px 12px; overflow: auto; }
+
+/* ---- Play: the games (js/app/components/games.js) ------------------------------------------- */
+.games-slot { flex: 1 1 auto; min-height: 0; overflow-y: auto; }
+.games-box { display: flex; flex-direction: column; min-height: 100%; }
+.game-tabs { flex: none; display: flex; padding: 0 4px; border-bottom: 1px solid var(--md-outline-variant); }
+.game-tabs .tab { flex: 1 1 0; padding: 10px 4px; font-size: 12.5px; white-space: nowrap; }
+.game-body { display: flex; flex-direction: column; gap: 10px; padding: 12px 14px 16px; }
+.game-title { margin: 0; font-size: 16px; }
+.game-text { margin: 0; font-size: 13px; color: var(--md-on-surface-variant); user-select: text; -webkit-user-select: text; }
+.game-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.game-label { font-size: 12px; color: var(--md-on-surface-variant); }
+.game-input { width: 100%; padding: 8px 10px; border: 1px solid var(--md-outline-variant); border-radius: var(--radius-s); background: var(--md-surface-high); color: var(--md-on-surface); font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: 15px; resize: vertical; }
+.game-input:focus { outline: 2px solid var(--md-primary); outline-offset: -1px; }
+.game-row .game-input { flex: 1; width: auto; }
+.game-result { margin: 0; font-size: 13.5px; font-weight: 600; }
+.game-result.right { color: var(--lift); }
+.game-result.wrong { color: var(--attention); }
+.game-result:empty { display: none; }
+.game-score { margin: 0; font-size: 12px; color: var(--md-on-surface-variant); }
+.byte-rows { border-collapse: collapse; font-size: 12.5px; }
+.byte-rows th { font-weight: 600; color: var(--md-on-surface-variant); text-align: left; padding: 2px 10px 4px 0; }
+.byte-rows td { padding: 1px 10px 1px 0; font-variant-numeric: tabular-nums; }
+.byte-rows td.bits { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; letter-spacing: 0.08em; }
+.guess-cards { display: flex; flex-direction: column; gap: 3px; }
+.guess-card { display: flex; align-items: center; gap: 8px; padding: 2px 8px; border-radius: 4px; background: var(--paste-dim); color: var(--paste-ink); font-size: 14px; }
+.guess-card .num { width: 14px; font-size: 11px; font-weight: 650; }
+.guess-card .holes { letter-spacing: 0.15em; }
+.guess-choices { display: flex; gap: 8px; flex-wrap: wrap; }
+.guess-choice { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 6px; border: 2px solid var(--md-outline-variant); border-radius: var(--radius-s); background: var(--md-surface-high); color: var(--md-on-surface); font-size: 12px; cursor: pointer; }
+.guess-choice:hover { border-color: var(--md-outline); }
+.guess-choice.right { border-color: var(--lift); }
+.guess-choice.wrong { border-color: var(--attention); }
+.guess-choice[aria-disabled="true"] { cursor: default; }
+.drawboy-figure { margin: 0; display: flex; align-items: center; gap: 10px; font-size: 12px; color: var(--md-on-surface-variant); }
+.cords { display: grid; grid-template-columns: repeat(8, 1fr); gap: 4px; }
+.cord { height: 52px; border: 1px solid var(--md-outline-variant); border-radius: 6px; background: var(--md-surface-high); color: var(--md-on-surface); font-weight: 650; cursor: pointer; }
+.cord[aria-pressed="true"] { background: var(--lift); color: var(--md-surface); border-color: transparent; transform: translateY(-6px); }
+.machine-slot { flex: 1 1 auto; min-height: 0; display: flex; }

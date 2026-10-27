@@ -7,6 +7,7 @@
 import { say, t } from "../../l10n/l10n.js";
 import { endsPart, opensPart, placeInPart, STEPS, targetCloth } from "../../teach/tutorial.js";
 import { el, icon, setTip, showMenu } from "../../ui/components.js";
+import { clothThumb } from "../../view2d/clothThumb.js";
 import { answer, goTo, stepDone } from "../learn.js";
 /** @import { AppStore, AppState } from "../looms.js" */
 /** @import { Component } from "./component.js" */
@@ -41,23 +42,7 @@ const params = (step) => Object.fromEntries(Object.entries(step.params ?? {}).ma
  * @param {{ warp: string; weft: string }} c
  */
 function targetFigure(target, c) {
-  const cloth = targetCloth(target);
-  const ends = cloth[0]?.length ?? 8;
-  const px = Math.max(6, Math.min(14, Math.floor(240 / ends)));
-  const canvas = el("canvas", { class: "target-cloth", role: "img", "aria-label": t("learn.target") });
-  const dpr = window.devicePixelRatio || 1;
-  canvas.width = ends * px * dpr;
-  canvas.height = cloth.length * px * dpr;
-  canvas.style.width = `${ends * px}px`;
-  canvas.style.height = `${cloth.length * px}px`;
-  const g = /** @type {CanvasRenderingContext2D} */ (canvas.getContext("2d"));
-  g.scale(dpr, dpr);
-  cloth.forEach((row, p) =>
-    row.forEach((up, e) => {
-      g.fillStyle = up ? c.warp : c.weft;
-      g.fillRect(e * px, (cloth.length - 1 - p) * px, px - 1, px - 1);
-    }),
-  );
+  const canvas = clothThumb(targetCloth(target), { warp: c.warp, weft: c.weft, width: 240, label: t("learn.target"), cls: "target-cloth" });
   return el("figure", { class: "step-target" }, [canvas, el("figcaption", { text: t("learn.target") })]);
 }
 

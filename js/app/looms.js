@@ -9,6 +9,7 @@ import { Loom, STOPS } from "../sim/loom.js";
 import { endCount, hookOfEnd, STRAIGHT, tieLabel } from "../sim/tieup.js";
 import { followCell } from "../sim/trace.js";
 import { describeReading, readPicture, startPicture } from "../sim/picture.js";
+import { startPlay } from "./playState.js";
 import { allowedAt } from "../teach/tutorial.js";
 import { Store } from "./store.js";
 /** @import { Locale, Msg } from "../l10n/l10n.js" */
@@ -21,7 +22,7 @@ import { Store } from "./store.js";
 /** @typedef {"mine" | "tutorial" | "create" | "game"} LoomId */
 /** @typedef {"whole" | "needles" | "crooks"} SectionView */
 /** @typedef {"front" | "back"} Face */
-/** @typedef {"learn" | "weave" | "create"} Workspace the workspaces so far (Play comes in M9) */
+/** @typedef {"learn" | "weave" | "create" | "play"} Workspace */
 /** @typedef {import("../sim/link.js").StageView} StageView */
 
 /**
@@ -53,6 +54,7 @@ import { Store } from "./store.js";
  * @property {Partial<Record<Workspace, StageView[]>>} viewsBy each workspace's views, kept while another is on
  * @property {LearnState} learn where the tutorial is
  * @property {Record<PictureLoom, PictureSpec>} pictures the picture each picture loom is woven from
+ * @property {import("./playState.js").PlayState} play the games' own state, the game loom's cards made from it
  */
 
 /** The looms a picture is read onto: Create's, and the tutorial's in its picture steps. @typedef {"create" | "tutorial"} PictureLoom */
@@ -126,6 +128,7 @@ export function appState(o = {}) {
     viewsBy: {},
     learn: { step: 0, answers: {}, done: [] },
     pictures: { create: startPicture(), tutorial: startPicture() },
+    play: startPlay(),
     ...o,
   };
 }
@@ -178,9 +181,10 @@ const cur = (store) => store.state.current;
  * @param {Control} control
  */
 function locked(store, id, control) {
-  // Create's cards are read from its picture: they change with it, and only their colours by hand
-  if (id === "create" && control !== "colours" && control !== "picture") {
-    say(store, msg("pic.locked"), true, id);
+  // Create's cards are read from its picture, a game's made by the game: they change with it,
+  // and only their colours by hand
+  if ((id === "create" || id === "game") && control !== "colours" && control !== "picture") {
+    say(store, msg(id === "create" ? "pic.locked" : "play.locked"), true, id);
     return true;
   }
   if (id !== "tutorial" || store.state.workspace !== "learn" || allowedAt(store.state.learn.step).includes(control)) return false;
@@ -226,8 +230,8 @@ export function setWorkspace(store, w) {
   const s = store.state;
   if (w === s.workspace) return;
   // each workspace keeps its own views: Create opens on the cloth, large, the first time
-  const views = s.viewsBy[w] ?? (w === "create" ? /** @type {StageView[]} */ (["cloth"]) : s.views);
-  store.set({ workspace: w, current: /** @type {const} */ ({ learn: "tutorial", weave: "mine", create: "create" })[w], viewsBy: { ...s.viewsBy, [s.workspace]: s.views }, views });
+  const views = s.viewsBy[w] ?? (w === "create" || w === "play" ? /** @type {StageView[]} */ (["cloth"]) : s.views);
+  store.set({ workspace: w, current: /** @type {const} */ ({ learn: "tutorial", weave: "mine", create: "create", play: "game" })[w], viewsBy: { ...s.viewsBy, [s.workspace]: s.views }, views });
 }
 
 /**

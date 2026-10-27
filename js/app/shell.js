@@ -26,6 +26,8 @@ import { chooseLanguage } from "./language.js";
 import { leaveLearn, openLearn, watchDone } from "./learn.js";
 import { openCreate, watchPicture } from "./create.js";
 import { picturePanel } from "./components/picture.js";
+import { gamesPanel } from "./components/games.js";
+import { openPlay } from "./play.js";
 import { guidePanel } from "./components/guide.js";
 import { allowedAt, shownAt, STEPS } from "../teach/tutorial.js";
 import { arrange, choose, is3d, placeKey, SPLIT } from "./arrange.js";
@@ -53,7 +55,7 @@ export function modeOf() {
 const MENU_VIEWS = /** @type {const} */ (["section", "side", "front", "cloth", "3d", "u1", "u2", "u3", "u4", "u5"]);
 
 /** The workspaces of this release, in the order the bar shows them. */
-const WORKSPACES = /** @type {const} */ (["learn", "weave", "create"]);
+const WORKSPACES = /** @type {const} */ (["learn", "weave", "create", "play"]);
 
 /**
  * A view's component.
@@ -449,6 +451,7 @@ export function createShell(store, root) {
     if (w === store.state.workspace) return;
     if (w === "learn") openLearn(store);
     else if (w === "create") openCreate(store);
+    else if (w === "play") openPlay(store);
     else leaveLearn(store);
   }
 
@@ -468,7 +471,7 @@ export function createShell(store, root) {
   /** Grey the controls the step on show locks, on the tutorial's loom. */
   function greyLocked() {
     const s = store.state;
-    const free = s.current === "tutorial" ? allowedAt(s.learn.step) : s.current === "create" ? ["colours", "picture"] : null;
+    const free = s.current === "tutorial" ? allowedAt(s.learn.step) : s.current === "create" || s.current === "game" ? ["colours", "picture"] : null;
     for (const e of /** @type {NodeListOf<HTMLElement>} */ (root.querySelectorAll("[data-control]"))) {
       const locked = free !== null && !free.includes(/** @type {Control} */ (e.dataset.control));
       e.classList.toggle("locked", locked);
@@ -598,6 +601,12 @@ export function createShell(store, root) {
    */
   function programPanel() {
     if (store.state.workspace === "create") return picturesPanel();
+    if (store.state.workspace === "play") {
+      const slot = el("div", { class: "games-slot" });
+      const panel = el("aside", { class: "panel left" }, [rail("left"), el("div", { class: "panel-head" }, [label("h2", "game.title")]), slot]);
+      put(gamesPanel(store), slot);
+      return panel;
+    }
     const bench = controls(el("div", { class: "bench-slot" }), "punch");
     const chain = controls(el("div", { class: "chain-slot" }), "punch");
     const head = el("div", { class: "panel-head" }, [label("h2", "cards.title"), ...cardTools()]);
@@ -645,6 +654,15 @@ export function createShell(store, root) {
 
   /** The output: the cloth, and the thread followed below it; in Create, the cards the picture makes. */
   function outputPanel() {
+    // in Play, the machine beside the game, small: the head in section, on the game's loom
+    if (store.state.workspace === "play") {
+      const machine = el("div", { class: "machine-slot" });
+      const trace = el("div", { class: "trace-slot" });
+      const panel = el("aside", { class: "panel right" }, [rail("right"), el("div", { class: "panel-head" }, [label("h2", "game.machine")]), machine, trace]);
+      put(sectionView(store), machine);
+      put(tracePanel(store), trace);
+      return panel;
+    }
     if (store.state.workspace === "create") {
       const chain = el("div", { class: "chain-slot" });
       const panel = el("aside", { class: "panel right" }, [rail("right"), el("div", { class: "panel-head" }, [label("h2", "pic.cards")]), el("div", { class: "weave-it-row" }, [weaveIt()]), chain]);
@@ -894,7 +912,7 @@ export function createShell(store, root) {
   /** A phone's sheet: the program, the output and (in Learn) the guide, by tab. */
   function sheet() {
     const ws = store.state.workspace;
-    const ids = ws === "create" ? ["picture", "cards"] : [...(ws === "learn" ? ["guide"] : []), "cards", "cloth"];
+    const ids = ws === "create" ? ["picture", "cards"] : ws === "play" ? ["game"] : [...(ws === "learn" ? ["guide"] : []), "cards", "cloth"];
     const list = el("div", { class: "tabs", role: "tablist" });
     const body = el("div", { class: "sheet-body" });
     for (const id of ids) list.appendChild(label("button", `sheet.${id}`, { type: "button", role: "tab", class: "tab", id: `sheet-${id}` }));
@@ -915,6 +933,11 @@ export function createShell(store, root) {
         put(picturePanel(store, { loom: "tutorial" }), picture);
         follow((s) => [s.learn.step], () => (picture.hidden = !STEPS[store.state.learn.step].picture));
       }
+      if (id === "game") {
+        const slot = el("div", { class: "games-slot" });
+        body.append(slot);
+        put(gamesPanel(store), slot);
+      }
       if (id === "picture") {
         const slot = el("div", { class: "picture-slot" });
         body.append(slot);
@@ -925,7 +948,7 @@ export function createShell(store, root) {
         body.append(el("div", { class: "panel-head" }, [label("h2", "pic.cards")]), el("div", { class: "weave-it-row" }, [weaveIt()]), chain);
         put(chainPanel(store), chain);
       }
-      if (id === "cards" && ws !== "create") {
+      if (id === "cards" && ws !== "create" && ws !== "play") {
         const bench = el("div", { class: "bench-slot" });
         const chain = el("div", { class: "chain-slot" });
         body.append(el("div", { class: "panel-head" }, [label("h2", "cards.title"), ...cardTools()]), setupRow(), bench, chain);
