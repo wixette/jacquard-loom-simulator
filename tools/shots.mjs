@@ -47,6 +47,7 @@ const SHOTS = [
   { name: "app-1366-learn", path: "index.html", ready: APP_READY, setup: `document.getElementById('ws-learn')?.click(); await sleep(300); ${APP}`, size: [1366, 768] },
   { name: "app-setup", path: "index.html", ready: APP_READY, setup: `${APP} document.querySelector('.setup-chip').click(); await sleep(300);`, size: [1366, 768] },
   { name: "app-colours", path: "index.html", ready: APP_READY, setup: `${APP} document.querySelector('.panel.right [aria-haspopup="dialog"]').click(); await sleep(300);`, size: [1366, 768] },
+  { name: "app-64", path: "index.html", ready: APP_READY, setup: `document.querySelector('.setup-chip').click(); await sleep(200); const h = document.getElementById('setup-hooks'); h.value = '64'; h.dispatchEvent(new Event('change')); await sleep(300); document.querySelector('.chain').scrollLeft = 400; await sleep(200);`, size: [1366, 768] },
   { name: "app-tablet", path: "index.html", ready: APP_READY, setup: APP, size: [820, 1180] },
   { name: "app-phone", path: "index.html", ready: APP_READY, setup: APP, size: [390, 844] },
   { name: "app-phone-cloth", path: "index.html", ready: APP_READY, setup: `${APP} document.getElementById('sheet-cloth')?.click(); await sleep(400);`, size: [390, 844] },

@@ -113,7 +113,8 @@ svg.bench-card .hole:hover { stroke: var(--md-primary); }
 svg.bench-card .collbl { fill: var(--label); font-family: var(--font); }
 
 /* ---- the chain, one line of holes a card ----------------------------------------------------- */
-.chain { margin-top: 8px; overflow-x: auto; display: flex; flex-direction: column; gap: 2px; }
+/* one column as wide as the longest line (a wide head scrolls), and never narrower than the box */
+.chain { margin-top: 8px; overflow-x: auto; display: grid; grid-template-columns: minmax(max-content, 1fr); gap: 2px; }
 .strip-head, .card-line { display: grid; grid-template-columns: 26px max-content 1fr; align-items: center; gap: 6px; }
 .strip { display: grid; grid-template-columns: repeat(var(--hooks), var(--cell)); gap: 1px; }
 .strip-head .hn { font-size: 9px; color: var(--md-on-surface-variant); text-align: center; cursor: pointer; overflow: visible; white-space: nowrap; }
