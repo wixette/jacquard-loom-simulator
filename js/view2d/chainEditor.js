@@ -5,7 +5,8 @@
 // click on either punches the hole or fills it again; they are the same hole. The two are
 // apart (ChainList, BenchCard), so each can have a place of its own.
 
-import { t, tn } from "../l10n/l10n.js";
+import { locale, t, tn } from "../l10n/l10n.js";
+import { onPress } from "../ui/components.js";
 import { realCard } from "./cardLayout.js";
 /** @import { Snapshot } from "../sim/loom.js" */
 /** @import { Trace } from "../sim/trace.js" */
@@ -22,22 +23,22 @@ import { realCard } from "./cardLayout.js";
 const NS = "http://www.w3.org/2000/svg";
 
 /**
- * A click on a card or one of its holes, wherever it is drawn.
+ * A click on a card or one of its holes, wherever it is drawn (onPress gives the part pressed).
  * @param {ChainEvents} events
- * @returns {(e: Event) => void}
+ * @returns {(part: Element) => void}
  */
-const clicks = (events) => (e) => {
-  const lace = /** @type {Element} */ (e.target).closest("[data-lace]");
+const clicks = (events) => (part) => {
+  const lace = part.closest("[data-lace]");
   if (lace instanceof HTMLElement) {
     events.onLace?.(lace.dataset.lace !== "1");
     return;
   }
-  const head = /** @type {Element} */ (e.target).closest("[data-head]");
+  const head = part.closest("[data-head]");
   if (head instanceof HTMLElement) {
     events.onFollow(Number(head.dataset.head));
     return;
   }
-  const t = /** @type {Element} */ (e.target).closest("[data-card]");
+  const t = part.closest("[data-card]");
   if (!(t instanceof HTMLElement || t instanceof SVGElement)) return;
   const card = Number(t.dataset.card);
   if (t.dataset.hook !== undefined) events.onToggle(card, Number(t.dataset.hook));
@@ -55,7 +56,7 @@ export class ChainList {
     host.appendChild(this.list);
     this.key = "";
     this.laces = events.onLace !== undefined;
-    this.list.addEventListener("click", clicks(events));
+    onPress(this.list, clicks(events));
   }
 
   /**
@@ -117,7 +118,9 @@ export class BenchCard {
     this.label = document.createElement("p");
     this.label.className = "bench-label";
     host.appendChild(this.label);
-    this.svg.addEventListener("click", clicks(events));
+    onPress(this.svg, clicks(events));
+    /** What it last drew (render's key). @type {string} */
+    this.drawn = "";
   }
 
   /**
@@ -128,6 +131,11 @@ export class BenchCard {
   render(snap, selected, follow) {
     const { deck } = snap;
     const card = deck.cards[selected];
+    // drawn again only when what it shows changes: drawn every frame while the loom plays, a
+    // hole would be replaced between its press and its release, and the punch lost
+    const key = JSON.stringify([deck.hooks, selected, follow, card ? card.map(Number).join("") : null, this.svg.clientWidth, this.svg.clientHeight, locale()]);
+    if (key === this.drawn) return;
+    this.drawn = key;
     const rc = realCard(deck.hooks);
     const m = 6;
     this.svg.setAttribute("viewBox", `${-m} ${-m - 6} ${rc.width + 2 * m} ${rc.height + 2 * m + 6}`);

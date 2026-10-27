@@ -2,7 +2,7 @@
 // size (the phone's and the tablet's in frames of their sizes), S-2 the machine's settings beside
 // what they change, S-3 the transport and its stepper, S-4 the keyboard, S-5 the panels' edges,
 // S-6 every view in every arrangement, S-7 links, S-8 the languages, S-9 the sounds, S-12 the
-// griffe's labels. S-10, the 3D
+// griffe's labels, S-13 clicks while the loom plays. S-10, the 3D
 // parts' names, needs no page (tests/scene/partNames.test.js).
 
 import { linkOf, openLink } from "../app/links.js";
@@ -52,7 +52,7 @@ export async function runM6Checks(page) {
   const { store } = page;
   act.setWorkspace(store, "weave");
   const out = [];
-  for (const check of [frame, settings, transport, keyboard, edges, views, links, languages, sounds, griffeLabels]) {
+  for (const check of [frame, settings, transport, keyboard, edges, views, links, languages, sounds, griffeLabels, clicksWhilePlaying]) {
     act.reset(store);
     act.follow(store, null);
     out.push(await check(page));
@@ -507,4 +507,72 @@ async function griffeLabels({ store }) {
   if (sides.size !== 2) bad.push(`the labels change sides: ${[...sides].join(", ")}`);
   act.reset(store);
   return result("S-12", "The griffe and its knives are labelled beside the griffe at every moment, on one side", bad.length === 0, bad.slice(0, 4).join("; ") || "7 moments, rest to shed closed and the next card");
+}
+
+/**
+ * S-13: while the loom plays, a click is never lost: no control of the frame is replaced or has
+ * its contents replaced (the play button's icon only when playing starts or stops), and a press
+ * on a part of something drawn anew (a hook in the section, a hole in the chain) counts once,
+ * even when it is redrawn between the press and its release.
+ * @param {AppPage} page
+ * @returns {Promise<CheckResult>}
+ */
+async function clicksWhilePlaying({ store }) {
+  /** @type {string[]} */
+  const bad = [];
+  const ls = () => store.state.looms[store.state.current];
+  act.setViews(store, ["section"]);
+  act.loadPreset(store, "twill");
+  await frames();
+  act.play(store);
+  await frames();
+  const icon = $('.player [data-act="play"] .icon');
+  /** @type {Set<string>} */
+  const replaced = new Set();
+  const CONTROLS = "button, select, input, label";
+  const watch = new MutationObserver((ms) => {
+    for (const m of ms) {
+      const t = /** @type {Element} */ (m.target);
+      const hit = [...m.removedNodes].some((n) => n instanceof Element && n.matches(CONTROLS)) || t.closest?.(CONTROLS);
+      if (hit) replaced.add(`${(t.closest?.(CONTROLS) ?? t).tagName.toLowerCase()}.${String((t.closest?.(CONTROLS) ?? t).className).split(" ")[0]}`);
+    }
+  });
+  for (const area of $$(".player, .panel-head, .setup-row, .pane-tools, .stage-tools, .trace-box, .topbar")) watch.observe(area, { childList: true, subtree: true, characterData: true });
+  await sleep(800);
+  watch.disconnect();
+  if (replaced.size) bad.push(`replaced while playing: ${[...replaced].join(", ")}`);
+  if ($('.player [data-act="play"] .icon') !== icon) bad.push("the pause button's icon is replaced while playing");
+  if (getComputedStyle(/** @type {Element} */ (icon)).pointerEvents !== "none") bad.push("a button's icon takes the pointer");
+  act.pause(store);
+  /** A press on an element, then a redraw, then the release where it was pressed. @param {Element} part @param {Element} root @param {() => void} redraw */
+  const pressAcross = async (part, root, redraw) => {
+    const r = part.getBoundingClientRect();
+    const at = { bubbles: true, button: 0, pointerId: 7, clientX: r.left + r.width / 2, clientY: r.top + r.height / 2 };
+    part.dispatchEvent(new PointerEvent("pointerdown", at));
+    redraw();
+    await frames();
+    if (part.isConnected) bad.push("the part was not redrawn, so the check checks nothing");
+    root.dispatchEvent(new PointerEvent("pointerup", at));
+    await frames();
+  };
+  const hook = /** @type {Element} */ (document.querySelector('.stage svg.section polyline.hook[data-hook="2"]'));
+  await pressAcross(hook, /** @type {Element} */ (document.querySelector(".stage svg.section")), () => act.touch(store));
+  if (ls().follow?.hook !== 2) bad.push("a hook pressed across a redraw was not followed");
+  act.follow(store, null);
+  const card = 1;
+  const before = ls().loom.deck.cards[card][0];
+  const hole = /** @type {Element} */ (document.querySelector(`.chain [data-card="${card}"] .hole`));
+  await pressAcross(hole, /** @type {Element} */ ($(".chain")), () => act.select(store, 3));
+  if (ls().loom.deck.cards[card][0] === before) bad.push("a hole pressed across a redraw was not punched");
+  // a plain click (no redraw between) counts once, not twice
+  const once = /** @type {HTMLElement} */ (document.querySelector(`.chain [data-card="${card}"] .hole`));
+  const r = once.getBoundingClientRect();
+  const at = { bubbles: true, button: 0, pointerId: 8, clientX: r.left + 2, clientY: r.top + 2 };
+  once.dispatchEvent(new PointerEvent("pointerdown", at));
+  once.dispatchEvent(new PointerEvent("pointerup", at));
+  once.click();
+  await sleep(10);
+  if (ls().loom.deck.cards[card][0] !== before) bad.push("a plain click on a hole counted twice");
+  act.loadPreset(store, "plain");
+  return result("S-13", "While the loom plays no click is lost: no control is replaced, and a press on a part drawn anew counts once", bad.length === 0, bad.slice(0, 4).join("; ") || "0.8 s of playing: no control replaced; a hook and a hole pressed across a redraw, and a plain click counted once");
 }

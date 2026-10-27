@@ -13,7 +13,7 @@ import { encodeLink, LONG_LINK, STAGE_VIEWS } from "../sim/link.js";
 import { linkOf } from "./links.js";
 import { tieLabel } from "../sim/tieup.js";
 import { printDocument } from "../teach/printCards.js";
-import { applyIcons, el, icon, setTip, showMenu, tabs } from "../ui/components.js";
+import { applyIcons, el, icon, setText, setTip, showMenu, tabs } from "../ui/components.js";
 import { colourPicker } from "../ui/colourPicker.js";
 import { wireEdge } from "../ui/edge.js";
 import { showAbout } from "./about.js";
@@ -577,7 +577,7 @@ export function createShell(store, root) {
     chip.addEventListener("click", () => (chip.classList.contains("locked") ? act.say(store, msg("learn.locked"), true) : setupPopover(chip)));
     follow((s) => [s.looms[s.current].rev, s.locale], () => {
       const { deck, tie } = ls().loom;
-      text.textContent = t("setup.chip", { head: tn("hooks.option", deck.hooks / 8, { hooks: deck.hooks }), tie: words(tieLabel(tie)) });
+      setText(text, t("setup.chip", { head: tn("hooks.option", deck.hooks / 8, { hooks: deck.hooks }), tie: words(tieLabel(tie)) }));
     });
     return el("div", { class: "setup-row" }, [chip]);
   }
@@ -707,8 +707,11 @@ export function createShell(store, root) {
     follow((s) => [s.sectionView, s.looms[s.current].crossRow, s.looms[s.current].rev, s.locale], () => {
       for (const b of zoom.querySelectorAll("button")) b.setAttribute("aria-pressed", String(/** @type {HTMLElement} */ (b).dataset.l10n === `section.${store.state.sectionView}`));
       const n = ls().loom.deck.hooks / 8;
-      cross.replaceChildren(...[...Array(n).keys()].map((c) => new Option(t("section.crossRow", { row: c + 1, from: c * 8 + 1, to: c * 8 + 8 }), String(c))));
-      cross.value = String(ls().crossRow);
+      // the options are made anew only when the head or the language changes: made every frame
+      // while the loom plays, the open list would close under the pointer
+      const options = [...Array(n).keys()].map((c) => t("section.crossRow", { row: c + 1, from: c * 8 + 1, to: c * 8 + 8 }));
+      if ([...cross.options].map((x) => x.text).join("\n") !== options.join("\n")) cross.replaceChildren(...options.map((text, c) => new Option(text, String(c))));
+      if (cross.value !== String(ls().crossRow)) cross.value = String(ls().crossRow);
       crossChip.hidden = n === 1;
     });
     return [zoomTool, crossChip];

@@ -46,6 +46,7 @@
 | S-9 | Each moment passed going forward sounds its own sound, once; going back, a reset and a link opened are silent; running out of cards sounds the refusal. | page |
 | S-10 | Every part the 3D models name has a message key whose English is the model's own name; every unit's title and idea is a message. | logic |
 | S-11 | The prototypes still work: every developer page's `?selftest` passes (`pnpm selftest`). | page |
+| S-13 | While the loom plays no click is lost: no control of the frame is replaced or has its contents replaced (the play button's icon only when playing starts or stops; a button's icon never takes the pointer), and a press on a part of something drawn anew (a hook in the section, a hole in the chain) counts once, even when redrawn between its press and release (added 2026-10-27: the pause button could not be clicked while playing, its icon replaced every frame). | page |
 | S-12 | At every moment of a pick the section labels the griffe and its knives beside the griffe's frame where it is, on one side throughout (added 2026-10-27: the griffe's label had sat at the top of its travel, over empty space). | page |
 
 ### Results (2026-10-27)
@@ -64,3 +65,4 @@
 | S-10 | 6 models, 60 part names (87 named parts): every one's English is its key's; the 5 units' titles and ideas are messages |
 | S-11 | `pnpm selftest`: all 8 pages pass (the app's 9 checks, the developer pages' 120) |
 | S-12 | 7 moments, from rest to the next card: both labels beside the frame, on its right |
+| S-13 | 0.8 s of playing: no control replaced; a hook and a hole pressed across a redraw, and a plain click counted once |

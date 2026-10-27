@@ -47,6 +47,56 @@ export function el(tag, attrs = {}, children = []) {
 }
 
 /**
+ * Set an element's text only when it differs: a part of the page written on every frame while
+ * the loom plays would otherwise be replaced under the pointer, and a click on it lost.
+ * @param {Element} e
+ * @param {string} text
+ */
+export function setText(e, text) {
+  if (e.textContent !== text) e.textContent = text;
+}
+
+/**
+ * A click on a part of something drawn anew as the loom moves (a drawing every frame while it
+ * plays, the chain at every card): the part is read when it is pressed, and the press counts as
+ * a click when it is let go on the same root close by, so a redraw between the two cannot lose
+ * it (a browser drops a click whose press and release fall on different elements). A click with
+ * no press before it (a key's: Enter on a hole, the F key, a check's) counts as well, once.
+ * @param {Element} svg the root, which is not redrawn
+ * @param {(part: Element) => void} run
+ * @returns {() => void} the way to take the listeners away
+ */
+export function onPress(svg, run) {
+  /** @type {{ target: Element; x: number; y: number; id: number } | null} */
+  let down = null;
+  let handled = false;
+  const press = (/** @type {PointerEvent} */ e) => {
+    down = e.button === 0 ? { target: /** @type {Element} */ (e.target), x: e.clientX, y: e.clientY, id: e.pointerId } : null;
+  };
+  const release = (/** @type {PointerEvent} */ e) => {
+    const d = down;
+    down = null;
+    if (!d || e.pointerId !== d.id || Math.hypot(e.clientX - d.x, e.clientY - d.y) > 6) return;
+    run(d.target);
+    // the click that follows, when the part was not redrawn, is the same press
+    handled = true;
+    setTimeout(() => (handled = false), 0);
+  };
+  const click = (/** @type {MouseEvent} */ e) => {
+    if (!handled) run(/** @type {Element} */ (e.target));
+  };
+  const root = /** @type {HTMLElement} */ (svg);
+  root.addEventListener("pointerdown", press);
+  root.addEventListener("pointerup", release);
+  root.addEventListener("click", click);
+  return () => {
+    root.removeEventListener("pointerdown", press);
+    root.removeEventListener("pointerup", release);
+    root.removeEventListener("click", click);
+  };
+}
+
+/**
  * Replace each <i data-icon="name"> placeholder under root with its icon.
  * @param {ParentNode} root
  */

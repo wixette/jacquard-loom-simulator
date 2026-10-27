@@ -149,3 +149,7 @@
   pointer-events: none;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
 }
+
+/* a button's icon never takes the pointer: a press and its release fall on the button itself,
+   even when the icon is changed between them */
+button .icon { pointer-events: none; }
