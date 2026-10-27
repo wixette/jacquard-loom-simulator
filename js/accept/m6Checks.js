@@ -347,7 +347,11 @@ async function views({ store }) {
     if (panes.length !== vs.length) bad.push(`${vs.join(",")}: ${panes.length} panes`);
     panes.forEach((host, i) => {
       const d = host.querySelector(":scope > svg, :scope > canvas");
-      if (!d || area(d) < 0.5 * area(host)) bad.push(`${vs[i]} in ${vs.join(",")}: does not fill its pane`);
+      // the cloth is drawn at a size its threads can be seen at: it fits its pane, not fills it
+      if (vs[i] === "cloth") {
+        const c = host.querySelector("canvas");
+        if (!c || area(c) === 0 || c.getBoundingClientRect().height > host.getBoundingClientRect().height + 1) bad.push(`cloth in ${vs.join(",")}: not in its pane`);
+      } else if (!d || area(d) < 0.5 * area(host)) bad.push(`${vs[i]} in ${vs.join(",")}: does not fill its pane`);
     });
   }
   act.setViews(store, ["section"]);

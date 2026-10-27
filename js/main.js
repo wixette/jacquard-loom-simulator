@@ -20,10 +20,10 @@ watchWorkspace(store);
 const shell = createShell(store, /** @type {HTMLElement} */ (document.getElementById("app")));
 window.addEventListener("hashchange", () => openLink(store, location.hash));
 
-// With ?selftest, M6's and M7's checks run on the app (design/m6-notes.md, design/m7-notes.md).
+// With ?selftest, M6's to M9's checks run on the app (design/m6-notes.md to design/m9-notes.md).
 if (new URLSearchParams(location.search).has("selftest")) {
-  const [{ runM6Checks }, { runM7Checks }, { showSelftest }] = await Promise.all([import("./accept/m6Checks.js"), import("./accept/m7Checks.js"), import("./accept/selftestPanel.js")]);
+  const [{ runM6Checks }, { runM7Checks }, { runM8Checks }, { runM9Checks }, { showSelftest }] = await Promise.all([import("./accept/m6Checks.js"), import("./accept/m7Checks.js"), import("./accept/m8Checks.js"), import("./accept/m9Checks.js"), import("./accept/selftestPanel.js")]);
   const t0 = performance.now();
-  const results = [...(await runM6Checks({ store, shell })), ...(await runM7Checks({ store, shell }))];
+  const results = [...(await runM6Checks({ store, shell })), ...(await runM7Checks({ store, shell })), ...(await runM8Checks({ store, shell })), ...(await runM9Checks({ store, shell }))];
   showSelftest(document.body, results, performance.now() - t0);
 }

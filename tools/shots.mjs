@@ -45,6 +45,8 @@ const README_SHOTS = [
   { name: "readme-app", path: "index.html#v=2&view=section,3d", ready: APP_READY, setup: `${APP} await sleep(2500);`, size: [1920, 1080] },
   { name: "readme-learn", path: "index.html#v=2&w=learn&step=how-griffe", ready: APP_READY, setup: "await sleep(1200);", size: [1440, 900] },
   { name: "readme-units", path: "index.html#v=2&h=8&c=x.cc-66-33-99&p=5&s=2&f=1&view=u1", ready: APP_READY, setup: "await sleep(2500); document.querySelector('.unit-note summary').click(); await sleep(400);", size: [1440, 900] },
+  { name: "readme-create", path: "index.html#v=2&w=create", ready: APP_READY, setup: "await sleep(800);", size: [1440, 900] },
+  { name: "readme-play", path: "index.html#v=2&w=play&game=name&text=Ada", ready: APP_READY, setup: "await sleep(600); [...document.querySelectorAll('.game-body .btn.filled')][0]?.click(); await sleep(1200);", size: [1440, 900] },
   { name: "readme-phone", path: "index.html#v=2&w=learn&step=weave-twill", ready: APP_READY, setup: "await sleep(1000); document.querySelector('.predict input')?.click(); await sleep(400);", size: [390, 844] },
 ];
 

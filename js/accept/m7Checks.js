@@ -66,7 +66,9 @@ async function walk({ store }) {
     if ($("#step-title")?.textContent !== t(`tut.${s.id}.title`)) bad.push(`${s.id}: not its title`);
     if (store.state.views.join() !== shownAt(i).views.join()) bad.push(`${s.id}: views ${store.state.views.join()}`);
     const left = /** @type {HTMLElement} */ ($(".panel.left"));
-    if (left.classList.contains("guide-only") === shownAt(i).cards) bad.push(`${s.id}: the cards ${shownAt(i).cards ? "hidden" : "shown"}`);
+    // a picture step shows the picture tool where the cards would be
+    if (left.classList.contains("guide-only") !== (!shownAt(i).cards && !s.picture)) bad.push(`${s.id}: the cards ${shownAt(i).cards ? "hidden" : "shown"}`);
+    if (s.picture && !left.classList.contains("on-picture")) bad.push(`${s.id}: no picture tool`);
     if (s.image) {
       const img = /** @type {HTMLImageElement | null} */ ($(".step-picture img"));
       for (let k = 0; k < 50 && img && !img.complete; k++) await sleep(100);
@@ -283,7 +285,7 @@ async function viewMenu({ store }) {
   const heads = [...(menu?.querySelectorAll(".menu-divider span") ?? [])].map((e) => e.textContent);
   if (heads.join("|") !== [t("view.group.2d"), t("view.group.3d")].join("|")) bad.push(`groups: ${heads.join(", ")}`);
   const items = [...(menu?.querySelectorAll("[role=menuitemradio]") ?? [])].map((e) => e.textContent ?? "");
-  if (items.length !== 9) bad.push(`${items.length} items`);
+  if (items.length !== 10) bad.push(`${items.length} items`);
   if (items.some((x) => /\bU[1-5]\b/.test(x))) bad.push("a unit code shows");
   if (!items[0].includes(t("view.at.topLeft"))) bad.push(`the section does not say where it is: ${items[0]}`);
   /** @type {HTMLElement} */ (menu?.querySelectorAll("[role=menuitemradio]")[0]).click();

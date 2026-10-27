@@ -9,7 +9,8 @@
 The loom that wove pictures from a chain of punched cards, in your browser. Punch the cards,
 turn the loom, and watch the head choose every thread, pick by pick, in 2D and in 3D, until
 the cloth shows the pattern you put in the holes. A tutorial takes you from the loom's story to
-weaving a picture by hand.
+weaving a picture by hand, and on to the punched cards that came after. Draw a picture and the
+simulator cuts its cards; or play four games on the loom.
 
 **[▶ Try it online](https://wixette.github.io/jacquard-loom-simulator/)**, with nothing to
 install, on a computer or a phone, in ten languages.
@@ -21,8 +22,9 @@ install, on a computer or a phone, in ten languages.
 [2. How a card lifts a thread](#2-how-a-card-lifts-a-thread) →
 [3. Learn](#3-learn-the-tutorial) →
 [4. Weave](#4-weave-the-loom-is-yours) →
-[5. How faithful](#5-how-faithful-is-it) →
-[6. For developers](#6-for-developers)
+[5. Create and Play](#5-create-and-play) →
+[6. How faithful](#6-how-faithful-is-it) →
+[7. For developers](#7-for-developers)
 
 ## 1. Try it in a minute
 
@@ -65,7 +67,7 @@ was borrowed for one: Babbage chose Jacquard's cards for his Analytical Engine.
 
 ![A step of the tutorial: its card on the left asks the learner to step on to "Shed open", and the parts it names glow amber in the section](./screenshots/readme-learn.png)
 
-**Learn** runs 21 short steps in three parts, on a loom of its own: your cards in Weave are
+**Learn** runs 37 short steps in six parts, on a loom of its own: your cards in Weave are
 never touched.
 
 | Part | Steps |
@@ -73,6 +75,9 @@ never touched.
 | **1. The story** | The draw loom; holes before Jacquard (Bouchon 1725, Falcon 1728, Vaucanson 1745); Jacquard puts it together; the woven portrait of 1839. With historical pictures and their credits |
 | **2. How it works** | The loom in 3D and its units; the head cut through; a hole or a blank; a light card and a heavy lift; one card, one row; the chain as a program, and as a loop; what it is not |
 | **3. Weave** | Punch a card; plain weave; twill; satin, and why stepping by two fails; one hook, many threads; a picture, woven from its bottom row up |
+| **4. Challenge** | Four broken looms to fix (two cards swapped, a hole missing, the wrong tie-up, a card too many), each with the cloth it should weave |
+| **5. Your tools** | The picture tool, and why a picture read square by square falls apart; following a thread; the head and its tie-up; sharing; Create and Play |
+| **6. What came next** | Babbage's operation and variable cards; Ada Lovelace's notes; Hollerith's census cards, which held data; what a computer adds |
 
 Each step is one card: its text, often a question to predict before weaving, and a task
 checked on the loom itself, with a button that works the control it needs. What a step does
@@ -89,8 +94,8 @@ the right, and the controls along the bottom.
   deck (plain weave, twill, satin, the arrow), and lace the chain into a loop. The chip above
   the cards sets the head, from 8 to 64 hooks, and the tie-up, which repeats the pattern across
   the warp.
-- **The drawings.** The menu on each view chooses it: three 2D drawings (the head in section,
-  the loom from the side and from the front) or six 3D models (the whole loom, and its five
+- **The drawings.** The menu on each view chooses it: four 2D drawings (the head in section,
+  the loom from the side and from the front, and the cloth alone) or six 3D models (the whole loom, and its five
   units alone, each with a note on the idea it shows). Show one, two side by side, or four.
   Click any part to follow its thread through every view; the thread is traced in words under
   the cloth.
@@ -111,7 +116,30 @@ and the tutorial share a sheet below it, dragged up or down.
 
 <img src="./screenshots/readme-phone.png" alt="The simulator on a phone: the section on top, the controls under it, and a tutorial step in the sheet below" width="260">
 
-## 5. How faithful is it?
+## 5. Create and Play
+
+![Create: a heart painted on point paper on the left, its cloth large in the middle with the long loose threads read square by square marked in red, and its cards on the right](./screenshots/readme-create.png)
+
+**Create** is the picture tool. Paint a picture on point paper, 8 to 32 squares a side, take a
+ready-made one, or open an image (it is read in your browser and never uploaded). Then choose
+how the loom reads it: square by square, one square to a thread, or as damask, two satins
+woven in blocks, the way figured silk holds together. The cloth is drawn large, its long loose
+threads marked in red; **Weave it** puts the cards on your loom in Weave, and Share sends the
+picture as a link.
+
+**Play** has four games on a loom of their own:
+
+![Play: the name game has woven "Ada" in damask, and reads the cloth back; the head is in section on the right](./screenshots/readme-play.png)
+
+
+| Game | What you do |
+|---|---|
+| **The name game** | Type your name; the loom weaves it in a pixel font, as real damask or quickly, and reads the cloth back |
+| **One byte per card** | Type a message: on an 8-hook head one card is one byte. Share sends a friend only the cards, to read back into text |
+| **Guess the cloth** | A few cards and three cloths: which one do they weave? The wrong ones are the cards misread |
+| **Draw boy against Jacquard** | Weave a figure as a draw boy did, pulling the cords for every row; then let the cards do it |
+
+## 6. How faithful is it?
 
 It shows a single-lift Jacquard head on a silk hand loom, of the kind used from about 1810 to
 1900: not Jacquard's own first machine, whose size no source gives. The head
@@ -130,7 +158,7 @@ machine), no card count for the woven portrait (the famous 24,000 has no source)
 Lovelace's words as she wrote them. The research, including what the sources do not say, is in
 [research/REPORT.md](research/REPORT.md).
 
-## 6. For developers
+## 7. For developers
 
 ### Run it locally
 

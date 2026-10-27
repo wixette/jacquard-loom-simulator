@@ -59,6 +59,27 @@ describe("the examples of design/links.md", () => {
     assert.equal(l.deck, null);
   });
 
+  it("a picture for Create, read as damask (0.2.0)", async () => {
+    const l = await read("#v=2&w=create&pw=8&pic=x.18-3c-5a-99-18-18-18-18&rd=damask&k=3");
+    assert.equal(l.workspace, "create");
+    assert.equal(l.picture?.rows.length, 8);
+    assert.deepEqual(l.picture?.rows[0].map(Number), [0, 0, 0, 1, 1, 0, 0, 0]);
+    assert.equal(l.picture?.mode, "damask");
+    assert.equal(l.picture?.k, 3);
+  });
+
+  it("the name game, the guessing game's puzzle, a byte game's secret (0.2.0)", async () => {
+    const name = await read("#v=2&w=play&game=name&text=Ada&mode=direct");
+    assert.deepEqual(name.game, { name: "name", text: "Ada", mode: "direct", seed: 1 });
+    const guess = await read("#v=2&w=play&game=guess&seed=7");
+    assert.equal(guess.game?.name, "guess");
+    assert.equal(guess.game?.seed, 7);
+    const secret = await read("#v=2&w=play&game=byte&h=8&c=x.48-69");
+    assert.equal(secret.game?.name, "byte");
+    assert.equal(secret.game?.text, "");
+    assert.deepEqual(secret.deck?.cards.map((c) => c.reduce((n, x) => (n << 1) | Number(x), 0)), [0x48, 0x69]);
+  });
+
   it("a link of the prototype's format is refused, and says so", async () => {
     const r = await decodeLink("#v=1&h=8&d=ff");
     assert.ok(!r.ok);
