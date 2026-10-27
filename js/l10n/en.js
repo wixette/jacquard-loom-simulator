@@ -411,7 +411,6 @@ export default {
   "p3d.unit.shed": "the shed, the shuttle and the batten",
   // ---- Learn: the tutorial's frame (js/app/components/guide.js) ------------------------------
   "comp.guide": "The tutorial's step",
-  "learn.where": "Part {part} · {at}/{of}",
   "learn.kicker": "Part {part} · {name} · {at}/{of}",
   "learn.contents": "All the steps",
   "learn.back": "Back",

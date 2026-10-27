@@ -25,7 +25,7 @@ import { frontView, sectionView, sideView, UNIT_VIEWS, unitsView } from "./compo
 import { chooseLanguage } from "./language.js";
 import { leaveLearn, openLearn, watchDone } from "./learn.js";
 import { guidePanel } from "./components/guide.js";
-import { allowedAt, placeInPart, shownAt } from "../teach/tutorial.js";
+import { allowedAt, shownAt } from "../teach/tutorial.js";
 import { arrange, choose, is3d, placeKey, SPLIT } from "./arrange.js";
 import * as act from "./looms.js";
 import { TIES, tieKey } from "./looms.js";
@@ -473,14 +473,6 @@ export function createShell(store, root) {
     }
     tabs(list, (id) => goWorkspace(/** @type {Workspace} */ (id.slice(3))));
     for (const tab of list.children) tab.setAttribute("aria-selected", String(tab.id === `ws-${store.state.workspace}`));
-    // Learn carries the tutorial's place while it is on (the mode in the top bar, the sibling's U27)
-    const where = el("span", { class: "ws-where" });
-    list.querySelector("#ws-learn")?.append(where);
-    follow((s) => [s.workspace, s.learn.step, s.locale], () => {
-      const p = placeInPart(store.state.learn.step);
-      where.hidden = store.state.workspace !== "learn";
-      where.textContent = t("learn.where", { part: p.part, at: p.at, of: p.of });
-    });
     const share = el("button", { type: "button", class: "btn has-icon", "aria-haspopup": "menu" }, [icon("share"), label("span", "bar.share")]);
     share.dataset.l10nTip = "bar.share.tip";
     share.setAttribute("data-tip-describes", "");

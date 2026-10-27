@@ -392,7 +392,6 @@ export default {
 
   // ---- Impara: la cornice del tutorial (js/app/components/guide.js) ----------------------------
   "comp.guide": "La tappa del tutorial",
-  "learn.where": "Parte {part} · {at}/{of}",
   "learn.kicker": "Parte {part} · {name} · {at}/{of}",
   "learn.contents": "Tutte le tappe",
   "learn.back": "Precedente",

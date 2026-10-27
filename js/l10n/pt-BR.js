@@ -392,7 +392,6 @@ export default {
 
   // ---- Aprender: a moldura do tutorial (js/app/components/guide.js) --------------------------
   "comp.guide": "O passo do tutorial",
-  "learn.where": "Parte {part} · {at}/{of}",
   "learn.kicker": "Parte {part} · {name} · {at}/{of}",
   "learn.contents": "Todos os passos",
   "learn.back": "Voltar",

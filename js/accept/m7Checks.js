@@ -180,11 +180,15 @@ async function place({ store }) {
   openLearn(store);
   if (store.state.learn.step !== stepIndex("how-loop")) bad.push("Learn did not resume where it was left");
   await frames();
-  const tab = $("#ws-learn .ws-where");
-  if (!tab || tab.hidden || !tab.textContent?.includes("/")) bad.push("the Learn tab does not carry the place");
+  // the place is on the step's card; the tabs keep their size, whichever workspace is on
+  if (!$(".step-kicker")?.textContent?.includes("/")) bad.push("the step's card does not say where");
+  const widths = () => ["#ws-learn", "#ws-weave"].map((id) => Math.round($(id)?.getBoundingClientRect().width ?? 0)).join();
+  const inLearn = widths();
   leaveLearn(store);
+  await frames();
+  if (widths() !== inLearn) bad.push(`the tabs change size between the workspaces (${inLearn} → ${widths()})`);
   act.setViews(store, ["section"]);
-  return result("L-4", "The place is kept on the device; Weave keeps its loom and views; Learn resumes where it was left, and its tab says where", bad.length === 0, bad.slice(0, 4).join("; ") || `resumed at how-loop, ${kept.done?.length ?? 0} steps kept done`);
+  return result("L-4", "The place is kept on the device; Weave keeps its loom and views; Learn resumes where it was left, its card says where, and the tabs keep their size", bad.length === 0, bad.slice(0, 4).join("; ") || `resumed at how-loop, ${kept.done?.length ?? 0} steps kept done`);
 }
 
 /**

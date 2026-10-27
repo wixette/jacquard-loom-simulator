@@ -391,7 +391,6 @@ export default {
   "p3d.unit.shed": "개구, 북, 바디집",
 
   "comp.guide": "튜토리얼 단계",
-  "learn.where": "{part}부 · {at}/{of}",
   "learn.kicker": "{part}부 · {name} · {at}/{of}",
   "learn.contents": "모든 단계",
   "learn.back": "이전",

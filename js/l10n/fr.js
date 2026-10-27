@@ -392,7 +392,6 @@ export default {
 
   // ---- Apprendre : le cadre du tutoriel (js/app/components/guide.js) --------------------------
   "comp.guide": "L'étape du tutoriel",
-  "learn.where": "Partie {part} · {at}/{of}",
   "learn.kicker": "Partie {part} · {name} · {at}/{of}",
   "learn.contents": "Toutes les étapes",
   "learn.back": "Précédent",

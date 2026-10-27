@@ -393,7 +393,6 @@ export default {
 
   // ---- Aprender: el marco del tutorial (js/app/components/guide.js) --------------------------
   "comp.guide": "El paso del tutorial",
-  "learn.where": "Parte {part} · {at}/{of}",
   "learn.kicker": "Parte {part} · {name} · {at}/{of}",
   "learn.contents": "Todos los pasos",
   "learn.back": "Atrás",

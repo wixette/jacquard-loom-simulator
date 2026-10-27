@@ -391,7 +391,6 @@ export default {
   "p3d.unit.shed": "das Fach, der Schützen und die Lade",
 
   "comp.guide": "Der Schritt des Tutorials",
-  "learn.where": "Teil {part} · {at}/{of}",
   "learn.kicker": "Teil {part} · {name} · {at}/{of}",
   "learn.contents": "Alle Schritte",
   "learn.back": "Zurück",

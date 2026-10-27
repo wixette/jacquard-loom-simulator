@@ -10,7 +10,7 @@
 |---|---|---|
 | The steps | `js/teach/tutorial.js` | 21 steps in three parts, as data: each its name (for links and progress), its picture, the views it puts on the stage, the loom it sets up, the parts it points at, its question and its task. No DOM: the tests run the same steps |
 | The guide | `js/app/components/guide.js`, `css/app.css` | The step as one card: the part and place over it, with the list of all the steps; the part's aim at its first step; the picture and its credit; the text; the question; the task line, whose buttons work the real controls; what the task showed, once done; the part's recap at its last step; Back and Next under it |
-| Learn as a mode | `js/app/learn.js`, `js/app/shell.js` | The tutorial's own loom set up for each step; the place and the steps done kept on the device; Weave's loom and views given back on leaving; the Learn tab carrying the place; the stage framed in blue; what a step does not use greyed and locked |
+| Learn as a mode | `js/app/learn.js`, `js/app/shell.js` | The tutorial's own loom set up for each step; the place and the steps done kept on the device; Weave's loom and views given back on leaving; the stage framed in blue; what a step does not use greyed and locked |
 | The locks | `js/app/looms.js` | On the tutorial's loom, the actions that change the cards or the loom (punch, the card tools, the loop, the head and tie-up, the colours) refuse unless the step asks for them, and say why |
 | Pointing at parts | `js/app/components/views.js`, `js/view2d/sectionView.js`, `css/views.css` | The section's parts a step names glow amber, their labels amber and bold |
 | Links to steps | `js/app/links.js` | Share in Learn writes the step; a link opens it (design/links.md, Learn) |
@@ -50,7 +50,7 @@
 4. **Predict, then weave:** a question comes before the task, and the task line appears once it has an answer, right or wrong. Next waits for an answer, not for the right one: being wrong, then weaving and seeing why, is the lesson.
 5. **What a step locks is what changes the cards or the loom.** The transport, the views, the cloth's face and following a thread are always free, so a learner can always look and step; the card tools, punching, the loop, the head and tie-up and the colours are greyed unless the step's task asks for them, and pressed say why and the way out (Weave). The lock is in the actions, so the keyboard and every path are locked alike.
 6. **In Learn the guide has the left panel's room:** the story's steps show the guide alone; later steps show the cards under it, the bench only where the step punches, the chain only as tall as its cards.
-7. **The Learn tab carries "Part 2 · 6/9", not the part's name:** a part called "Weave" next to the Weave tab would read as that tab's.
+7. **The place is on the step's card, not in the top bar.** The Learn tab first carried "Part 2 · 6/9"; it made the tab grow and shrink as the workspace changed, moving the Weave tab and outgrowing its own underline, and repeated what the card already says (revised after the review, 2026-10-27).
 8. **Pointing at parts, in 2D:** a step names the section's parts it points at (`glow`), drawn with an amber halo that keeps their own colours (lifted green, followed blue), and their labels amber. In 3D a step points by showing one unit alone; a glow on 3D parts waits for the steps that need it (design/ui-layout.md §7).
 9. **The history follows the research, not the legends** (research REPORT §6, notes-history-and-machines.md §6): no patent of 1801, no card count for the portrait ("many thousands"), "in about 1804–1805", Bouchon, Falcon and Vaucanson before Jacquard, Lovelace's own words. T-3 keeps the English that way. Two changes from public-app.md's plan: part 1 has four screens, not two or three (the portrait earns its own); and the closed chain is not called "the first loop in the history of programming", since Falcon's cards of 1728 were already an endless chain and barrel organs repeated long before: the step says a loop repeats instructions without writing them out again, and credits Falcon.
 10. **The pictures are the research's freely licensed ones,** scaled and re-encoded (720 px on the long side, for a panel about 320 px wide on a screen of twice its pixels); each step shows its credit under its picture, REUSE.toml records each file's licence, and About names the licences.
@@ -72,7 +72,7 @@
 | L-1 | Every step, reached by Next from the first, shows its title, its picture and credit, its views and cards; Next waits for its question and its task, and takes the learner on once both are done; every step is counted done. | page |
 | L-2 | A task line's button works the real control, which glows while the task waits; a step greys and locks what it does not use (pressed, it says why and changes nothing) and frees what it asks for. | page |
 | L-3 | Share in Learn links to the step; a step's link opens it with its loom; a name no step has opens the start and says so. | page |
-| L-4 | The place is kept on the device; leaving for Weave gives Weave's loom and views back; Learn resumes where it was left, and its tab says where. | page |
+| L-4 | The place is kept on the device; leaving for Weave gives Weave's loom and views back; Learn resumes where it was left; the step's card says where, and the tabs keep their size whichever workspace is on. | page |
 | L-5 | The parts a step points at glow in the section, their labels in amber; nothing glows in Weave. | page |
 | L-6 | In every language every step speaks it, with no English left. | page |
 | L-7 | On a phone, Learn opens the sheet on the guide, at the step, with the controls under the stage. | page |
@@ -91,7 +91,7 @@
 | L-1 | 21 steps by Next, 4 pictures loaded with their credits, every step counted done |
 | L-2 | Step pressed from the task line; the card tools greyed, refusing with the reason; a hole punched on the bench in weave-punch |
 | L-3 | Share in Learn: `v=2&w=learn&step=weave-twill`, which opens the step with its loom; `step=no-such-step` opens the start, saying so |
-| L-4 | Resumed at how-loop; Weave's loom and views as they were; 21 steps kept done; the Learn tab carrying the place |
+| L-4 | Resumed at how-loop; Weave's loom and views as they were; 21 steps kept done; the card saying where; the tabs the same size in Learn and Weave |
 | L-5 | how-section: the cylinder, needles, hooks and knives glowing, the labels amber; nothing glowing in Weave |
 | L-6 | 9 languages × 21 steps: no English left |
 | L-7 | 390 × 844: the sheet on the guide, at weave-plain, the controls under the stage |

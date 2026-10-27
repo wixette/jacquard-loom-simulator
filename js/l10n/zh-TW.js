@@ -391,7 +391,6 @@ export default {
   "p3d.unit.shed": "梭口、梭子與筘座",
 
   "comp.guide": "教學的這一步",
-  "learn.where": "第 {part} 部分 · {at}/{of}",
   "learn.kicker": "第 {part} 部分 · {name} · {at}/{of}",
   "learn.contents": "所有步驟",
   "learn.back": "上一步",

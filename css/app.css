@@ -162,9 +162,8 @@ body.resizing .stage { pointer-events: none; }
 .popover input[type="color"] { width: 44px; height: 28px; padding: 0; border: 1px solid var(--md-outline-variant); border-radius: 6px; background: none; }
 
 /* ---- the guide (Learn): the tutorial's step card above the panel it needs ---------------------- */
-/* Learn is a mode: the stage is framed in blue, the Learn tab carries the tutorial's place */
+/* Learn is a mode: its tab is selected and the stage framed in blue; the step's card says where */
 .app[data-ws="learn"] .stage::after { content: ""; position: absolute; inset: 0; z-index: 4; border: 2px solid var(--md-primary); pointer-events: none; }
-.ws-where { margin-left: 8px; padding: 1px 8px; border-radius: var(--radius-full); background: var(--md-primary-container); color: var(--md-on-primary-container); font-size: 11.5px; font-weight: 600; white-space: nowrap; }
 /* The step stacks from the top: the card, Back and Next right under it, then the cards with all
    the height left. A step longer than its room scrolls, and Back and Next stay at its foot. */
 .guide { flex: 0 1 auto; display: flex; min-height: min(220px, 100%); border-bottom: 1px solid var(--md-outline-variant); background: var(--md-surface-mid); }

@@ -391,7 +391,6 @@ export default {
   "p3d.unit.shed": "杼口、杼、筬框",
 
   "comp.guide": "チュートリアルの手順",
-  "learn.where": "第 {part} 部 · {at}/{of}",
   "learn.kicker": "第 {part} 部 · {name} · {at}/{of}",
   "learn.contents": "すべての手順",
   "learn.back": "戻る",

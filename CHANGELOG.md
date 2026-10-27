@@ -11,6 +11,7 @@ What changed in each release. Versions follow `package.json` and are tagged `vX.
 - The link format agreed, with tests for every field and value.
 - The section labels the griffe and its knives beside the griffe, wherever it is in its lift.
 - The cloth's colours: the button shows the warp and weft themselves; its panel has a row for each thread, the page's own colour picker (in place of the browser's), a swap, six ready-made pairs, Reset, and a small piece of twill in the two colours by its title; it hangs from its button.
+- The tutorial's place is on the step's card only: the Learn tab no longer grows with it.
 - The popovers follow their button when the window is resized, and shut as popovers do (their button, a press elsewhere, Esc).
 
 **M7, the tutorial, parts 1 to 3 (2026-10-27)** ([notes](design/m7-notes.md))
