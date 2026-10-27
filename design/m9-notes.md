@@ -1,4 +1,4 @@
-# M9 notes: Play, the four games
+# M9 notes: Games (first called Play), the four games
 
 - **Status:** built 2026-10-27/28, on the branch `release/v0.2.0` ([public-app.md](public-app.md) §2, §4). The games' logic passes in `pnpm test` (`tests/game/games.test.js`, `tests/accept/game.accept.test.js`), their links in `tests/sim/link.test.js` and `tests/app/links.test.js`, and the app with `?selftest` (P-1 to P-6).
 - **Page:** [`index.html`](../index.html): a fourth workspace, Play.

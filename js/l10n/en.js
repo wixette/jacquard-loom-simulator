@@ -417,8 +417,8 @@ export default {
   "learn.next.answer": "Answer the question first",
   "learn.taskDone": "Done!",
   "learn.go.weave": "Go to Weave",
-  "learn.go.create": "Go to Create",
-  "learn.go.play": "Go to Play",
+  "learn.go.create": "Go to Design",
+  "learn.go.play": "Go to Games",
   "learn.target": "The cloth it should weave",
   "learn.ask.step": "Step",
   "learn.ask.play": "Play",
@@ -538,7 +538,7 @@ export default {
   "img.model1810": "A model of a Jacquard loom, 1810, in the Musée des Arts et Métiers, Paris. Photo: MdeVicente, CC0",
   "img.portrait": "Jacquard's portrait, woven in silk by Michel-Marie Carquillat, Lyon, 1839. Photo: Wellcome Collection, CC BY 4.0 (scaled)",
   // ---- Create: the picture tool (js/app/components/picture.js, js/sim/picture.js) ------------
-  "ws.create": "Create",
+  "ws.create": "Design",
   "sheet.picture": "Picture",
   "view.cloth": "Cloth",
   "comp.picture": "The picture",
@@ -623,14 +623,14 @@ export default {
   "tut.tools-share.title": "Keep and share",
   "tut.tools-share.text": "Share, in the top bar, keeps your work three ways: a link that opens the loom just as it is (send it, or put it on a worksheet), a picture of the cloth, and the cards printed at true size, to punch and lace by hand. Every step of this tutorial has its link too.",
   "tut.tools-create.title": "Your own pictures",
-  "tut.tools-create.text": "The picture tool has a workspace of its own: Create. Draw or open a picture there, read it square by square or as damask, and Weave it puts its cards on your loom.",
+  "tut.tools-create.text": "The picture tool has a workspace of its own: Design. Draw or open a picture there, read it square by square or as damask, and Weave it puts its cards on your loom.",
 
   // ---- Play: the games (js/app/components/games.js, js/game/) ----------------------------------
-  "ws.play": "Play",
+  "ws.play": "Games",
   "sheet.game": "Game",
   "comp.games": "The games",
   "play.locked": "These cards are the game's: they change with it. To change them by hand, weave your own in Weave.",
-  "game.title": "Play",
+  "game.title": "Games",
   "game.machine": "The machine",
   "game.choose": "Choose a game",
   "game.name": "Name",
@@ -716,7 +716,7 @@ export default {
 
   // ---- the tutorial: part 5's games, and part 6 (0.2.0) ---------------------------------------
   "tut.tools-games.title": "Four games",
-  "tut.tools-games.text": "Play has four games on the loom: weave your name, set in a pixel font; send a friend a secret message, one byte a card; guess which cloth a few cards weave; and weave a figure the draw boy's way, cord by cord, before the cards do it for you.",
+  "tut.tools-games.text": "The Games workspace has four games on the loom: weave your name, set in a pixel font; send a friend a secret message, one byte a card; guess which cloth a few cards weave; and weave a figure the draw boy's way, cord by cord, before the cards do it for you.",
   "tut.part6": "What came next",
   "tut.part6.goal": "This part: where the cards went after the loom, to a calculating engine, to a census, and to the computer, and what changed on the way.",
   "tut.part6.recap": "Recap: the loom's cards held a fixed program; Babbage's held a program that calculates; Hollerith's held data. Computers came to hold all of it, as numbers in a memory they can read and write.",

@@ -51,8 +51,8 @@ export function modeOf() {
   return /** @type {Mode} */ ("phone");
 }
 
-/** The views in the order of the view menu: the 2D drawings, the cloth, then the 3D models. */
-const MENU_VIEWS = /** @type {const} */ (["section", "side", "front", "cloth", "3d", "u1", "u2", "u3", "u4", "u5"]);
+/** The views in the order of the view menu: the 2D drawings, the 3D models, then the cloth. */
+const MENU_VIEWS = /** @type {const} */ (["section", "side", "front", "3d", "u1", "u2", "u3", "u4", "u5", "cloth"]);
 
 /** The workspaces of this release, in the order the bar shows them. */
 const WORKSPACES = /** @type {const} */ (["learn", "weave", "create", "play"]);
@@ -634,11 +634,22 @@ export function createShell(store, root) {
     return panel;
   }
 
-  /** Create's left panel: the picture, and how it is read (js/app/components/picture.js). */
+  /**
+   * Design's left panel: the picture and how it is read (js/app/components/picture.js), and
+   * under it the cards it makes, with Weave it, as Learn stacks its guide over the cards.
+   */
   function picturesPanel() {
     const slot = el("div", { class: "picture-slot" });
-    const panel = el("aside", { class: "panel left" }, [rail("left"), el("div", { class: "panel-head" }, [label("h2", "pic.title")]), slot]);
+    const chain = el("div", { class: "chain-slot" });
+    const panel = el("aside", { class: "panel left on-design" }, [
+      rail("left"),
+      el("div", { class: "panel-head" }, [label("h2", "pic.title")]),
+      slot,
+      el("div", { class: "panel-head" }, [label("h2", "pic.cards"), weaveIt()]),
+      chain,
+    ]);
     put(picturePanel(store, { loom: "create" }), slot);
+    put(chainPanel(store), chain);
     return panel;
   }
 
@@ -652,21 +663,16 @@ export function createShell(store, root) {
     return b;
   }
 
-  /** The output: the cloth, and the thread followed below it; in Create, the cards the picture makes. */
+  /** The output: the cloth, and the thread followed below it; in Design and Games, the machine. */
   function outputPanel() {
-    // in Play, the machine beside the game, small: the head in section, on the game's loom
-    if (store.state.workspace === "play") {
+    // in Design and Games, the machine beside the cloth on the stage, small: the head in
+    // section, on the workspace's own loom
+    if (store.state.workspace === "play" || store.state.workspace === "create") {
       const machine = el("div", { class: "machine-slot" });
       const trace = el("div", { class: "trace-slot" });
       const panel = el("aside", { class: "panel right" }, [rail("right"), el("div", { class: "panel-head" }, [label("h2", "game.machine")]), machine, trace]);
       put(sectionView(store), machine);
       put(tracePanel(store), trace);
-      return panel;
-    }
-    if (store.state.workspace === "create") {
-      const chain = el("div", { class: "chain-slot" });
-      const panel = el("aside", { class: "panel right" }, [rail("right"), el("div", { class: "panel-head" }, [label("h2", "pic.cards")]), el("div", { class: "weave-it-row" }, [weaveIt()]), chain]);
-      put(chainPanel(store), chain);
       return panel;
     }
     const cloth = el("div", { class: "cloth-slot" });
@@ -693,7 +699,7 @@ export function createShell(store, root) {
     const host = el("div", { class: "pane-host" });
     const chip = el("button", { type: "button", class: "chip view-chip", "aria-haspopup": "menu" }, [el("span", { class: "view-name" }), icon("keyboard_arrow_down")]);
     follow((s) => [s.locale], () => (/** @type {HTMLElement} */ (chip.firstChild).textContent = viewName(v)));
-    // One flat list in two groups, the 2D drawings and the 3D models; a view on show in another
+    // One flat list: the 2D drawings, the 3D models, then the cloth; a view on show in another
     // pane says where, and choosing it swaps the two (js/app/arrange.js).
     chip.addEventListener("click", () => {
       const views = store.state.views;

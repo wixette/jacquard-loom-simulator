@@ -4,10 +4,11 @@ What changed in each release. Versions follow `package.json` and are tagged `vX.
 
 ## Unreleased (0.2.0)
 
-- **Create:** the picture tool as a workspace: paint a picture on point paper, take a ready-made one or open an image, and read it square by square or as damask; the cloth large, its long floats marked; Weave it puts its cards on your loom; Share links to the picture.
-- **Play:** four games: the name game, one byte per card (with a friend's secret to read), guess the cloth, and draw boy against Jacquard; each can be shared as a link.
+- **Design:** the picture tool as a workspace: paint a picture on point paper, take a ready-made one or open an image, and read it square by square or as damask; the cloth large, its long floats marked; Weave it puts its cards on your loom; Share links to the picture.
+- **Games:** four games: the name game, one byte per card (with a friend's secret to read), guess the cloth, and draw boy against Jacquard; each can be shared as a link.
 - **Learn:** the tutorial's parts 4 (four debugging challenges, each with the cloth it should weave), 5 (your tools) and 6 (what came next: Babbage, Lovelace, Hollerith, the computer).
-- The cloth as a view of its own, in the view menu.
+- The cloth as a view of its own, last in the view menu.
+- The workspaces are Learn, Weave, Design and Games (the last two first called Create and Play; their links keep `w=create` and `w=play`).
 
 ## 0.1.0
 

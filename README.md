@@ -22,7 +22,7 @@ install, on a computer or a phone, in ten languages.
 [2. How a card lifts a thread](#2-how-a-card-lifts-a-thread) →
 [3. Learn](#3-learn-the-tutorial) →
 [4. Weave](#4-weave-the-loom-is-yours) →
-[5. Create and Play](#5-create-and-play) →
+[5. Design and Games](#5-design-and-games) →
 [6. How faithful](#6-how-faithful-is-it) →
 [7. For developers](#7-for-developers)
 
@@ -76,7 +76,7 @@ never touched.
 | **2. How it works** | The loom in 3D and its units; the head cut through; a hole or a blank; a light card and a heavy lift; one card, one row; the chain as a program, and as a loop; what it is not |
 | **3. Weave** | Punch a card; plain weave; twill; satin, and why stepping by two fails; one hook, many threads; a picture, woven from its bottom row up |
 | **4. Challenge** | Four broken looms to fix (two cards swapped, a hole missing, the wrong tie-up, a card too many), each with the cloth it should weave |
-| **5. Your tools** | The picture tool, and why a picture read square by square falls apart; following a thread; the head and its tie-up; sharing; Create and Play |
+| **5. Your tools** | The picture tool, and why a picture read square by square falls apart; following a thread; the head and its tie-up; sharing; Design and Games |
 | **6. What came next** | Babbage's operation and variable cards; Ada Lovelace's notes; Hollerith's census cards, which held data; what a computer adds |
 
 Each step is one card: its text, often a question to predict before weaving, and a task
@@ -116,20 +116,20 @@ and the tutorial share a sheet below it, dragged up or down.
 
 <img src="./screenshots/readme-phone.png" alt="The simulator on a phone: the section on top, the controls under it, and a tutorial step in the sheet below" width="260">
 
-## 5. Create and Play
+## 5. Design and Games
 
-![Create: a heart painted on point paper on the left, its cloth large in the middle with the long loose threads read square by square marked in red, and its cards on the right](./screenshots/readme-create.png)
+![Design: a heart painted on point paper on the left with its cards under it, its cloth large in the middle with the long loose threads read square by square marked in red, and the head in section on the right](./screenshots/readme-create.png)
 
-**Create** is the picture tool. Paint a picture on point paper, 8 to 32 squares a side, take a
+**Design** is the picture tool. Paint a picture on point paper, 8 to 32 squares a side, take a
 ready-made one, or open an image (it is read in your browser and never uploaded). Then choose
 how the loom reads it: square by square, one square to a thread, or as damask, two satins
 woven in blocks, the way figured silk holds together. The cloth is drawn large, its long loose
 threads marked in red; **Weave it** puts the cards on your loom in Weave, and Share sends the
 picture as a link.
 
-**Play** has four games on a loom of their own:
+**Games** has four games on a loom of their own:
 
-![Play: the name game has woven "Ada" in damask, and reads the cloth back; the head is in section on the right](./screenshots/readme-play.png)
+![Games: the name game has woven "Ada" in damask, and reads the cloth back; the head is in section on the right](./screenshots/readme-play.png)
 
 
 | Game | What you do |

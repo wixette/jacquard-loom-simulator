@@ -302,6 +302,11 @@ dialog::backdrop { background: var(--md-scrim); }
 
 /* ---- Create: the picture on point paper, and how it is read (js/app/components/picture.js) ---- */
 .picture-slot { flex: 1 1 auto; min-height: 0; overflow-y: auto; }
+/* Design: the picture at its own height (scrolling if the panel is short), the cards under it with the room left */
+.panel.left.on-design > .picture-slot { flex: 0 1 auto; }
+.panel.left.on-design > .chain-slot { flex: 1 1 0; min-height: 120px; }
+.panel.left.on-design > .panel-head ~ .panel-head { border-top: 1px solid var(--md-outline-variant); }
+.panel-head .weave-it { height: 32px; padding: 0 14px; gap: 6px; font-size: 13px; }
 .panel.left.on-picture > .guide { flex: 0 1 auto; max-height: 55%; }
 .pic-box { display: flex; flex-direction: column; gap: 10px; padding: 10px 12px 14px; }
 .pic-tools { display: flex; align-items: center; gap: 4px; }

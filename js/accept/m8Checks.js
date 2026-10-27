@@ -51,11 +51,12 @@ async function opens({ store }) {
   if (store.state.current !== "create") bad.push(`the loom is ${store.state.current}`);
   if (store.state.views.join() !== "cloth") bad.push(`views ${store.state.views.join()}`);
   if (!$(".panel.left .pic-grid")) bad.push("no paper");
-  if (!$(".panel.right .weave-it")) bad.push("no Weave it");
+  if (!$(".panel.left .weave-it") || !$(".panel.left .chain-slot .chain-box")) bad.push("no cards and Weave it under the paper");
+  if (!$(".panel.right svg.section")) bad.push("no machine on the right");
   if (!$(".stage .cloth-box.large canvas")) bad.push("no large cloth");
   const l = store.state.looms.create.loom;
   if (l.pick !== l.deck.cards.length) bad.push("the cloth is not woven to its end");
-  return result("C-1", "Create opens on its loom: the paper on the left, the cloth alone and large, the cards and Weave it on the right", bad.length === 0, bad.slice(0, 4).join("; ") || `${l.deck.cards.length} cards, ${l.deck.hooks} hooks`);
+  return result("C-1", "Design opens on its loom: the paper on the left with its cards and Weave it under it, the cloth alone and large, the machine on the right", bad.length === 0, bad.slice(0, 4).join("; ") || `${l.deck.cards.length} cards, ${l.deck.hooks} hooks`);
 }
 
 /**
@@ -121,7 +122,7 @@ async function weaveIt({ store }) {
   /** @type {string[]} */
   const bad = [];
   const cards = JSON.stringify(store.state.looms.create.loom.deck.cards);
-  /** @type {HTMLElement} */ ($(".panel.right .weave-it")).click();
+  /** @type {HTMLElement} */ ($(".panel.left .weave-it")).click();
   await frames();
   if (store.state.workspace !== "weave" || store.state.current !== "mine") bad.push(`went to ${store.state.workspace}, ${store.state.current}`);
   if (JSON.stringify(store.state.looms.mine.loom.deck.cards) !== cards) bad.push("not the picture's cards");

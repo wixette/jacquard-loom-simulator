@@ -1,4 +1,4 @@
-# M8 notes: Create, and the tutorial's parts 4 and 5
+# M8 notes: Design (first called Create), and the tutorial's parts 4 and 5
 
 - **Status:** built 2026-10-27/28, on the branch `release/v0.2.0`. The first milestone of release 0.2.0 ([public-app.md](public-app.md) §4). The spec below passes in `pnpm test` (the picture's reading in `tests/sim/picture.test.js`, the tutorial's steps in `tests/teach/tutorial.test.js`, the links in `tests/sim/link.test.js` and `tests/app/links.test.js`) and on the app with `?selftest` (C-1 to C-6, and M7's L-1 walking the new steps).
 - **Page:** [`index.html`](../index.html): a third workspace, Create, after Learn and Weave.
@@ -42,3 +42,6 @@
 ## After the review (2026-10-28)
 
 7. **The cloth view sizes its squares as the side panel's cloth does:** by the width only, so they keep their size as rows are woven, and rows past the pane's height scroll (newest on top, where the scroll starts). Its squares are at most 33 px, 1.5 times the panel's 22, which leaves room for the red float marks; it first fitted the whole cloth in its pane, so its squares shrank as the cloth grew and started much larger than the panel's.
+8. **Design's cards are under the picture, and the machine is on the right,** as Learn stacks its guide over the cards and Games shows the machine: the left panel is what the learner works on (the picture, and the cards it makes, with Weave it), the stage shows the cloth, and the right the head in section on the picture's loom.
+9. **The workspaces are named Learn, Weave, Design and Games.** Create was too general for a picture tool, and Play could be read as "play the machine" (the transport's Play button); Design is the trade's own word (designers drew the figure on point paper, from which the cards were cut), and Games says what is there. The links keep `w=create` and `w=play`, and the code its ids: the link format is a contract (design/links.md).
+10. **The view menu lists the 2D drawings, the 3D models, then the cloth,** set apart by a divider: the cloth is what the loom makes, not a drawing of the machine.
