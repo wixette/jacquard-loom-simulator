@@ -2,9 +2,21 @@
 
 What changed in each release. Versions follow `package.json` and are tagged `vX.Y.Z` ([docs/development.md](docs/development.md), *Versions and releases*). Each stage's details are in its notes in [design/](design/).
 
-## Unreleased
+## 0.1.0
 
-**After M7's review (2026-10-27)**
+The first public release (2026-10-27): the Jacquard loom, whole, to weave on and to learn from, in
+the browser, on a computer or a phone, in ten languages.
+
+- **Weave:** punch the cards, turn the loom and watch it weave, in the head's section, from the
+  side and the front, or in 3D (the whole loom, and its five units alone), one view, two or four;
+  follow any thread from its hole to the cloth; heads of 8 to 64 hooks and their tie-ups; the
+  cloth's colours; share the loom as a link, save the cloth as a picture, print the cards.
+- **Learn:** a tutorial of 21 steps in three parts, the story, how it works and weaving by hand,
+  with historical pictures, questions to predict before weaving and tasks checked on the loom.
+- The machine's sounds, the keyboard, a dark theme, and a link format that is now a contract
+  ([design/links.md](design/links.md)).
+
+**Before the release (2026-10-27)**
 - A newcomer opens on Learn, with the whole loom in 3D; after that the app opens on the workspace last used.
 - The tutorial's step stacks from the top: Back and Next right under the text, the cards below with the room left.
 - The view menu in two groups, 2D drawings and 3D models, with the units by name (no "U1"…"U5"); a view on show is never shown twice (choosing it swaps the panes), the four-view grid holds one 3D model, and going to two or four views keeps those on show.
