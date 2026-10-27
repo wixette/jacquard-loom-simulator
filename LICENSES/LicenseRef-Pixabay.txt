@@ -1,0 +1,15 @@
+Pixabay Content License
+
+The sounds in audio/ were edited for this project (in Audacity) from sound effects published on
+Pixabay under the Pixabay Content License. Each file's source is listed in audio/SOURCES.md.
+
+The full terms are at https://pixabay.com/service/terms/ and summarised at
+https://pixabay.com/service/license-summary/. In short, as Pixabay summarises them:
+
+- Content may be used for free, without attribution, and modified or adapted into new works.
+- Content may not be sold or distributed on a standalone basis (as sound effects in their own
+  right, apart from this project); it may not be used on merchandise for sale, as part of a
+  trade mark, or in an immoral, illegal, misleading or deceptive way.
+
+So these files may be passed on as part of this simulator, but not as a sound collection of
+their own. Third-party rights may also apply, as the terms explain.

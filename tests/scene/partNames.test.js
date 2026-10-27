@@ -1,5 +1,6 @@
 // The 3D parts' names (js/scene/partNames.js): every part the models name has a message key,
-// whose English, filled in, is the model's own English name; so a part renamed in
+// whose English, filled in, is the model's own English name (without the unit's code, "U1 · ",
+// which the page does not show: design/ui-layout.md §4, The stage); so a part renamed in
 // blender/scripts, or a part added, fails here until its message follows. The repeat bands are
 // named by their own keys (band.*), not by the part's.
 
@@ -30,7 +31,7 @@ describe("the 3D parts' names", () => {
         if (typeof label !== "string" || node.extras?.band) continue;
         const m = partName(node.name);
         assert.ok(m.key in MESSAGES.en, `${node.name}: no message ${m.key}`);
-        assert.equal(t(m.key, m.params, "en"), label, node.name);
+        assert.equal(t(m.key, m.params, "en"), label.replace(/^U[1-5] · /, ""), node.name);
         n++;
       }
       assert.ok(n > 0, "no named parts");

@@ -61,7 +61,7 @@ The weaving tasks (parts 3 and 4) come before the tools (part 5), so the learner
   | The cylinder swinging out and turning to the next card | the card chain's wooden knock |
   | Refused (the chain has run out) | a dull stop |
 
-  Each play varies a little in pitch and loudness; playing fast, the sounds of a pick shorten, and above a speed only the batten sounds. A tutorial step setting the loom up is silent.
+  Each play varies a little in pitch and loudness, and is heard on the motion that makes it; playing fast, every sound still plays, cut short with a fade to fit within half a pick, near its own pitch, the batten loudest. A tutorial step setting the loom up is silent.
 - **Languages:** the sibling project's ten (English, Español, Français, Deutsch, Italiano, Português (Brasil), 简体中文, 繁體中文, 日本語, 한국어), with its machinery: one module per language holding every string of the page, the tutorial, the games and the part names, English the reference and the fallback, and a test that every language has every key (docs/conventions.md, *Code*). Part names are each language's own weaving terms (in French, Lyon's: griffe, crochet, aiguille, carton).
 - **Phones and Chromebooks:** the same app on every screen (ui-layout.md §5); the 3D view starts in its lighter quality on weak devices.
 - **Sharing:** every cloth can be saved as a picture and reopened by a link.
@@ -77,6 +77,6 @@ The work runs in milestones as before (M5 onward, each with its notes, acceptanc
 | **1.0.0: release** | **M11, the release review:** accessibility, the phone and tablet layouts in all ten languages at 320 and 375 px, the 3D view on weak devices, the README with screenshots, the feedback from the test with learners. | The same app, reviewed |
 
 - **Links** (docs/ui-design.md, P8): every link type the app supports (the loom, a workspace and view, a tutorial step, the picture tool's picture, each game's state) is designed in M5 with the store, in one module and one design note, compressed where a state is large (a 400-hook deck, a picture), and frozen from 0.1.0: a later release may add fields or link types, never rename, drop or reread one. The format is reviewed before 0.1.0 ships. The prototype's links (0.0.1) are not kept.
-- **Placeholders:** the sound files, the logo and the other artwork are provided later; until then each has a placeholder at its final path and name, so the real file drops in without a code change.
+- **Placeholders:** the sound files, the logo and the other artwork are provided later; until then each has a placeholder at its final path and name, so the real file drops in without a code change. The sounds came on 2026-10-27, edited from Pixabay sound effects (`audio/SOURCES.md`, the Pixabay Content License). The logo (`images/logo.svg`) stays for 0.1.0 to 1.0.0, and serves as the favicon too, until a logo and favicon are drawn as a pair.
 - **Translations:** written and reviewed by Claude; native speakers check them by hand before each release.
 - **The test with learners:** run by the project's author with friends; their feedback goes into the next milestone.

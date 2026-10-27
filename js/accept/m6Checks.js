@@ -1,7 +1,8 @@
 // M6's checks on the app (design/m6-notes.md), run by index.html?selftest: S-1 the frame at every
 // size (the phone's and the tablet's in frames of their sizes), S-2 the machine's settings beside
 // what they change, S-3 the transport and its stepper, S-4 the keyboard, S-5 the panels' edges,
-// S-6 every view in every arrangement, S-7 links, S-8 the languages, S-9 the sounds. S-10, the 3D
+// S-6 every view in every arrangement, S-7 links, S-8 the languages, S-9 the sounds, S-12 the
+// griffe's labels, S-13 clicks while the loom plays. S-10, the 3D
 // parts' names, needs no page (tests/scene/partNames.test.js).
 
 import { linkOf, openLink } from "../app/links.js";
@@ -51,7 +52,7 @@ export async function runM6Checks(page) {
   const { store } = page;
   act.setWorkspace(store, "weave");
   const out = [];
-  for (const check of [frame, settings, transport, keyboard, edges, views, links, languages, sounds]) {
+  for (const check of [frame, settings, transport, keyboard, edges, views, links, languages, sounds, griffeLabels, clicksWhilePlaying]) {
     act.reset(store);
     act.follow(store, null);
     out.push(await check(page));
@@ -150,13 +151,58 @@ async function settings({ store }) {
   }
   const palette = /** @type {HTMLElement | null} */ ($('.panel.right .panel-head [aria-haspopup="dialog"]'));
   palette?.click();
-  const warp = /** @type {HTMLInputElement | null} */ (document.getElementById("colour-warp"));
-  if (!warp) bad.push("no colours over the cloth");
+  /** @param {string} v */
+  const typeHex = (v) => {
+    const hex = /** @type {HTMLInputElement | null} */ (document.getElementById("colour-hex"));
+    if (!hex) return false;
+    hex.value = v;
+    hex.dispatchEvent(new Event("input"));
+    return true;
+  };
+  if (!typeHex("#336699")) bad.push("no colours over the cloth");
   else {
-    warp.value = "#336699";
-    warp.dispatchEvent(new Event("input"));
-    if (ls().warp !== "#336699") bad.push("the warp colour does not change the cloth");
+    if (ls().warp !== "#336699") bad.push("the picker does not set the warp");
+    /** @type {HTMLElement | null} */ ($("#colour-weft"))?.click();
+    typeHex("abc");
+    if (ls().weft !== "#aabbcc" || ls().warp !== "#336699") bad.push("the weft's row does not give the picker the weft");
+    await frames();
+    // the button shows the pair itself, warp in front; a ready-made pair sets both; swap swaps
+    const front = () => palette?.querySelector(".pair-swatch .warp")?.getAttribute("fill");
+    if (front() !== "#336699") bad.push(`the colours button shows ${front()}, not the warp`);
+    const pair = /** @type {HTMLElement | null} */ ($('.colours-pop .pair[data-pair="madder"]'));
+    pair?.click();
+    if (ls().warp !== "#9b2d30" || ls().weft !== "#e8c16a") bad.push("a ready-made pair does not set both colours");
+    await frames();
+    if (pair?.getAttribute("aria-pressed") !== "true") bad.push("the pair chosen is not marked");
+    /** @type {HTMLElement | null} */ ($(".colours-pop .swap"))?.click();
+    if (ls().warp !== "#e8c16a" || ls().weft !== "#9b2d30") bad.push("swap does not swap the colours");
+    if (/** @type {HTMLInputElement | null} */ (document.getElementById("colour-hex"))?.value !== "#9B2D30") bad.push("the picker does not follow the colours");
+    // a non-modal popover: it follows its button when the layout moves, its button and a press
+    // elsewhere and Esc shut it
+    const pop = () => /** @type {HTMLElement | null} */ ($(".colours-pop"));
+    /** Whether the panel hangs from its button: just under it, their right edges together. */
+    const hung = () => {
+      const [a, p] = [palette?.getBoundingClientRect(), pop()?.getBoundingClientRect()];
+      return !!a && !!p && Math.abs(p.right - a.right) <= 2 && Math.abs(p.top - a.bottom - 6) <= 2;
+    };
+    if (!hung()) bad.push("the panel does not hang from its button");
+    // the button moved (as a resize moves it): the panel follows
+    if (palette) palette.style.marginRight = "120px";
+    window.dispatchEvent(new Event("resize"));
+    await frames();
+    await frames();
+    if (!hung()) bad.push("the panel did not follow its button");
+    if (palette) palette.style.marginRight = "";
+    window.dispatchEvent(new Event("resize"));
+    await frames();
     palette?.click();
+    if (pop()) bad.push("its button does not shut it");
+    palette?.click();
+    document.body.dispatchEvent(new PointerEvent("pointerdown", { bubbles: true }));
+    if (pop()) bad.push("a press elsewhere does not shut it");
+    palette?.click();
+    document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+    if (pop()) bad.push("Esc does not shut it");
     act.setColours(store, { warp: act.WARP, weft: act.WEFT });
   }
   const loopButton = () => /** @type {HTMLElement} */ ($('.panel.left .panel-head [aria-pressed]'));
@@ -171,7 +217,7 @@ async function settings({ store }) {
     if (ls().loom.deck.loop !== want) bad.push("the chain's end does not lace or open the chain");
     if ($(".chain-end.lace")?.getAttribute("aria-checked") !== String(want) || loopButton()?.getAttribute("aria-pressed") !== String(want)) bad.push("the chain's end and the loop button disagree");
   }
-  return result("S-2", "The machine's settings sit with what they change: the head and tie-up over the cards, the colours over the cloth, the loop at the chain's end; the top bar holds only the app's own", bad.length === 0, bad.slice(0, 4).join("; ") || "top bar: Share, language, About; head 16 → 32 → 16 from its chip; warp from the palette; the chain laced and opened from its end");
+  return result("S-2", "The machine's settings sit with what they change: the head and tie-up over the cards, the colours over the cloth, the loop at the chain's end; the top bar holds only the app's own", bad.length === 0, bad.slice(0, 4).join("; ") || "top bar: Share, language, About; head 16 → 32 → 16 from its chip; warp and weft from the page's own picker, a pair and swap, the button showing them; the panel follows its button and shuts as a popover does; the chain laced and opened from its end");
 }
 
 /**
@@ -391,6 +437,18 @@ async function sounds({ store, shell }) {
     act.reset(store);
     await openLink(store, "#v=2&h=8&c=x.aa-55&l=1&p=1&s=3");
     if (heard.length) bad.push(`back, a reset and a link sound ${heard.join()}`);
+    // playing at the fastest speed, every sound of a pick is still heard
+    act.loadPreset(store, "plain");
+    act.lace(store, true);
+    act.reset(store);
+    act.setSpeed(store, 60);
+    heard = [];
+    act.play(store);
+    await sleep(1600);
+    act.pause(store);
+    act.setSpeed(store, 12);
+    const fast = ["lift", "turn", "shuttle", "beat", "fall", "press"].filter((n) => !heard.includes(n));
+    if (fast.length) bad.push(`at 60 picks a minute ${fast.join(", ")} not heard`);
     act.loadPreset(store, "blank");
     act.lace(store, false);
     heard = [];
@@ -400,5 +458,125 @@ async function sounds({ store, shell }) {
     sound.play = play;
     act.loadPreset(store, "plain");
   }
-  return result("S-9", "Each moment passed going forward sounds its own sound, once; back, a reset and a link are silent; a refusal sounds", bad.length === 0, bad.slice(0, 4).join("; ") || "lift, turn, shuttle, beat, fall, press; silent back, reset and link; the refusal heard");
+  // every file loads and decodes, and starts within a fifth of a second of its file's start
+  const { FILES, onset } = await import("../app/sound.js");
+  const ctx = new OfflineAudioContext(1, 1, 44100);
+  /** @type {string[]} */
+  const starts = [];
+  for (const [name, file] of Object.entries(FILES)) {
+    try {
+      const buffer = await ctx.decodeAudioData(await (await fetch(`audio/${file}`)).arrayBuffer());
+      const at = onset(buffer);
+      if (buffer.duration < 0.1 || at > 0.2) bad.push(`${file}: ${buffer.duration.toFixed(2)} s, starting at ${at.toFixed(2)} s`);
+      starts.push(`${name} ${Math.round(at * 1000)} ms`);
+    } catch {
+      bad.push(`${file} does not load`);
+    }
+  }
+  return result("S-9", "Each motion of a pick passed going forward sounds its own sound, once, as it happens, at every speed; back, a reset and a link are silent; a refusal sounds; every file loads, heard from where it starts", bad.length === 0, bad.slice(0, 4).join("; ") || `lift, turn, shuttle, beat, fall, press, stepped and at 60 picks a minute; silent back, reset and link; the refusal heard; started past ${starts.join(", ")}`);
+}
+
+/**
+ * S-12: at every moment of a pick, the section labels the griffe and its knives beside the
+ * griffe's frame where it is (not at the top of its travel), and on the same side throughout.
+ * @param {AppPage} page
+ * @returns {Promise<CheckResult>}
+ */
+async function griffeLabels({ store }) {
+  /** @type {string[]} */
+  const bad = [];
+  act.setViews(store, ["section"]);
+  const { t } = await import("../l10n/l10n.js");
+  /** @type {Set<string>} */
+  const sides = new Set();
+  for (let k = 0; k <= 6; k++) {
+    await frames();
+    const frameBox = document.querySelector(".stage svg.section .griffe-frame")?.getBoundingClientRect();
+    const find = (/** @type {string} */ key) => [...document.querySelectorAll(".stage svg.section .lbl")].find((e) => e.textContent === t(key))?.getBoundingClientRect();
+    const [griffe, knives] = [find("part.griffe"), find("part.knives")];
+    if (!frameBox || !griffe || !knives) {
+      bad.push(`moment ${k}: ${!griffe ? "no griffe label" : "no knives label"}`);
+    } else {
+      for (const [name, r] of /** @type {const} */ ([["griffe", griffe], ["knives", knives]])) {
+        if (r.bottom < frameBox.top - 4 || r.top > frameBox.bottom + 4) bad.push(`moment ${k}: the ${name} label is not beside the griffe`);
+        sides.add(`${name}:${r.left >= frameBox.right ? "right" : "left"}`);
+      }
+    }
+    act.step(store);
+  }
+  if (sides.size !== 2) bad.push(`the labels change sides: ${[...sides].join(", ")}`);
+  act.reset(store);
+  return result("S-12", "The griffe and its knives are labelled beside the griffe at every moment, on one side", bad.length === 0, bad.slice(0, 4).join("; ") || "7 moments, rest to shed closed and the next card");
+}
+
+/**
+ * S-13: while the loom plays, a click is never lost: no control of the frame is replaced or has
+ * its contents replaced (the play button's icon only when playing starts or stops), and a press
+ * on a part of something drawn anew (a hook in the section, a hole in the chain) counts once,
+ * even when it is redrawn between the press and its release.
+ * @param {AppPage} page
+ * @returns {Promise<CheckResult>}
+ */
+async function clicksWhilePlaying({ store }) {
+  /** @type {string[]} */
+  const bad = [];
+  const ls = () => store.state.looms[store.state.current];
+  act.setViews(store, ["section"]);
+  act.loadPreset(store, "twill");
+  await frames();
+  act.play(store);
+  await frames();
+  const icon = $('.player [data-act="play"] .icon');
+  /** @type {Set<string>} */
+  const replaced = new Set();
+  const CONTROLS = "button, select, input, label";
+  const watch = new MutationObserver((ms) => {
+    for (const m of ms) {
+      const t = /** @type {Element} */ (m.target);
+      const hit = [...m.removedNodes].some((n) => n instanceof Element && n.matches(CONTROLS)) || t.closest?.(CONTROLS);
+      if (hit) replaced.add(`${(t.closest?.(CONTROLS) ?? t).tagName.toLowerCase()}.${String((t.closest?.(CONTROLS) ?? t).className).split(" ")[0]}`);
+    }
+  });
+  for (const area of $$(".player, .panel-head, .setup-row, .pane-tools, .stage-tools, .trace-box, .topbar")) watch.observe(area, { childList: true, subtree: true, characterData: true });
+  await sleep(800);
+  watch.disconnect();
+  if (replaced.size) bad.push(`replaced while playing: ${[...replaced].join(", ")}`);
+  if ($('.player [data-act="play"] .icon') !== icon) bad.push("the pause button's icon is replaced while playing");
+  if (getComputedStyle(/** @type {Element} */ (icon)).pointerEvents !== "none") bad.push("a button's icon takes the pointer");
+  act.pause(store);
+  /** A press on an element, then a redraw, then the release where it was pressed. @param {Element} part @param {Element} root @param {() => void} redraw */
+  const pressAcross = async (part, root, redraw) => {
+    const r = part.getBoundingClientRect();
+    const at = { bubbles: true, button: 0, pointerId: 7, clientX: r.left + r.width / 2, clientY: r.top + r.height / 2 };
+    part.dispatchEvent(new PointerEvent("pointerdown", at));
+    redraw();
+    await frames();
+    if (part.isConnected) bad.push("the part was not redrawn, so the check checks nothing");
+    root.dispatchEvent(new PointerEvent("pointerup", at));
+    await frames();
+  };
+  const hook = /** @type {Element} */ (document.querySelector('.stage svg.section polyline.hook[data-hook="2"]'));
+  await pressAcross(hook, /** @type {Element} */ (document.querySelector(".stage svg.section")), () => act.touch(store));
+  if (ls().follow?.hook !== 2) bad.push("a hook pressed across a redraw was not followed");
+  act.follow(store, null);
+  const card = 1;
+  const before = ls().loom.deck.cards[card][0];
+  const hole = /** @type {Element} */ (document.querySelector(`.chain [data-card="${card}"] .hole`));
+  await pressAcross(hole, /** @type {Element} */ ($(".chain")), () => act.select(store, 3));
+  if (ls().loom.deck.cards[card][0] === before) bad.push("a hole pressed across a redraw was not punched");
+  // a plain click (no redraw between) counts once, not twice
+  const once = /** @type {HTMLElement} */ (document.querySelector(`.chain [data-card="${card}"] .hole`));
+  const r = once.getBoundingClientRect();
+  const at = { bubbles: true, button: 0, pointerId: 8, clientX: r.left + 2, clientY: r.top + 2 };
+  once.dispatchEvent(new PointerEvent("pointerdown", at));
+  once.dispatchEvent(new PointerEvent("pointerup", at));
+  // the click a press makes, sent late, as a tap's can be
+  await sleep(60);
+  once.dispatchEvent(new MouseEvent("click", { ...at, detail: 1 }));
+  if (ls().loom.deck.cards[card][0] !== before) bad.push("a plain click on a hole counted twice");
+  // a key's click (Enter on a hole) counts, even just after a press
+  /** @type {HTMLElement} */ (document.querySelector(`.chain [data-card="${card}"] .hole`)).click();
+  if (ls().loom.deck.cards[card][0] === before) bad.push("a key's click on a hole after a press did not count");
+  act.loadPreset(store, "plain");
+  return result("S-13", "While the loom plays no click is lost: no control is replaced, and a press on a part drawn anew counts once", bad.length === 0, bad.slice(0, 4).join("; ") || "0.8 s of playing: no control replaced; a hook and a hole pressed across a redraw; a click sent late counted once, a key's counted");
 }

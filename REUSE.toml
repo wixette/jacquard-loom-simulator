@@ -95,3 +95,11 @@ path = ["images/tutorial/portrait.jpg"]
 precedence = "override"
 SPDX-FileCopyrightText = "Wellcome Collection (photograph of the woven portrait of J.-M. Jacquard, Lyon, 1839)"
 SPDX-License-Identifier = "CC-BY-4.0"
+
+# The machine's sounds: edited for this project from Pixabay sound effects (audio/SOURCES.md),
+# under the Pixabay Content License; not to be distributed apart from the simulator.
+[[annotations]]
+path = "audio/*.mp3"
+precedence = "override"
+SPDX-FileCopyrightText = "Pixabay contributors (sources in audio/SOURCES.md); edited for jacquard-loom-simulator"
+SPDX-License-Identifier = "LicenseRef-Pixabay"

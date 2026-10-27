@@ -2,7 +2,32 @@
 
 What changed in each release. Versions follow `package.json` and are tagged `vX.Y.Z` ([docs/development.md](docs/development.md), *Versions and releases*). Each stage's details are in its notes in [design/](design/).
 
-## Unreleased
+## 0.1.0
+
+The first public release (2026-10-27): the Jacquard loom, whole, to weave on and to learn from, in
+the browser, on a computer or a phone, in ten languages.
+
+- **Weave:** punch the cards, turn the loom and watch it weave, in the head's section, from the
+  side and the front, or in 3D (the whole loom, and its five units alone), one view, two or four;
+  follow any thread from its hole to the cloth; heads of 8 to 64 hooks and their tie-ups; the
+  cloth's colours; share the loom as a link, save the cloth as a picture, print the cards.
+- **Learn:** a tutorial of 21 steps in three parts, the story, how it works and weaving by hand,
+  with historical pictures, questions to predict before weaving and tasks checked on the loom.
+- The machine's sounds, the keyboard, a dark theme, and a link format that is now a contract
+  ([design/links.md](design/links.md)).
+
+**Before the release (2026-10-27)**
+- A newcomer opens on Learn, with the whole loom in 3D; after that the app opens on the workspace last used.
+- The tutorial's step stacks from the top: Back and Next right under the text, the cards below with the room left.
+- The view menu in two groups, 2D drawings and 3D models, with the units by name (no "U1"…"U5"); a view on show is never shown twice (choosing it swaps the panes), the four-view grid holds one 3D model, and going to two or four views keeps those on show.
+- The link format agreed, with tests for every field and value.
+- The section labels the griffe and its knives beside the griffe, wherever it is in its lift.
+- The cloth's colours: the button shows the warp and weft themselves; its panel has a row for each thread, the page's own colour picker (in place of the browser's), a swap, six ready-made pairs, Reset, and a small piece of twill in the two colours by its title; it hangs from its button.
+- The tutorial's place is on the step's card only: the Learn tab no longer grows with it.
+- The machine's sounds: edited from Pixabay sound effects (audio/SOURCES.md), in place of the placeholders. Each is heard on the motion that makes it (the swish as the shuttle is thrown, the clack as the batten strikes), past any silence at its file's start. Every sound plays at every speed: faster than 30 picks a minute each is cut short with a fade, near its own pitch, the batten loudest.
+- Clicks are never lost while the loom plays: Pause, a hook in a drawing, a hole in the chain or on the bench, the cross-row menu and the 3D bands' labels (each had been redrawn every frame, between a click's press and its release).
+- The logo is the favicon too, in place of a square card that read as a Go board.
+- The popovers follow their button when the window is resized, and shut as popovers do (their button, a press elsewhere, Esc).
 
 **M7, the tutorial, parts 1 to 3 (2026-10-27)** ([notes](design/m7-notes.md))
 - Learn: 21 steps in three parts. The story (the draw loom; Bouchon, Falcon and Vaucanson; Jacquard; the woven portrait), with four historical pictures and their credits; how it works (the loom in 3D, the head cut through, a light card and a heavy lift, one card one row, the chain as a program and a loop, what the loom is not); weaving by hand (punch a card, plain weave, twill, satin and why stepping by two fails, the tie-up's repeats, a picture woven bottom-up).

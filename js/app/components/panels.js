@@ -6,7 +6,7 @@ import { say, t, tn } from "../../l10n/l10n.js";
 import { STOP_KEYS, STOPS } from "../../sim/loom.js";
 import { endCount } from "../../sim/tieup.js";
 import { traceOf } from "../../sim/trace.js";
-import { el, icon, setTip } from "../../ui/components.js";
+import { el, icon, setText, setTip } from "../../ui/components.js";
 import { BenchCard, ChainList } from "../../view2d/chainEditor.js";
 import { ClothView } from "../../view2d/clothView.js";
 import { follow, followCloth, followHook, lace, pause, play, punch, reset, select, setSpeed, step, stepBack } from "../looms.js";
@@ -203,22 +203,27 @@ export function transportPanel(store, o = {}) {
       setTip(b.fwd, t("transport.fwd.tip"));
       setTip(b.reset, t("transport.reset.tip"));
       setTip(b.play, t(ls.playing ? "transport.pause" : "transport.play"));
-      b.play.replaceChildren(icon(ls.playing ? "pause" : "play_arrow"));
+      // the icon is changed only when it changes: replaced under a press (every frame, playing),
+      // it would lose the click that pauses
+      if (b.play.dataset.playing !== String(ls.playing)) {
+        b.play.dataset.playing = String(ls.playing);
+        b.play.replaceChildren(icon(ls.playing ? "pause" : "play_arrow"));
+      }
       speed.value = String(ls.speed);
-      speedOut.textContent = tn("transport.speed", ls.speed);
+      setText(speedOut, tn("transport.speed", ls.speed));
       moments.setAttribute("aria-label", t("transport.moments"));
       const at = STOPS.findIndex((x) => Math.abs(x - snap.phi) < 1e-9);
       const here = snap.phi === 0 ? STOPS.length - 1 : at;
       for (const li of /** @type {HTMLCollectionOf<HTMLElement>} */ (moments.children)) {
         const i = Number(li.dataset.stop);
-        /** @type {HTMLElement} */ (li.lastElementChild).textContent = t(STOP_KEYS[i]);
+        setText(/** @type {HTMLElement} */ (li.lastElementChild), t(STOP_KEYS[i]));
         li.classList.toggle("done", snap.phi > 0 && STOPS[i] <= snap.phi + 1e-9);
         li.classList.toggle("here", i === here);
         if (i === here) li.setAttribute("aria-current", "step");
         else li.removeAttribute("aria-current");
       }
       const card = snap.cardIndex === null ? t("where.noCard") : t("where.card", { card: snap.cardIndex + 1 });
-      where.textContent = tn("where", snap.cloth.length, { pick: snap.pick + 1, card, percent: Math.round(snap.phi * 100), ends: endCount(snap.tie, snap.deck.hooks) });
+      setText(where, tn("where", snap.cloth.length, { pick: snap.pick + 1, card, percent: Math.round(snap.phi * 100), ends: endCount(snap.tie, snap.deck.hooks) }));
     },
     unmount() {
       box.remove();
@@ -284,8 +289,8 @@ export function tracePanel(store, o = {}) {
     },
     update(s) {
       const ls = loomOf(s, o.loom);
-      text.textContent = ls.follow ? say(traceOf(ls.loom.snapshot(), ls.follow).text) : t("trace.hint");
-      stop.textContent = t("follow.stop");
+      setText(text, ls.follow ? say(traceOf(ls.loom.snapshot(), ls.follow).text) : t("trace.hint"));
+      setText(stop, t("follow.stop"));
       stop.hidden = !ls.follow;
     },
     unmount() {

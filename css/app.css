@@ -152,7 +152,7 @@ body.resizing .stage { pointer-events: none; }
 .app.landscape .under-stage .caption { display: none; }
 
 /* ---- the setup popover and the about dialog ---------------------------------------------------- */
-.popover { position: fixed; z-index: 25; display: grid; grid-template-columns: auto 1fr; gap: 10px 14px; align-items: center; padding: 14px 16px; border-radius: var(--radius-m); background: var(--md-surface-highest); box-shadow: 0 8px 28px rgba(0, 0, 0, 0.5); }
+.popover { position: fixed; z-index: 25; max-height: calc(100dvh - 16px); overflow-y: auto; display: grid; grid-template-columns: auto 1fr; gap: 10px 14px; align-items: center; padding: 14px 16px; border-radius: var(--radius-m); background: var(--md-surface-highest); box-shadow: 0 8px 28px rgba(0, 0, 0, 0.5); }
 .popover label { font-size: 12px; color: var(--md-on-surface-variant); }
 .popover .btn { justify-self: start; height: 32px; padding: 0 12px; }
 .setup-row { padding: 8px 10px 0; }
@@ -162,24 +162,23 @@ body.resizing .stage { pointer-events: none; }
 .popover input[type="color"] { width: 44px; height: 28px; padding: 0; border: 1px solid var(--md-outline-variant); border-radius: 6px; background: none; }
 
 /* ---- the guide (Learn): the tutorial's step card above the panel it needs ---------------------- */
-/* Learn is a mode: the stage is framed in blue, the Learn tab carries the tutorial's place */
+/* Learn is a mode: its tab is selected and the stage framed in blue; the step's card says where */
 .app[data-ws="learn"] .stage::after { content: ""; position: absolute; inset: 0; z-index: 4; border: 2px solid var(--md-primary); pointer-events: none; }
-.ws-where { margin-left: 8px; padding: 1px 8px; border-radius: var(--radius-full); background: var(--md-primary-container); color: var(--md-on-primary-container); font-size: 11.5px; font-weight: 600; white-space: nowrap; }
-.guide { flex: 1 1 auto; display: flex; min-height: 0; border-bottom: 1px solid var(--md-outline-variant); background: var(--md-surface-mid); }
+/* The step stacks from the top: the card, Back and Next right under it, then the cards with all
+   the height left. A step longer than its room scrolls, and Back and Next stay at its foot. */
+.guide { flex: 0 1 auto; display: flex; min-height: min(220px, 100%); border-bottom: 1px solid var(--md-outline-variant); background: var(--md-surface-mid); }
 .panel.left > .guide ~ .bench-slot { height: clamp(110px, 20%, 170px); }
-/* under the guide the chain takes only the room its cards need, up to two fifths */
-.panel.left > .guide ~ .chain-slot { flex: 0 1 auto; max-height: 34%; display: flex; flex-direction: column; }
-.panel.left > .guide ~ .chain-slot > .chain-box { flex: 0 1 auto; height: auto; min-height: 0; }
+.panel.left > .guide ~ .chain-slot { flex: 1 1 0; min-height: 110px; }
 /* where the step does not use the cards (the story), the guide has the panel */
 .panel.left.guide-only > :not(.guide):not(.rail) { display: none; }
-.panel.left.guide-only > .guide { flex: 1 1 auto; max-height: none; border-bottom: 0; }
-.sheet-body > .guide { flex: 1 1 auto; max-height: none; border-bottom: 0; }
+.panel.left.guide-only > .guide { border-bottom: 0; }
+.sheet-body > .guide { border-bottom: 0; }
 .guide-box { flex: 1; display: flex; flex-direction: column; min-width: 0; min-height: 0; }
 .step-head { flex: none; display: flex; align-items: center; gap: 6px; padding: 8px 8px 4px 16px; }
 .step-kicker { flex: 1; margin: 0; font-size: 11px; font-weight: 650; letter-spacing: 0.08em; text-transform: uppercase; color: var(--md-primary); }
 .step-head .btn.icon-only { width: 34px; height: 34px; }
 .step-head .icon { width: 20px; height: 20px; }
-.step-scroll { flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: 0 12px 4px; scrollbar-gutter: stable; }
+.step-scroll { flex: 0 1 auto; min-height: 0; overflow-y: auto; padding: 0 12px 4px; scrollbar-gutter: stable; }
 .step-card { padding: 14px 16px; border: 1px solid var(--card-edge); border-radius: var(--radius-l); background: var(--md-surface-high); }
 .step-card h3 { margin: 0 0 8px; font-size: 17px; line-height: 1.3; outline: none; }
 .step-card p { margin: 0 0 10px; max-width: 68ch; user-select: text; -webkit-user-select: text; }
@@ -249,3 +248,54 @@ dialog::backdrop { background: var(--md-scrim); }
 .unit-card { position: absolute; top: calc(100% + 6px); left: 0; z-index: 5; width: min(380px, 100%); padding: 12px 14px; border-radius: var(--radius-m); background: var(--md-surface-highest); box-shadow: 0 8px 28px rgba(0, 0, 0, 0.5); }
 .unit-card h3 { margin: 0 0 6px; font-size: 14px; font-weight: 620; color: var(--md-on-surface); }
 .unit-card p { margin: 0; font-size: 13px; line-height: 1.5; color: var(--md-on-surface-variant); user-select: text; -webkit-user-select: text; }
+
+/* the section's zoom: a plain magnifier, no control of its own, marks the chips beside it as a
+   zoom (on a phone, where room is short, the chips alone) */
+.zoom-tool { display: inline-flex; align-items: center; gap: 4px; }
+.zoom-mark { display: inline-flex; color: var(--md-on-surface-variant); pointer-events: none; }
+.zoom-mark .icon { width: 18px; height: 18px; }
+.app:not(.desktop) .zoom-mark { display: none; }
+
+/* ---- the cloth's colours: the button shows the pair, the panel sets each and offers pairs -------- */
+.pair-swatch rect { stroke: color-mix(in srgb, currentColor 55%, transparent); stroke-width: 1; }
+.colours-btn .pair-swatch { width: 22px; height: 22px; }
+.popover.colours-pop { display: flex; flex-direction: column; align-items: stretch; gap: 10px; width: min(320px, calc(100vw - 16px)); padding: 14px 14px 12px; }
+.popover-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.colour-sample { display: block; width: 72px; height: 30px; border-radius: 6px; overflow: hidden; border: 1px solid var(--md-outline-variant); }
+.colour-sample svg { display: block; width: 100%; height: 100%; shape-rendering: crispEdges; }
+.popover-title { margin: 0 2px; font-size: 14px; font-weight: 620; color: var(--md-on-surface); }
+.popover-sub { margin: 4px 2px 0; font-size: 11px; font-weight: 650; letter-spacing: 0.08em; text-transform: uppercase; color: var(--md-on-surface-variant); }
+.colour-threads { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; column-gap: 4px; }
+.colour-threads .swap { grid-column: 2; grid-row: 1 / 3; width: 36px; height: 36px; }
+/* each thread is a button that gives it to the picker below; the one being set is marked */
+.colour-row { grid-column: 1; display: grid; grid-template-columns: 36px minmax(0, 1fr) auto; align-items: center; gap: 12px; padding: 6px 8px; border: 1px solid transparent; border-radius: var(--radius-s); background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+.colour-row:hover { background: color-mix(in srgb, var(--md-on-surface) 6%, transparent); }
+.colour-row[aria-pressed="true"] { border-color: var(--md-primary); background: color-mix(in srgb, var(--md-primary) 10%, transparent); }
+.colour-row:focus-visible { outline: 2px solid var(--md-primary); outline-offset: 1px; }
+.swatch { width: 36px; height: 36px; border-radius: 9px; border: 1px solid var(--md-outline); }
+.colour-text { display: flex; flex-direction: column; min-width: 0; }
+.colour-name { font-size: 13.5px; font-weight: 600; color: var(--md-on-surface); }
+.colour-hint { font-size: 11.5px; line-height: 1.35; color: var(--md-on-surface-variant); }
+.colour-row .hex { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: 12px; color: var(--md-on-surface-variant); }
+.colour-pairs { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 2px; }
+.pair { display: grid; place-items: center; width: 40px; height: 40px; padding: 0; border: 1px solid var(--md-outline-variant); border-radius: 10px; background: var(--md-surface-high); color: var(--md-on-surface); cursor: pointer; }
+.pair:hover { border-color: var(--md-outline); }
+.pair[aria-pressed="true"] { border-color: var(--md-primary); box-shadow: inset 0 0 0 1px var(--md-primary); }
+.pair .pair-swatch { width: 28px; height: 28px; }
+.popover-foot { display: flex; justify-content: flex-end; margin-top: 2px; padding-top: 10px; border-top: 1px solid var(--md-outline-variant); }
+
+/* the page's colour picker (js/ui/colourPicker.js): saturation across and brightness up a square
+   of the hue, the hue below it, the hex value */
+.cp { display: flex; flex-direction: column; gap: 10px; padding: 2px 2px 0; }
+.cp-area { position: relative; height: 140px; border-radius: var(--radius-s); cursor: crosshair; touch-action: none; outline: none; background: linear-gradient(to top, #000, transparent), linear-gradient(to right, #fff, hsl(calc(var(--hue, 0) * 1deg) 100% 50%)); }
+.cp-area:focus-visible { box-shadow: 0 0 0 2px var(--md-primary); }
+.cp-thumb { position: absolute; width: 16px; height: 16px; margin: -8px 0 0 -8px; border: 2px solid #fff; border-radius: 50%; box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.5), 0 1px 4px rgba(0, 0, 0, 0.5); pointer-events: none; }
+.cp-row { display: flex; align-items: center; gap: 10px; }
+.cp-swatch { flex: none; width: 24px; height: 24px; border-radius: 6px; border: 1px solid var(--md-outline); }
+.cp-hue { flex: 1; height: 14px; margin: 0; border-radius: 7px; -webkit-appearance: none; appearance: none; background: linear-gradient(to right, #f00, #ff0, #0f0, #0ff, #00f, #f0f, #f00); cursor: pointer; }
+.cp-hue::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border: 2px solid #fff; border-radius: 50%; background: transparent; box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.5); }
+.cp-hue::-moz-range-thumb { width: 12px; height: 12px; border: 2px solid #fff; border-radius: 50%; background: transparent; box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.5); }
+.cp-hue:focus-visible { outline: 2px solid var(--md-primary); outline-offset: 2px; }
+.cp-hex-row { display: flex; align-items: center; gap: 10px; font-size: 12px; color: var(--md-on-surface-variant); }
+.cp-hex { width: 96px; padding: 5px 8px; border: 1px solid var(--md-outline-variant); border-radius: var(--radius-s); background: var(--md-surface-high); color: var(--md-on-surface); font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: 12.5px; text-transform: uppercase; }
+.cp-hex:focus { outline: 2px solid var(--md-primary); outline-offset: -1px; }

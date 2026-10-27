@@ -8,9 +8,42 @@ import * as act from "./looms.js";
 /** @import { AppStore } from "./looms.js" */
 
 const KEY = "jacquard.tutorial";
+/** The workspace last used on this device (design/ui-layout.md §3: the app opens where it was left). */
+const WORKSPACE = "jacquard.workspace";
 
 /** Weave's views, kept while Learn shows the steps' own, to give back on leaving. @type {WeakMap<AppStore, import("../sim/link.js").StageView[]>} */
 const weaveViews = new WeakMap();
+
+/**
+ * The workspace the app opens on, without a link: the one last used on this device, or Learn
+ * for a newcomer, who starts with the whole loom in 3D.
+ * @returns {import("./looms.js").Workspace}
+ */
+export function openingWorkspace() {
+  try {
+    return localStorage.getItem(WORKSPACE) === "weave" ? "weave" : "learn";
+  } catch {
+    return "learn";
+  }
+}
+
+/**
+ * Remember the workspace each time it changes, for the next time the app opens.
+ * @param {AppStore} store
+ * @returns {() => void}
+ */
+export function watchWorkspace(store) {
+  return store.watch(
+    (s) => [s.workspace],
+    () => {
+      try {
+        localStorage.setItem(WORKSPACE, store.state.workspace);
+      } catch {
+        // not remembered
+      }
+    },
+  );
+}
 
 /**
  * The place and the steps done, as this device remembers them.
@@ -44,8 +77,8 @@ function remember(store) {
 export function goTo(store, i) {
   const n = Math.max(0, Math.min(STEPS.length - 1, i));
   const { loom, follow } = loomAt(n);
-  act.setLoom(store, loom, follow === null ? null : { hook: follow, end: null, pick: null }, "tutorial");
-  act.setLearn(store, { step: n });
+  // the step and its loom in one update: the step done is never judged on the other's loom
+  act.setLoom(store, loom, follow === null ? null : { hook: follow, end: null, pick: null }, "tutorial", { learn: { ...store.state.learn, step: n } });
   act.setViews(store, shownAt(n).views);
   act.setSectionView(store, "whole");
   remember(store);

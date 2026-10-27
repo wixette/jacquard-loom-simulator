@@ -70,6 +70,9 @@ export function shuttleAcross(phi) {
   return ease(phi, P.shuttle);
 }
 
+/** When the batten strikes the weft into the cloth: three fifths into its beat. */
+export const BATTEN_STRIKE = P.beat[0] + (P.beat[1] - P.beat[0]) * 0.6;
+
 /**
  * The batten's swing: 0 at rest, -1 pushed back for the shuttle, +1 at the strike.
  * @param {number} phi
@@ -78,10 +81,9 @@ export function shuttleAcross(phi) {
 export function battenSwing(phi) {
   const back = ease(phi, [P.griffeRise[1], P.shuttle[0]]);
   const [a, b] = P.beat;
-  const strike = a + (b - a) * 0.6;
   if (phi < a) return back > 0 ? -back : 0;
-  if (phi < strike) return -1 + 2 * ease(phi, [a, strike]);
-  return 1 - ease(phi, [strike, b]);
+  if (phi < BATTEN_STRIKE) return -1 + 2 * ease(phi, [a, BATTEN_STRIKE]);
+  return 1 - ease(phi, [BATTEN_STRIKE, b]);
 }
 
 /** True once this pick's weft has been beaten into the cloth. */

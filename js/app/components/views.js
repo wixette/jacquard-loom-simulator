@@ -9,6 +9,7 @@ import { frontLayout, FrontView } from "../../view2d/frontView.js";
 import { sectionLayout } from "../../view2d/layout.js";
 import { SectionView } from "../../view2d/sectionView.js";
 import { sideLayout, SideView } from "../../view2d/sideView.js";
+import { onPress } from "../../ui/components.js";
 import { followEnd, followHook } from "../looms.js";
 import { loomOf, shown } from "./component.js";
 /** @import { AppStore, LoomId } from "../looms.js" */
@@ -41,9 +42,9 @@ export function sectionView(store, o = {}) {
   let view;
   /** @type {() => void} */
   let restore;
-  /** @param {Event} e */
-  const click = (e) => {
-    const p = /** @type {Element} */ (e.target).closest("[data-hook]");
+  /** @param {Element} part */
+  const click = (part) => {
+    const p = part.closest("[data-hook]");
     if (p instanceof SVGElement && p.dataset.hook !== undefined) followHook(store, Number(p.dataset.hook), o.loom);
   };
   return {
@@ -52,7 +53,7 @@ export function sectionView(store, o = {}) {
       host = h;
       restore = asView(h);
       view = new SectionView(h);
-      view.svg.addEventListener("click", click);
+      onPress(view.svg, click);
     },
     watch(s) {
       const ls = loomOf(s, o.loom);
@@ -121,9 +122,9 @@ export function frontView(store, o = {}) {
   let view;
   /** @type {() => void} */
   let restore;
-  /** @param {Event} e */
-  const click = (e) => {
-    const p = /** @type {Element} */ (e.target).closest("[data-end], [data-hook]");
+  /** @param {Element} part */
+  const click = (part) => {
+    const p = part.closest("[data-end], [data-hook]");
     if (!(p instanceof SVGElement)) return;
     if (p.dataset.end) followEnd(store, Number(p.dataset.end), o.loom);
     else if (p.dataset.hook) followHook(store, Number(p.dataset.hook), o.loom);
@@ -134,7 +135,7 @@ export function frontView(store, o = {}) {
       host = h;
       restore = asView(h);
       view = new FrontView(h);
-      view.svg.addEventListener("click", click);
+      onPress(view.svg, click);
     },
     watch(s) {
       const ls = loomOf(s, o.loom);
@@ -153,14 +154,14 @@ export function frontView(store, o = {}) {
   };
 }
 
-/** The unit each 3D view of the stage shows (js/sim/link.js, STAGE_VIEWS), with its code. */
+/** The unit each 3D view of the stage shows (js/sim/link.js, STAGE_VIEWS). */
 export const UNIT_VIEWS = /** @type {const} */ ({
-  "3d": { unit: "machine", code: "" },
-  u1: { unit: "selector", code: "U1" },
-  u2: { unit: "cylinder", code: "U2" },
-  u3: { unit: "griffe", code: "U3" },
-  u4: { unit: "harness", code: "U4" },
-  u5: { unit: "shed", code: "U5" },
+  "3d": { unit: "machine" },
+  u1: { unit: "selector" },
+  u2: { unit: "cylinder" },
+  u3: { unit: "griffe" },
+  u4: { unit: "harness" },
+  u5: { unit: "shed" },
 });
 
 /**
@@ -181,6 +182,8 @@ export function unitsView(store, o = {}) {
   /** @type {string | null} */
   let failed = null;
   let gone = false;
+  /** The language the bands were last labelled in. */
+  let labelled = "";
   /** @type {() => void} */
   let restore;
   const say = () => (note.textContent = failed !== null ? t("units.failed", { error: failed }) : t("units.loading", { percent: Math.round(progress * 100) }));
@@ -224,7 +227,11 @@ export function unitsView(store, o = {}) {
     update(s) {
       if (note.isConnected) say();
       if (!view?.loaded) return;
-      view.relabel();
+      // the bands' labels are buttons: written only when the language changes, not every frame
+      if (labelled !== s.locale) {
+        labelled = s.locale;
+        view.relabel();
+      }
       const ls = loomOf(s, o.loom);
       view.pose(ls.loom.snapshot(), ls.follow ? ls.follow.hook : 0);
     },

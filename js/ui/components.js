@@ -47,6 +47,62 @@ export function el(tag, attrs = {}, children = []) {
 }
 
 /**
+ * Set an element's text only when it differs: a part of the page written on every frame while
+ * the loom plays would otherwise be replaced under the pointer, and a click on it lost.
+ * @param {Element} e
+ * @param {string} text
+ */
+export function setText(e, text) {
+  if (e.textContent !== text) e.textContent = text;
+}
+
+/**
+ * A click on a part of something drawn anew as the loom moves (a drawing every frame while it
+ * plays, the chain at every card): the part is read when it is pressed, and the press counts as
+ * a click when it is let go on the same root close by, so a redraw between the two cannot lose
+ * it (a browser drops a click whose press and release fall on different elements). A click with
+ * no press before it (a key's: Enter on a hole, the F key, a check's) counts as well, once.
+ * @param {Element} svg the root, which is not redrawn
+ * @param {(part: Element) => void} run
+ * @returns {() => void} the way to take the listeners away
+ */
+export function onPress(svg, run) {
+  /** @type {{ target: Element; x: number; y: number; id: number } | null} */
+  let down = null;
+  /** Where and when the last press was let go (it counted), to know its click again. @type {{ x: number; y: number; at: number } | null} */
+  let counted = null;
+  const press = (/** @type {PointerEvent} */ e) => {
+    counted = null;
+    down = e.button === 0 ? { target: /** @type {Element} */ (e.target), x: e.clientX, y: e.clientY, id: e.pointerId } : null;
+  };
+  const release = (/** @type {PointerEvent} */ e) => {
+    const d = down;
+    down = null;
+    if (!d || e.pointerId !== d.id || Math.hypot(e.clientX - d.x, e.clientY - d.y) > 6) return;
+    run(d.target);
+    counted = { x: e.clientX, y: e.clientY, at: e.timeStamp };
+  };
+  // The click a press makes (when the part was not redrawn) is that press again: known by where
+  // and soon after it was let go, however late the browser sends it (a tap's comes later than a
+  // mouse's), and taken once. A click no pointer made (a key's: detail 0) always counts.
+  const click = (/** @type {MouseEvent} */ e) => {
+    const c = counted;
+    counted = null;
+    if (c && e.detail > 0 && e.timeStamp - c.at < 1000 && Math.hypot(e.clientX - c.x, e.clientY - c.y) <= 10) return;
+    run(/** @type {Element} */ (e.target));
+  };
+  const root = /** @type {HTMLElement} */ (svg);
+  root.addEventListener("pointerdown", press);
+  root.addEventListener("pointerup", release);
+  root.addEventListener("click", click);
+  return () => {
+    root.removeEventListener("pointerdown", press);
+    root.removeEventListener("pointerup", release);
+    root.removeEventListener("click", click);
+  };
+}
+
+/**
  * Replace each <i data-icon="name"> placeholder under root with its icon.
  * @param {ParentNode} root
  */
@@ -58,16 +114,13 @@ export function applyIcons(root) {
 
 /**
  * Translate the texts under root: data-l10n sets the text, data-l10n-tip the tooltip and the
- * screen-reader name (an icon button's only name).
+ * screen-reader name (an icon button's only name), data-l10n-name the name alone.
  * @param {ParentNode} root
  */
 export function applyL10n(root) {
-  for (const e of /** @type {NodeListOf<HTMLElement>} */ (root.querySelectorAll("[data-l10n]"))) {
-    e.textContent = t(/** @type {string} */ (e.dataset.l10n));
-  }
-  for (const e of /** @type {NodeListOf<HTMLElement>} */ (root.querySelectorAll("[data-l10n-tip]"))) {
-    setTip(e, t(/** @type {string} */ (e.dataset.l10nTip)));
-  }
+  for (const e of /** @type {NodeListOf<HTMLElement>} */ (root.querySelectorAll("[data-l10n]"))) setText(e, t(/** @type {string} */ (e.dataset.l10n)));
+  for (const e of /** @type {NodeListOf<HTMLElement>} */ (root.querySelectorAll("[data-l10n-tip]"))) setTip(e, t(/** @type {string} */ (e.dataset.l10nTip)));
+  for (const e of /** @type {NodeListOf<HTMLElement>} */ (root.querySelectorAll("[data-l10n-name]"))) e.setAttribute("aria-label", t(/** @type {string} */ (e.dataset.l10nName)));
 }
 
 // ---- tooltips ---------------------------------------------------------------------------------

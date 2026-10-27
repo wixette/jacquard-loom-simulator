@@ -150,3 +150,73 @@ describe("in Learn a step locks what it does not use (design/m7-notes.md, decisi
   });
 });
 
+
+describe("the card tools, the loop and the play loop (js/app/looms.js)", () => {
+  const cards = (/** @type {Store<AppState>} */ s) => s.state.looms.mine.loom.deck.cards.map((c) => c.map(Number).join(""));
+  it("duplicate, move, invert and remove act on the selected card, and say what they did", () => {
+    const { store } = setup();
+    act.loadPreset(store, "twill", "mine");
+    const before = cards(store);
+    act.select(store, 1, "mine");
+    act.duplicate(store, "mine");
+    assert.deepEqual(cards(store), [before[0], before[1], before[1], before[2], before[3]].map(String));
+    assert.equal(store.state.looms.mine.selected, 2);
+    act.move(store, -1, "mine");
+    assert.equal(store.state.looms.mine.selected, 1);
+    act.move(store, -1, "mine");
+    act.move(store, -1, "mine");
+    assert.equal(store.state.looms.mine.selected, 0, "a card goes no earlier than the first");
+    act.invert(store, "mine");
+    assert.equal(cards(store)[0], [...before[1]].map((b) => (b === "1" ? "0" : "1")).join(""));
+    assert.deepEqual(store.state.looms.mine.status.msg, { key: "status.inverted", params: { card: 1 } });
+    act.remove(store, "mine");
+    assert.equal(cards(store).length, 4);
+    for (let i = 0; i < 5; i++) act.remove(store, "mine");
+    assert.equal(cards(store).length, 0, "the chain can be emptied");
+    const rev = store.state.looms.mine.rev;
+    act.remove(store, "mine");
+    act.duplicate(store, "mine");
+    act.invert(store, "mine");
+    assert.equal(store.state.looms.mine.rev, rev, "with no cards they do nothing");
+  });
+  it("lacing the chain says so, and lacing it again changes nothing", () => {
+    const { store } = setup();
+    act.lace(store, true, "mine");
+    assert.equal(store.state.looms.mine.loom.deck.loop, true);
+    assert.deepEqual(store.state.looms.mine.status.msg, { key: "status.loopOn" });
+    const rev = store.state.looms.mine.rev;
+    act.lace(store, true, "mine");
+    assert.equal(store.state.looms.mine.rev, rev);
+    act.lace(store, false, "mine");
+    assert.deepEqual(store.state.looms.mine.status.msg, { key: "status.loopOff" });
+  });
+  it("playing runs the loom on at its speed, saying each moment passed, and stops where the chain runs out", () => {
+    const { store } = setup();
+    act.loadPreset(store, "plain", "mine");
+    act.lace(store, false, "mine");
+    act.setSpeed(store, 60, "mine");
+    store.set({ looms: { ...store.state.looms, mine: { ...store.state.looms.mine, playing: true } } });
+    act.tick(store, 0.5);
+    const ls = () => store.state.looms.mine;
+    assert.ok(Math.abs(ls().loom.phi - 0.5) < 1e-9, "half a pick in half a second, at 60 a minute");
+    assert.equal(/** @type {{ key: string }} */ (ls().status.msg).key, "loom.open", "the last moment passed: the shed open");
+    for (let i = 0; i < 10; i++) act.tick(store, 0.5);
+    assert.equal(ls().playing, false, "stopped");
+    assert.equal(ls().loom.cloth.length, 2, "after the chain's two cards");
+    assert.equal(ls().status.warn, true);
+    act.reset(store, "mine");
+    assert.deepEqual([ls().loom.pick, ls().loom.phi, ls().loom.cloth.length], [0, 0, 0]);
+    assert.deepEqual(ls().status.msg, { key: "status.reset" });
+  });
+  it("a cell of the cloth followed back to its hook; the section's cross-row chosen", () => {
+    const { store } = setup();
+    act.setHooks(store, 16, "mine");
+    for (let i = 0; i < 12; i++) act.step(store, "mine");
+    act.followCloth(store, 0, 13, "mine");
+    assert.equal(store.state.looms.mine.follow?.hook, 12);
+    assert.equal(store.state.looms.mine.follow?.end, 13);
+    assert.equal(store.state.looms.mine.crossRow, 1, "the section turns to the hook's cross-row");
+    act.setCrossRow(store, 0, "mine");
+    assert.equal(store.state.looms.mine.crossRow, 0);
+  });
+});

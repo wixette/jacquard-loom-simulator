@@ -49,7 +49,6 @@ Pages cannot be opened from `file://`, because browsers do not load modules from
 | `pnpm selftest` | Every page's `?selftest`, run in headless Chrome: the browser half of the checks |
 | `pnpm shots` | Screenshots of every view, from headless Chrome, into `shots/` (`--out`, `--only`): for reviewing a change of the theme or the layout side by side |
 | `pnpm stamp` | Writes the version into every file name the pages load |
-| `pnpm sounds` | Writes the placeholder sounds into `audio/` (a recorded sound replaces one by taking its name, `js/app/sound.js`) |
 | `reuse lint` | Every file's licence is declared (REUSE; CI runs it) |
 
 Before a commit: `pnpm check:refs`, `pnpm typecheck`, `pnpm test`, and `pnpm selftest` (or the `?selftest` of the pages a change touches). After a change to `params/` or `blender/scripts/`: `pnpm build:model`, and commit the new `.glb` files with it.

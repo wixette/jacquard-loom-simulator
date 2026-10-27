@@ -7,6 +7,7 @@ import { decodeLink } from "../sim/link.js";
 import { POSITIONS } from "../sim/loom.js";
 import { tieLabel } from "../sim/tieup.js";
 import { STEPS } from "../teach/tutorial.js";
+import { arrange } from "./arrange.js";
 import { chooseLanguage } from "./language.js";
 import { openLearn } from "./learn.js";
 import * as act from "./looms.js";
@@ -60,6 +61,7 @@ export async function openLink(store, fragment) {
   act.setBits(store, l.bits);
   act.setSectionView(store, l.sectionView);
   // A link that names no views leaves the stage as the screen chose it (design/links.md).
-  if (new URLSearchParams(fragment.replace(/^#/, "")).has("view")) act.setViews(store, l.views);
+  // kept to the stage's rules (js/app/arrange.js): four views hold one 3D model at most
+  if (new URLSearchParams(fragment.replace(/^#/, "")).has("view")) act.setViews(store, arrange(l.views, /** @type {1 | 2 | 4} */ (l.views.length)));
   return true;
 }

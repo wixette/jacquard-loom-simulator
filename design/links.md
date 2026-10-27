@@ -1,7 +1,7 @@
 # Links: the format
 
-- **Status:** draft, 2026-10-27, for review before release 0.1.0. From 0.1.0 it is a contract ([docs/ui-design.md](../docs/ui-design.md), P8): a later release may add fields, values and link types, and must read every link an earlier release wrote, as that release meant it; it never renames, drops or reads a field differently.
-- **Code:** `js/sim/link.js` (no DOM), pinned by `tests/sim/link.test.js`, which decodes every example below.
+- **Status:** agreed on 2026-10-27, for release 0.1.0. From 0.1.0 it is a contract ([docs/ui-design.md](../docs/ui-design.md), P8): a later release may add fields, values and link types, and must read every link an earlier release wrote, as that release meant it; it never renames, drops or reads a field differently.
+- **Code:** `js/sim/link.js` (no DOM), pinned by `tests/sim/link.test.js`: it decodes every example below, reads every value each table allows and refuses those just outside, checks what a writer leaves out and how it writes a deck, round-trips every link type, and opens every step of the tutorial by its name. A change to the format adds tests; it never changes or drops one.
 - **Replaces** the prototype's format (`v=1`, 0.0.1), which is not kept: a `v=1` link is refused with a reason.
 
 ## Why links matter
@@ -19,7 +19,7 @@ A link is the app's address with a **fragment**: `https://…/jacquard-loom-simu
 | Field | Values | Default | Meaning |
 |---|---|---|---|
 | `v` | `2` | required | The format's version. A later format, if ever needed, takes 3; this one stays readable. |
-| `w` | `weave`, `learn`, `create`, `play` | `weave` | The workspace the app opens on (design/ui-layout.md §3). |
+| `w` | `weave`, `learn`, `create`, `play` | `weave` | The workspace the app opens on (design/ui-layout.md §3). A link that names none opens Weave; the app opened with no link at all opens on the workspace last used on the device, or a newcomer's Learn. |
 | `lang` | a locale: `en`, `es`, `fr`, `de`, `it`, `pt-BR`, `zh`, `zh-TW`, `ja`, `ko` | the reader's | The language, when the link's writer wants one. *Copy link* does not add it: a reader's own language usually serves them better. |
 
 ## Weave: a loom (0.1.0)
@@ -80,7 +80,7 @@ Each is decoded by `tests/sim/link.test.js` as stated here.
 
 | Link (the fragment) | Opens |
 |---|---|
-| `#v=2` | Weave, as the app opens |
+| `#v=2` | Weave, with its opening loom and views |
 | `#v=2&w=weave&h=16&c=x.a5a5-5a5a&p=3&s=2&f=5` | A 16-hook head with two cards (holes 1, 3, 6, 8, 9, 11, 14, 16, then the others), laced into a loop, straight tie; pick 4 with the shuttle across; following hook 5 |
 | `#v=2&h=8&c=x.18-18-18-18-99-5a-3c-18&l=0&view=section,3d` | The research's arrow on one cross-row, an open chain, the section beside the loom in 3D |
 | `#v=2&w=learn&step=weave-twill` | The tutorial at the step named `weave-twill` |

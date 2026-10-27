@@ -501,14 +501,21 @@ export function setColours(store, c, id = cur(store)) {
 
 /**
  * Put a loom in place of a loom's machine, as it is (a step of the tutorial): its cards, its
- * moment and its cloth, the thread it follows. A new machine, so it sounds nothing.
+ * moment and its cloth, the thread it follows. A new machine, so it sounds nothing. Whatever else
+ * goes with it (the step it is the loom of) changes in the same update, so that nothing watching
+ * ever sees the new loom with the old step, or the other way round.
  * @param {AppStore} store
  * @param {Loom} loom
  * @param {Follow | null} f
  * @param {LoomId} id
+ * @param {Partial<AppState>} [also]
  */
-export function setLoom(store, loom, f, id) {
-  change(store, id, () => ({ loom, selected: 0, playing: false, follow: f, crossRow: f ? Math.floor(f.hook / 8) : 0, status: said(msg("status.start")) }));
+export function setLoom(store, loom, f, id, also = {}) {
+  store.set((s) => {
+    const ls = s.looms[id];
+    const next = { ...ls, loom, selected: 0, playing: false, follow: f, crossRow: f ? Math.floor(f.hook / 8) : 0, status: said(msg("status.start")), rev: ls.rev + 1 };
+    return { ...also, looms: { ...s.looms, [id]: next } };
+  });
 }
 
 /**

@@ -7,7 +7,7 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { say } from "../../js/l10n/l10n.js";
 import { presetDeck } from "../../js/sim/deck.js";
-import { decodeDeck, decodeLink, DEFAULT_LINK, encodeDeck, encodeLink, LONG_LINK, MAX_CARDS, packCards } from "../../js/sim/link.js";
+import { decodeDeck, decodeLink, DEFAULT_LINK, encodeDeck, encodeLink, LONG_LINK, MAX_CARDS, packCards, STAGE_VIEWS } from "../../js/sim/link.js";
 /** @import { AppLink } from "../../js/sim/link.js" */
 
 /** @param {string} bits @returns {boolean[]} */
@@ -199,5 +199,191 @@ describe("a later release's link opens as well as it can", () => {
     assert.equal(l.workspace, "weave");
     assert.equal(l.lang, null);
     assert.deepEqual(l.views, ["section"]);
+  });
+});
+
+// ---- the contract, field by field (added 2026-10-27, when design/links.md was agreed) ----------
+// Every value each table of design/links.md allows is read as it says, the values just outside
+// are refused, and the writer's rules hold. These pin the format for 0.1.0 and after.
+
+/**
+ * The fields a fragment reads as, beside the defaults: a loom of one 8-hook card unless the
+ * fragment gives its own.
+ * @param {string} rest
+ */
+const loomLink = (rest) => read(`#v=2&h=8&c=x.ff${rest}`);
+
+/** @param {string} fragment */
+async function refused(fragment) {
+  const r = await decodeLink(fragment);
+  assert.ok(!r.ok, `${fragment} was accepted`);
+}
+
+describe("the envelope (design/links.md, The envelope)", () => {
+  it("a fragment reads the same with or without its #, and in any order", async () => {
+    const a = await read("#v=2&h=16&c=x.a5a5&p=3&f=5");
+    assert.deepEqual(await read("v=2&h=16&c=x.a5a5&p=3&f=5"), a);
+    assert.deepEqual(await read("#f=5&p=3&c=x.a5a5&h=16&v=2"), a);
+  });
+  it("v is required, and only 2 is read", async () => {
+    for (const f of ["#h=8&c=x.ff", "#v=0", "#v=02", "#v=2.0", "#v=1"]) await refused(f);
+  });
+  it("w: every workspace is read", async () => {
+    for (const w of ["weave", "learn", "create", "play"]) assert.equal((await read(`#v=2&w=${w}`)).workspace, w);
+  });
+  it("lang: every locale is read, others fall back to the reader's", async () => {
+    for (const lang of ["en", "es", "fr", "de", "it", "pt-BR", "zh", "zh-TW", "ja", "ko"]) assert.equal((await read(`#v=2&lang=${lang}`)).lang, lang);
+    for (const lang of ["EN", "pt", "zh-CN", ""]) assert.equal((await read(`#v=2&lang=${lang}`)).lang, null, lang);
+  });
+});
+
+describe("Weave: a loom, field by field (design/links.md, Weave)", () => {
+  it("h: every head from 8 to 64 hooks, and no other", async () => {
+    for (let h = 8; h <= 64; h += 8) assert.equal((await read(`#v=2&h=${h}&c=x.${"0".repeat(h / 4)}`)).deck?.hooks, h);
+    for (const h of ["0", "4", "7", "12", "72", "080", "-8", "8.0"]) await refused(`#v=2&h=${h}&c=x.ff`);
+  });
+  it("c, x.: h/4 hex digits a card, hook 1 the highest bit, either case; an empty chain", async () => {
+    assert.deepEqual((await loomLink("")).deck?.cards, [card("11111111")]);
+    assert.deepEqual((await read("#v=2&h=8&c=x.80-01-A5")).deck?.cards, [card("10000000"), card("00000001"), card("10100101")]);
+    assert.deepEqual((await read("#v=2&h=8&c=x.")).deck?.cards, []);
+    for (const c of ["x.8", "x.800", "x.80--01", "x.80-", "x.g0"]) await refused(`#v=2&h=8&c=${c}`);
+  });
+  it("c, b.: h/8 bytes a card, hook 1 the highest bit of the first byte, base64url without padding", async () => {
+    // 64 hooks: hook 1 alone, then hook 64 alone
+    const bytes = new Uint8Array(16);
+    bytes[0] = 0x80;
+    bytes[15] = 0x01;
+    const r = await decodeDeck(`b.${Buffer.from(bytes).toString("base64url")}`, 64);
+    assert.ok(r.ok);
+    assert.deepEqual(r.cards, [[true, ...Array(63).fill(false)], [...Array(63).fill(false), true]]);
+    // a length that is not a whole number of cards, padding, and the standard alphabet's + / are refused
+    for (const b of ["b.gA", "b.gIA=", "b.+/8"]) assert.ok(!(await decodeDeck(b, 16)).ok, b);
+  });
+  it("c, z.: the packed bytes, raw DEFLATE, base64url; a chain of 1,024 cards is the longest", async () => {
+    const most = await decodeDeck(`x.${Array(MAX_CARDS).fill("a5").join("-")}`, 8);
+    assert.ok(most.ok && most.cards.length === MAX_CARDS);
+    const packed = new Uint8Array(MAX_CARDS).fill(0xa5);
+    const stream = new Blob([packed]).stream().pipeThrough(new CompressionStream("deflate-raw"));
+    const z = Buffer.from(await new Response(stream).arrayBuffer()).toString("base64url");
+    const r = await decodeDeck(`z.${z}`, 8);
+    assert.ok(r.ok && r.cards.length === MAX_CARDS && r.cards.every((x) => x.join() === card("10100101").join()));
+  });
+  it("l: 1 (or none) a loop, 0 an open chain", async () => {
+    assert.equal((await loomLink("")).deck?.loop, true);
+    assert.equal((await loomLink("&l=1")).deck?.loop, true);
+    assert.equal((await loomLink("&l=0")).deck?.loop, false);
+    for (const l of ["", "yes", "00"]) await refused(`#v=2&h=8&c=x.ff&l=${l}`);
+  });
+  it("t: straight 1 to 4 times, or point; nothing else", async () => {
+    for (const n of [1, 2, 3, 4]) assert.deepEqual((await loomLink(`&t=s${n}`)).tie, { kind: "straight", repeats: n });
+    assert.deepEqual((await loomLink("&t=p")).tie, { kind: "point" });
+    for (const t of ["s0", "s5", "S1", "point", ""]) await refused(`#v=2&h=8&c=x.ff&t=${t}`);
+  });
+  it("p: 0 to 1,000,000, written as plain digits", async () => {
+    assert.equal((await loomLink("&p=0")).pick, 0);
+    assert.equal((await loomLink("&p=1000000")).pick, 1_000_000);
+    for (const p of ["1000001", "1.5", "+3", "1e3", "", "%203"]) await refused(`#v=2&h=8&c=x.ff&p=${p}`);
+  });
+  it("s: the six moments, 0 to 5", async () => {
+    for (let s = 0; s <= 5; s++) assert.equal((await loomLink(`&s=${s}`)).stop, s);
+    for (const s of ["6", "-1", ""]) await refused(`#v=2&h=8&c=x.ff&s=${s}`);
+  });
+  it("wc, fc: 6 hex digits, either case, read in lower case", async () => {
+    const l = await read("#v=2&wc=ABCDEF&fc=012345");
+    assert.equal(l.warp, "#abcdef");
+    assert.equal(l.weft, "#012345");
+    for (const c of ["fff", "#abcdef", "abcdeg", "abcdef0"]) await refused(`#v=2&wc=${encodeURIComponent(c)}`);
+    await refused("#v=2&fc=red");
+  });
+  it("f: 1 to h; fe: 1 to the ends, the end of f's hook; fp: with fe", async () => {
+    assert.deepEqual((await read("#v=2&h=16&c=x.ffff&f=16")).follow, { hook: 15, end: null, pick: null });
+    for (const f of ["0", "17"]) await refused(`#v=2&h=16&c=x.ffff&f=${f}`);
+    // straight × 2 on 8 hooks: 16 ends, end 9 on hook 1, end 16 on hook 8
+    assert.deepEqual((await read("#v=2&h=8&c=x.ff&t=s2&f=1&fe=9&fp=4")).follow, { hook: 0, end: 9, pick: 3 });
+    assert.deepEqual((await read("#v=2&h=8&c=x.ff&t=s2&f=8&fe=16")).follow, { hook: 7, end: 16, pick: null });
+    await refused("#v=2&h=8&c=x.ff&t=s2&f=8&fe=17");
+    await refused("#v=2&h=8&c=x.ff&t=s2&f=2&fe=9");
+    await refused("#v=2&h=8&c=x.ff&f=1&fp=2");
+    await refused("#v=2&h=8&c=x.ff&f=1&fe=1&fp=0");
+  });
+  it("x: 1 to h/8; with none, the followed hook's cross-row, or the first", async () => {
+    assert.equal((await read("#v=2&h=24&c=x.ffffff&x=3")).crossRow, 2);
+    assert.equal((await read("#v=2&h=24&c=x.ffffff")).crossRow, null);
+    for (const x of ["0", "4"]) await refused(`#v=2&h=24&c=x.ffffff&x=${x}`);
+  });
+  it("sv, face, bits: each value, and nothing else", async () => {
+    for (const sv of ["whole", "needles", "crooks"]) assert.equal((await read(`#v=2&sv=${sv}`)).sectionView, sv);
+    for (const face of ["front", "back"]) assert.equal((await read(`#v=2&face=${face}`)).face, face);
+    assert.equal((await read("#v=2&bits=1")).bits, true);
+    assert.equal((await read("#v=2&bits=0")).bits, false);
+    for (const f of ["#v=2&sv=Whole", "#v=2&face=Back", "#v=2&bits=true", "#v=2&bits=2"]) await refused(f);
+  });
+  it("view: one, two or four of the nine views, in order; anything else falls back", async () => {
+    for (const v of STAGE_VIEWS) assert.deepEqual((await read(`#v=2&view=${v}`)).views, [v]);
+    assert.deepEqual((await read("#v=2&view=u3,section")).views, ["u3", "section"]);
+    assert.deepEqual((await read("#v=2&view=3d,side,front,section")).views, ["3d", "side", "front", "section"]);
+    for (const v of ["section,side,front", "section,section", "", "section,side,front,3d,u1"]) assert.deepEqual((await read(`#v=2&view=${v}`)).views, DEFAULT_LINK.views, v);
+  });
+  it("the loom's fields need a deck: a head alone is refused, and without c they are not read", async () => {
+    await refused("#v=2&h=8");
+    const l = await read("#v=2&p=5&s=3&f=2&t=p&l=0");
+    assert.deepEqual([l.deck, l.pick, l.stop, l.follow, l.tie], [null, 0, 0, null, DEFAULT_LINK.tie]);
+  });
+});
+
+describe("what a link is written as (design/links.md: only what differs, decks short)", () => {
+  it("a field at its default is left out; a cross-row that is the followed hook's is left out", async () => {
+    const deck = presetDeck("plain", 24);
+    assert.equal(await encodeLink({ deck, follow: { hook: 17, end: null, pick: null }, crossRow: 2 }), `v=2&h=24&c=${await encodeDeck(deck.cards, 24)}&f=18`);
+    assert.equal(await encodeLink({ deck, crossRow: 0 }), `v=2&h=24&c=${await encodeDeck(deck.cards, 24)}`);
+    assert.match(await encodeLink({ deck, crossRow: 1 }), /&x=2$/);
+  });
+  it("colours in lower case without #, views joined by a plain comma", async () => {
+    assert.equal(await encodeLink({ warp: "#ABCDEF", weft: "#00FF00", views: ["section", "3d"] }), "v=2&wc=abcdef&fc=00ff00&view=section,3d");
+  });
+  it("a deck whose hex is 80 characters or fewer is written readable; a longer one in the shorter of b. and z.", async () => {
+    const small = presetDeck("twill", 64);
+    assert.match(await encodeDeck(small.cards, 64), /^x\./);
+    const rand = random(3);
+    const noisy = [...Array(20)].map(() => [...Array(64)].map(() => rand() < 0.5));
+    const text = await encodeDeck(noisy, 64);
+    assert.match(text, /^[bz]\./);
+    const b = `b.${Buffer.from(packCards(noisy, 64)).toString("base64url")}`;
+    assert.ok(text.length <= b.length);
+    assert.deepEqual(await decodeDeck(text, 64), { ok: true, cards: noisy });
+  });
+  it("every tie, section view, face and set of views round-trips, with both colours", async () => {
+    const ties = /** @type {AppLink["tie"][]} */ ([...[1, 2, 3, 4].map((n) => ({ kind: "straight", repeats: n })), { kind: "point" }]);
+    const views = /** @type {AppLink["views"][]} */ ([["u1"], ["u5", "3d"], ["side", "front", "u2", "u4"]]);
+    for (const tie of ties)
+      for (const sectionView of /** @type {const} */ (["whole", "needles", "crooks"]))
+        for (const v of views) {
+          const l = { ...DEFAULT_LINK, deck: presetDeck("satin", 16), tie, sectionView, face: /** @type {const} */ ("back"), warp: "#010203", weft: "#fafbfc", views: v };
+          assert.deepEqual(await read(await encodeLink(l)), l);
+        }
+  });
+});
+
+describe("Learn: a step, by its name (design/links.md, Learn)", () => {
+  it("a name of lower-case letters, digits and -, up to 64 of them", async () => {
+    assert.equal((await read(`#v=2&w=learn&step=${"a".repeat(64)}`)).step, "a".repeat(64));
+    for (const s of ["a".repeat(65), "Weave-twill", "weave_twill", "weave%20twill", ""]) await refused(`#v=2&w=learn&step=${s}`);
+  });
+  it("every step of the tutorial, and every old name, opens by a link written for it", async () => {
+    const { ALIASES, stepIndex, STEPS } = await import("../../js/teach/tutorial.js");
+    for (const name of [...STEPS.map((s) => s.id), ...Object.keys(ALIASES)]) {
+      const l = await read(`#${await encodeLink({ workspace: "learn", step: name })}`);
+      assert.equal(l.step, name);
+      assert.ok(stepIndex(name) >= 0, name);
+    }
+  });
+  it("the step names of 0.1.0 are the ones design/links.md lists, and stay", async () => {
+    const { stepIndex } = await import("../../js/teach/tutorial.js");
+    const frozen = [
+      "story-draw-loom", "story-holes", "story-jacquard", "story-portrait",
+      "how-whole-loom", "how-units", "how-section", "how-needles", "how-griffe", "how-one-row", "how-program", "how-loop", "how-not-a-computer",
+      "weave-punch", "weave-plain", "weave-twill", "weave-satin", "weave-satin-by-two", "weave-tie-up", "weave-picture", "weave-next",
+    ];
+    for (const name of frozen) assert.ok(stepIndex(name) >= 0, `${name} no longer opens a step: keep it as an alias`);
   });
 });

@@ -13,7 +13,8 @@ import { encodeLink, LONG_LINK, STAGE_VIEWS } from "../sim/link.js";
 import { linkOf } from "./links.js";
 import { tieLabel } from "../sim/tieup.js";
 import { printDocument } from "../teach/printCards.js";
-import { applyIcons, el, icon, setTip, showMenu, tabs } from "../ui/components.js";
+import { applyIcons, applyL10n, el, icon, setText, setTip, showMenu, tabs } from "../ui/components.js";
+import { colourPicker } from "../ui/colourPicker.js";
 import { wireEdge } from "../ui/edge.js";
 import { showAbout } from "./about.js";
 import { wireKeys } from "./keys.js";
@@ -24,7 +25,8 @@ import { frontView, sectionView, sideView, UNIT_VIEWS, unitsView } from "./compo
 import { chooseLanguage } from "./language.js";
 import { leaveLearn, openLearn, watchDone } from "./learn.js";
 import { guidePanel } from "./components/guide.js";
-import { allowedAt, placeInPart, shownAt } from "../teach/tutorial.js";
+import { allowedAt, shownAt } from "../teach/tutorial.js";
+import { arrange, choose, is3d, placeKey, SPLIT } from "./arrange.js";
 import * as act from "./looms.js";
 import { TIES, tieKey } from "./looms.js";
 /** @import { AppStore, StageView, Workspace } from "./looms.js" */
@@ -62,9 +64,6 @@ function viewComponent(store, v, onMode) {
   return unitsView(store, { unit: UNIT_VIEWS[v].unit, onMode });
 }
 
-/** The views each arrangement opens with, when the stage is split. */
-const SPLIT = /** @type {Record<1 | 2 | 4, StageView[]>} */ ({ 1: ["section"], 2: ["section", "3d"], 4: ["section", "front", "side", "3d"] });
-
 /** The side panels' sizes (px): the smallest, the largest and the default (design/ui-layout.md §4). */
 const PANEL = { left: { min: 260, max: 480, size: 320 }, right: { min: 280, max: 520, size: 340 } };
 /** What the stage keeps at least beside the panels (px). */
@@ -72,6 +71,64 @@ const STAGE_MIN = 560;
 
 /** The narrowest stage that holds two views side by side (each about as wide as a laptop's one). */
 const TWO_VIEWS = 1040;
+
+/**
+ * Ready-made pairs of warp and weft colours, by the key of their names (colours.pair.*): the
+ * opening pair first, then pairs of the dyes and silks of the period.
+ * @type {Record<string, [string, string]>}
+ */
+const COLOUR_PAIRS = {
+  start: ["#5b3f8c", "#efe3c2"],
+  indigo: ["#25386b", "#f2efe6"],
+  madder: ["#9b2d30", "#e8c16a"],
+  black: ["#1f1f22", "#f4f1ea"],
+  green: ["#2f5d46", "#e9dfb8"],
+  silver: ["#7d8794", "#2a3247"],
+};
+
+const SVGNS = "http://www.w3.org/2000/svg";
+
+/**
+ * The two colours as a paint program shows them: the warp's square in front, the weft's behind.
+ * @param {string} warp
+ * @param {string} weft
+ * @returns {SVGSVGElement}
+ */
+function pairSwatch(warp, weft) {
+  const svg = document.createElementNS(SVGNS, "svg");
+  svg.setAttribute("viewBox", "0 0 24 24");
+  svg.setAttribute("class", "icon pair-swatch");
+  svg.setAttribute("aria-hidden", "true");
+  svg.innerHTML = `<rect class="weft" x="9" y="9" width="12.5" height="12.5" rx="2.5" fill="${weft}"/><rect class="warp" x="2.5" y="2.5" width="12.5" height="12.5" rx="2.5" fill="${warp}"/>`;
+  return svg;
+}
+
+/**
+ * A small piece of 2/2 twill in two colours: 12 ends and 6 picks, the warp where it lies over
+ * the weft.
+ * @param {string} warp
+ * @param {string} weft
+ * @returns {SVGSVGElement}
+ */
+function twillSample(warp, weft) {
+  const svg = document.createElementNS(SVGNS, "svg");
+  svg.setAttribute("viewBox", "0 0 12 6");
+  svg.setAttribute("preserveAspectRatio", "none");
+  svg.setAttribute("aria-hidden", "true");
+  let cells = `<rect width="12" height="6" fill="${weft}"/>`;
+  for (let p = 0; p < 6; p++) for (let e = 0; e < 12; e++) if ((e + p) % 4 < 2) cells += `<rect x="${e}" y="${5 - p}" width="1" height="1" fill="${warp}"/>`;
+  svg.innerHTML = cells;
+  return svg;
+}
+
+/**
+ * A view's name: on its chip, a 2D drawing by its short name and a 3D model as "3D · its name";
+ * in the view menu (long), under its group's heading, a 2D drawing by its full name and a 3D
+ * model by its own.
+ * @param {StageView} v
+ * @param {boolean} [long]
+ */
+const viewName = (v, long = false) => (is3d(v) ? (long ? t(`view.${v}`) : t("view.in3d", { name: t(`view.${v}`) })) : long ? t(`comp.${v}`) : t(`view.${v}`));
 
 /**
  * The views Weave opens with when no link names them: two where the stage holds them, else one.
@@ -157,9 +214,7 @@ export function createShell(store, root) {
 
   /** The frame's own texts and tooltips, in the store's language. */
   function relabel() {
-    for (const e of /** @type {NodeListOf<HTMLElement>} */ (root.querySelectorAll("[data-l10n]"))) e.textContent = t(/** @type {string} */ (e.dataset.l10n));
-    for (const e of /** @type {NodeListOf<HTMLElement>} */ (root.querySelectorAll("[data-l10n-tip]"))) setTip(e, t(/** @type {string} */ (e.dataset.l10nTip)));
-    for (const e of /** @type {NodeListOf<HTMLElement>} */ (root.querySelectorAll("[data-l10n-name]"))) e.setAttribute("aria-label", t(/** @type {string} */ (e.dataset.l10nName)));
+    applyL10n(root);
     document.title = t("app.title");
   }
 
@@ -217,27 +272,48 @@ export function createShell(store, root) {
   }
 
   /**
-   * A small dialog under its anchor, shut by pressing the anchor again, pressing elsewhere, or Esc.
+   * A small dialog by its anchor, as a non-modal popover does it: one at a time; pressing the
+   * anchor again, pressing elsewhere or Esc shuts it; it follows its anchor when the window is
+   * resized or the page scrolls, kept inside the window (under the anchor if it fits, else over
+   * it); and it shuts if its anchor goes (the frame rebuilt for another screen).
    * @param {HTMLElement} anchor
    * @param {string} id
    * @param {string} name
    * @param {HTMLElement[]} rows
+   * @param {string} [cls]
+   * @param {() => void} [onShut] what to undo when it shuts
    */
-  function popover(anchor, id, name, rows) {
+  function popover(anchor, id, name, rows, cls = "", onShut = () => {}) {
     const old = /** @type {HTMLElement | null} */ (document.querySelector(".popover"));
-    old?.remove();
+    old?.dispatchEvent(new Event("shut"));
     if (old?.dataset.for === id) return;
-    const pop = el("div", { class: "popover", role: "dialog", "aria-label": name }, rows);
+    const pop = el("div", { class: `popover ${cls}`.trim(), role: "dialog", "aria-label": name }, rows);
     pop.dataset.for = id;
     document.body.appendChild(pop);
-    const r = anchor.getBoundingClientRect();
-    const b = pop.getBoundingClientRect();
-    pop.style.top = `${r.bottom + 6}px`;
-    pop.style.left = `${Math.max(8, Math.min(window.innerWidth - b.width - 8, r.left))}px`;
+    const place = () => {
+      if (!anchor.isConnected) return shut();
+      const r = anchor.getBoundingClientRect();
+      const b = pop.getBoundingClientRect();
+      const below = r.bottom + 6 + b.height <= window.innerHeight - 8;
+      pop.style.top = `${below ? r.bottom + 6 : Math.max(8, r.top - 6 - b.height)}px`;
+      // hung from its button: from the button's left edge, or its right edge on the window's right
+      // half, as the menus open (js/ui/components.js)
+      const left = r.left + r.width / 2 > window.innerWidth / 2 ? r.right - b.width : r.left;
+      pop.style.left = `${Math.max(8, Math.min(window.innerWidth - b.width - 8, left))}px`;
+    };
+    let frame = 0;
+    const follow = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(place);
+    };
     const shut = () => {
+      cancelAnimationFrame(frame);
       pop.remove();
       document.removeEventListener("pointerdown", away);
       document.removeEventListener("keydown", esc);
+      window.removeEventListener("resize", follow);
+      window.removeEventListener("scroll", follow, true);
+      onShut();
     };
     const away = (/** @type {PointerEvent} */ e) => {
       if (!pop.contains(/** @type {Node} */ (e.target)) && !anchor.contains(/** @type {Node} */ (e.target))) shut();
@@ -245,10 +321,15 @@ export function createShell(store, root) {
     const esc = (/** @type {KeyboardEvent} */ e) => {
       if (e.key !== "Escape") return;
       shut();
-      anchor.focus();
+      if (anchor.isConnected) anchor.focus();
     };
+    pop.addEventListener("shut", shut, { once: true });
+    // listening first, so that a popover whose anchor has already gone shuts all it set up
     document.addEventListener("pointerdown", away);
     document.addEventListener("keydown", esc);
+    window.addEventListener("resize", follow);
+    window.addEventListener("scroll", follow, true);
+    place();
     /** @type {HTMLElement | null} */ (pop.querySelector("select, input, button"))?.focus();
   }
 
@@ -266,20 +347,91 @@ export function createShell(store, root) {
     popover(anchor, "setup", t("setup.tip"), [el("label", { for: "setup-hooks", text: t("setup.hooks") }), hooks, el("label", { for: "setup-tie", text: t("setup.tie") }), tie]);
   }
 
-  /** The cloth's colours, from the palette over the cloth. @param {HTMLElement} anchor */
+  /**
+   * The cloth's colours, from the button over the cloth: the two threads, one of them chosen
+   * for the picker below them (the page's own: js/ui/colourPicker.js), a swap, ready-made pairs
+   * and Reset, all in one popover.
+   * @param {HTMLElement} anchor
+   */
   function coloursPopover(anchor) {
-    const s = ls();
-    const warp = el("input", { type: "color", id: "colour-warp", value: s.warp });
-    warp.addEventListener("input", () => act.setColours(store, { warp: warp.value }));
-    const weft = el("input", { type: "color", id: "colour-weft", value: s.weft });
-    weft.addEventListener("input", () => act.setColours(store, { weft: weft.value }));
-    const again = el("button", { type: "button", class: "btn", text: t("colours.reset") });
-    again.addEventListener("click", () => {
-      act.setColours(store, { warp: act.WARP, weft: act.WEFT });
-      warp.value = act.WARP;
-      weft.value = act.WEFT;
+    // pressed again, its button shuts it, before anything (a watcher) is set up for a new one
+    const open = document.querySelector('.popover[data-for="colours"]');
+    if (open) return void open.dispatchEvent(new Event("shut"));
+    /** @type {"warp" | "weft"} */
+    let editing = "warp";
+    const picker = colourPicker({
+      value: ls().warp,
+      onInput: (hex) => act.setColours(store, { [editing]: hex }),
+      names: { area: t("colours.area"), hue: t("colours.hue"), hex: t("colours.hex"), areaValue: (sat, val) => t("colours.areaValue", { s: sat, v: val }) },
     });
-    popover(anchor, "colours", t("colours.tip"), [el("label", { for: "colour-warp", text: t("setup.warp") }), warp, el("label", { for: "colour-weft", text: t("setup.weft") }), weft, el("span"), again]);
+    /**
+     * One thread's row, a button that gives it to the picker: its swatch, its name and what it
+     * is, and its value as hex.
+     * @param {"warp" | "weft"} thread
+     */
+    const row = (thread) => {
+      const swatch = el("span", { class: "swatch", "aria-hidden": "true" });
+      const hex = el("span", { class: "hex" });
+      const line = el("button", { type: "button", class: "colour-row", id: `colour-${thread}` }, [
+        swatch,
+        el("span", { class: "colour-text" }, [el("span", { class: "colour-name", text: t(`setup.${thread}`) }), el("span", { class: "colour-hint", text: t(`colours.${thread}Hint`) })]),
+        hex,
+      ]);
+      line.addEventListener("click", () => {
+        editing = thread;
+        show();
+      });
+      return { line, swatch, hex, thread };
+    };
+    const rows = [row("warp"), row("weft")];
+    const swap = el("button", { type: "button", class: "btn icon-only swap" }, [icon("swap_vert")]);
+    setTip(swap, t("colours.swap"));
+    swap.addEventListener("click", () => act.setColours(store, { warp: ls().weft, weft: ls().warp }));
+    const pairs = el("div", { class: "colour-pairs", role: "group", "aria-label": t("colours.pairs") });
+    for (const [key, [warp, weft]] of Object.entries(COLOUR_PAIRS)) {
+      const b = el("button", { type: "button", class: "pair", "aria-label": t(`colours.pair.${key}`) }, [pairSwatch(warp, weft)]);
+      setTip(b, t(`colours.pair.${key}`));
+      b.dataset.pair = key;
+      b.addEventListener("click", () => act.setColours(store, { warp, weft }));
+      pairs.append(b);
+    }
+    const again = el("button", { type: "button", class: "btn", text: t("colours.reset") });
+    again.addEventListener("click", () => act.setColours(store, { warp: act.WARP, weft: act.WEFT }));
+    // a few rows of twill in the two colours: the cloth as the colours change, which the panel
+    // would otherwise hide
+    const sample = el("span", { class: "colour-sample", role: "img", "aria-label": t("colours.sample") });
+    // the panel follows the colours however they change: the picker, the swap, a pair, Reset
+    const show = () => {
+      const s = ls();
+      sample.replaceChildren(twillSample(s.warp, s.weft));
+      for (const r of rows) {
+        r.swatch.style.background = s[r.thread];
+        r.hex.textContent = s[r.thread].toUpperCase();
+        r.line.setAttribute("aria-pressed", String(r.thread === editing));
+      }
+      picker.set(s[editing]);
+      for (const b of /** @type {HTMLElement[]} */ ([...pairs.children])) {
+        const [w, f] = COLOUR_PAIRS[/** @type {string} */ (b.dataset.pair)];
+        b.setAttribute("aria-pressed", String(w === s.warp && f === s.weft));
+      }
+    };
+    const unwatch = store.watch((st) => [st.looms[st.current].warp, st.looms[st.current].weft], show);
+    popover(
+      anchor,
+      "colours",
+      t("colours.tip"),
+      [
+        el("div", { class: "popover-head" }, [el("h3", { class: "popover-title", text: t("colours.title") }), sample]),
+        el("div", { class: "colour-threads" }, [rows[0].line, swap, rows[1].line]),
+        picker.element,
+        el("p", { class: "popover-sub", text: t("colours.pairs") }),
+        pairs,
+        el("div", { class: "popover-foot" }, [again]),
+      ],
+      "colours-pop",
+      unwatch,
+    );
+    show();
   }
 
   /**
@@ -324,14 +476,6 @@ export function createShell(store, root) {
     }
     tabs(list, (id) => goWorkspace(/** @type {Workspace} */ (id.slice(3))));
     for (const tab of list.children) tab.setAttribute("aria-selected", String(tab.id === `ws-${store.state.workspace}`));
-    // Learn carries the tutorial's place while it is on (the mode in the top bar, the sibling's U27)
-    const where = el("span", { class: "ws-where" });
-    list.querySelector("#ws-learn")?.append(where);
-    follow((s) => [s.workspace, s.learn.step, s.locale], () => {
-      const p = placeInPart(store.state.learn.step);
-      where.hidden = store.state.workspace !== "learn";
-      where.textContent = t("learn.where", { part: p.part, at: p.at, of: p.of });
-    });
     const share = el("button", { type: "button", class: "btn has-icon", "aria-haspopup": "menu" }, [icon("share"), label("span", "bar.share")]);
     share.dataset.l10nTip = "bar.share.tip";
     share.setAttribute("data-tip-describes", "");
@@ -397,8 +541,11 @@ export function createShell(store, root) {
       back.setAttribute("aria-pressed", String(ls().face === "back"));
       bits.setAttribute("aria-pressed", String(ls().bits));
     });
-    const colours = controls(iconButton("palette", "colours.tip", () => (colours.classList.contains("locked") ? act.say(store, msg("learn.locked"), true) : coloursPopover(colours))), "colours");
-    colours.setAttribute("aria-haspopup", "dialog");
+    // the colours themselves, warp over weft, as a paint program shows its two colours
+    const colours = controls(el("button", { type: "button", class: "btn icon-only colours-btn", "aria-haspopup": "dialog" }), "colours");
+    colours.dataset.l10nTip = "colours.tip";
+    colours.addEventListener("click", () => (colours.classList.contains("locked") ? act.say(store, msg("learn.locked"), true) : coloursPopover(colours)));
+    follow((s) => [s.looms[s.current].warp, s.looms[s.current].weft], () => colours.replaceChildren(pairSwatch(ls().warp, ls().weft)));
     return [el("div", { class: "seg", role: "group" }, [front, back]), bits, colours];
   }
 
@@ -432,7 +579,7 @@ export function createShell(store, root) {
     chip.addEventListener("click", () => (chip.classList.contains("locked") ? act.say(store, msg("learn.locked"), true) : setupPopover(chip)));
     follow((s) => [s.looms[s.current].rev, s.locale], () => {
       const { deck, tie } = ls().loom;
-      text.textContent = t("setup.chip", { head: tn("hooks.option", deck.hooks / 8, { hooks: deck.hooks }), tie: words(tieLabel(tie)) });
+      setText(text, t("setup.chip", { head: tn("hooks.option", deck.hooks / 8, { hooks: deck.hooks }), tie: words(tieLabel(tie)) }));
     });
     return el("div", { class: "setup-row" }, [chip]);
   }
@@ -486,22 +633,26 @@ export function createShell(store, root) {
    */
   function pane(i, v) {
     const host = el("div", { class: "pane-host" });
-    const chip = el("button", { type: "button", class: "chip view-chip", "aria-haspopup": "menu" }, [label("span", `view.${v}`), icon("keyboard_arrow_down")]);
-    chip.addEventListener("click", () =>
+    const chip = el("button", { type: "button", class: "chip view-chip", "aria-haspopup": "menu" }, [el("span", { class: "view-name" }), icon("keyboard_arrow_down")]);
+    follow((s) => [s.locale], () => (/** @type {HTMLElement} */ (chip.firstChild).textContent = viewName(v)));
+    // One flat list in two groups, the 2D drawings and the 3D models; a view on show in another
+    // pane says where, and choosing it swaps the two (js/app/arrange.js).
+    chip.addEventListener("click", () => {
+      const views = store.state.views;
       showMenu(
         chip,
-        STAGE_VIEWS.map((x) => ({
-          label: t(`view.${x}`),
-          checked: x === v,
-          divider: x === "u1" ? true : undefined,
-          run: () => {
-            const views = [...store.state.views];
-            views[i] = x;
-            act.setViews(store, views);
-          },
-        })),
-      ),
-    );
+        STAGE_VIEWS.map((x) => {
+          const at = views.indexOf(x);
+          const name = viewName(x, true);
+          return {
+            label: at >= 0 && at !== i ? `${name} · ${t(placeKey(at, views.length))}` : name,
+            checked: x === v,
+            divider: x === "section" ? t("view.group.2d") : x === "3d" ? t("view.group.3d") : undefined,
+            run: () => act.setViews(store, choose(store.state.views, i, x)),
+          };
+        }),
+      );
+    });
     const tools = el("div", { class: "pane-tools" }, mode === "desktop" ? [chip] : []);
     if (v === "section") tools.append(...sectionTools());
     /** @type {((unit: "machine" | UnitId) => void) | undefined} */
@@ -529,8 +680,7 @@ export function createShell(store, root) {
     /** @type {"machine" | UnitId} */
     let shown = UNIT_VIEWS[v].unit;
     const write = () => {
-      const code = Object.values(UNIT_VIEWS).find((u) => u.unit === shown)?.code;
-      title.textContent = code ? `${code} · ${t(`unit.${shown}`)}` : t(`unit.${shown}`);
+      title.textContent = t(`unit.${shown}`);
       idea.textContent = t(`unit.${shown}.idea`);
     };
     follow((s) => [s.locale], write);
@@ -544,7 +694,10 @@ export function createShell(store, root) {
 
   /** The section's tools: how close it looks, and which cross-row it cuts. */
   function sectionTools() {
-    const zoom = el("div", { class: "chip-row", role: "group" });
+    // how close the section looks: a zoom on the same drawing, so a tool of the view, not a view;
+    // a plain magnifier before the chips says so (a mark, not a control: it looks like none)
+    const zoom = el("div", { class: "chip-row", role: "group", "data-l10n-name": "section.zoom" });
+    const zoomTool = el("div", { class: "zoom-tool", "data-l10n-tip": "section.zoom" }, [el("span", { class: "zoom-mark", "aria-hidden": "true" }, [icon("zoom_in")]), zoom]);
     for (const z of /** @type {const} */ (["whole", "needles", "crooks"])) {
       const b = label("button", `section.${z}`, { type: "button", class: "chip" });
       b.addEventListener("click", () => act.setSectionView(store, z));
@@ -554,13 +707,16 @@ export function createShell(store, root) {
     cross.addEventListener("change", () => act.setCrossRow(store, Number(cross.value)));
     const crossChip = el("label", { class: "chip" }, [cross]);
     follow((s) => [s.sectionView, s.looms[s.current].crossRow, s.looms[s.current].rev, s.locale], () => {
-      for (const b of zoom.children) b.setAttribute("aria-pressed", String(/** @type {HTMLElement} */ (b).dataset.l10n === `section.${store.state.sectionView}`));
+      for (const b of zoom.querySelectorAll("button")) b.setAttribute("aria-pressed", String(/** @type {HTMLElement} */ (b).dataset.l10n === `section.${store.state.sectionView}`));
       const n = ls().loom.deck.hooks / 8;
-      cross.replaceChildren(...[...Array(n).keys()].map((c) => new Option(t("section.crossRow", { row: c + 1, from: c * 8 + 1, to: c * 8 + 8 }), String(c))));
-      cross.value = String(ls().crossRow);
+      // the options are made anew only when the head or the language changes: made every frame
+      // while the loom plays, the open list would close under the pointer
+      const options = [...Array(n).keys()].map((c) => t("section.crossRow", { row: c + 1, from: c * 8 + 1, to: c * 8 + 8 }));
+      if ([...cross.options].map((x) => x.text).join("\n") !== options.join("\n")) cross.replaceChildren(...options.map((text, c) => new Option(text, String(c))));
+      if (cross.value !== String(ls().crossRow)) cross.value = String(ls().crossRow);
       crossChip.hidden = n === 1;
     });
-    return [zoom, crossChip];
+    return [zoomTool, crossChip];
   }
 
   /** The stage, split as the store says, with the arrangement and the thread followed. */
@@ -571,7 +727,7 @@ export function createShell(store, root) {
       const b = el("button", { type: "button", class: "chip" }, [icon(name)]);
       b.dataset.l10nTip = tip;
       b.dataset.n = String(n);
-      b.addEventListener("click", () => act.setViews(store, store.state.views.length === n ? store.state.views : SPLIT[n]));
+      b.addEventListener("click", () => act.setViews(store, arrange(store.state.views, n)));
       arrangement.appendChild(b);
     }
     const chipFollow = el("button", { type: "button", class: "chip follow-chip" });
@@ -600,10 +756,14 @@ export function createShell(store, root) {
     const st = el("main", { class: "stage" });
     const chips = el("div", { class: "view-chips", role: "group", "data-l10n-name": "stage.views" });
     for (const v of STAGE_VIEWS.filter((x) => !x.startsWith("u"))) {
-      const b = label("button", `view.${v}`, { type: "button", class: "chip" });
+      const b = el("button", { type: "button", class: "chip" });
+      b.dataset.view = v;
       b.addEventListener("click", () => act.setViews(store, [v]));
       chips.appendChild(b);
     }
+    follow((s) => [s.locale], () => {
+      for (const b of /** @type {HTMLElement[]} */ ([...chips.children])) b.textContent = viewName(/** @type {StageView} */ (b.dataset.view));
+    });
     const one = el("div", { class: "panes", style: "display: contents" });
     let mine = { placed: /** @type {Placed[]} */ ([]), unwatch: /** @type {(() => void)[]} */ ([]) };
     follow((s) => [s.views[0]], () => {
@@ -611,7 +771,7 @@ export function createShell(store, root) {
       const made = remake(mine, () => [pane(0, v)]);
       one.replaceChildren(...made.nodes);
       mine = made.mine;
-      for (const b of chips.children) b.setAttribute("aria-pressed", String(/** @type {HTMLElement} */ (b).dataset.l10n === `view.${v}`));
+      for (const b of chips.children) b.setAttribute("aria-pressed", String(/** @type {HTMLElement} */ (b).dataset.view === v));
       relabel();
     });
     st.append(chips, one);
@@ -736,7 +896,7 @@ export function createShell(store, root) {
     for (const u of unwatch) u();
     placed = [];
     unwatch = [];
-    document.querySelector(".popover")?.remove();
+    document.querySelector(".popover")?.dispatchEvent(new Event("shut"));
     mode = modeOf();
     root.className = `app ${mode}`;
     root.dataset.ws = store.state.workspace;

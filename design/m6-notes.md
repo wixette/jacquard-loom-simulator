@@ -14,7 +14,7 @@
 | The machine's settings | `js/app/shell.js`, `js/view2d/chainEditor.js` | The head and tie-up as a chip over the cards, showing their values; the colours as a palette over the cloth; the chain's end as a switch that laces it into a loop or opens it, beside the cards' loop button |
 | The panels' edges | `js/ui/edge.js` | Window splitters, as the sibling's dock edge: drag or arrow keys to resize, past the end or Enter to close to a rail; remembered on the device |
 | The keyboard | `js/app/keys.js` | Space, ← →, 1–4, F, Esc, never while a field that takes keys has the focus |
-| The sounds | `js/app/sound.js`, `audio/`, `tools/sounds.mjs` | One sound for each moment of a pick, played going forward; placeholders until the recorded ones take their names |
+| The sounds | `js/app/sound.js`, `audio/` | One sound for each moment of a pick, played going forward (synthesised placeholders in M6; since 2026-10-27, sounds edited from Pixabay's, `audio/SOURCES.md`) |
 | About | `js/app/about.js` | The app's one dialog, as the sibling's |
 | The 3D parts' names | `js/scene/partNames.js` | A message key for each named part of the models, made from its node's name; the units' titles and ideas as message keys |
 | The app's links | `js/app/links.js` | What the app shows, as a link (Share), and the app opened from one |
@@ -28,7 +28,7 @@
 4. **Every setting sits beside what it changes.** The top bar holds only the app's own; the head and tie-up are over the cards (a card has a hole for each hook), the colours over the cloth, the loop at the chain's end as well as in the cards' toolbar.
 5. **A panel's watchers live as long as its panes.** The stage's panes are made anew when the views change; the components and the frame's watchers made with them go with them.
 6. **The 3D models keep their English names;** the page names a part by a key made from its node's name (numbers dropped, a side dropped where both sides share a name), and a test checks every named part's English against its key's. Rebuilding the models with new names fails that test until the messages follow.
-7. **Sound observes the loom, not the buttons:** each moment passed going forward sounds, however it was passed (stepped, played, a key); going back and jumps (a reset, a link, a tutorial step) are silent. Above 30 picks a minute only the batten sounds.
+7. **Sound observes the loom, not the buttons:** each motion passed going forward sounds, however it was passed (stepped, played, a key), at the motion itself rather than at the moment the transport names after it (revised 2026-10-27: the shuttle's swish came as it landed, a second late at 12 picks a minute; now as it is thrown, the batten's clack as it strikes, the press as the card meets the needles; `SOUND_AT` in `js/app/sound.js`, one sound in each step of the transport); going back and jumps (a reset, a link, a tutorial step) are silent. Every sound plays at every speed: above 30 picks a minute each is cut short with a fade so that it is over within half a pick, sped up by a tenth at most (keeping its pitch), and all but the batten a little quieter, so the busier mix is no louder (`voice` in `js/app/sound.js`; revised 2026-10-27: at first only the batten sounded above 30, as the sounds, sped up by half, smeared together).
 8. **The checks see the phone in a frame:** S-1 loads the app in iframes of a phone's, a tablet's and a desktop's sizes, since a page in a frame takes the frame's size as its window.
 
 ## Acceptance spec
@@ -46,6 +46,8 @@
 | S-9 | Each moment passed going forward sounds its own sound, once; going back, a reset and a link opened are silent; running out of cards sounds the refusal. | page |
 | S-10 | Every part the 3D models name has a message key whose English is the model's own name; every unit's title and idea is a message. | logic |
 | S-11 | The prototypes still work: every developer page's `?selftest` passes (`pnpm selftest`). | page |
+| S-13 | While the loom plays no click is lost: no control of the frame is replaced or has its contents replaced (the play button's icon only when playing starts or stops; a button's icon never takes the pointer), and a press on a part of something drawn anew (a hook in the section, a hole in the chain) counts once, even when redrawn between its press and release (added 2026-10-27: the pause button could not be clicked while playing, its icon replaced every frame). | page |
+| S-12 | At every moment of a pick the section labels the griffe and its knives beside the griffe's frame where it is, on one side throughout (added 2026-10-27: the griffe's label had sat at the top of its travel, over empty space). | page |
 
 ### Results (2026-10-27)
 
@@ -62,3 +64,5 @@
 | S-9 | A pick sounds lift, turn, shuttle, beat, fall, press; back, a reset and a link are silent; running out of cards sounds the refusal |
 | S-10 | 6 models, 60 part names (87 named parts): every one's English is its key's; the 5 units' titles and ideas are messages |
 | S-11 | `pnpm selftest`: all 8 pages pass (the app's 9 checks, the developer pages' 120) |
+| S-12 | 7 moments, from rest to the next card: both labels beside the frame, on its right |
+| S-13 | 0.8 s of playing: no control replaced; a hook and a hole pressed across a redraw, and a plain click counted once |
