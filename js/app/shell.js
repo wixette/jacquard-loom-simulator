@@ -14,6 +14,7 @@ import { linkOf } from "./links.js";
 import { tieLabel } from "../sim/tieup.js";
 import { printDocument } from "../teach/printCards.js";
 import { applyIcons, el, icon, setTip, showMenu, tabs } from "../ui/components.js";
+import { colourPicker } from "../ui/colourPicker.js";
 import { wireEdge } from "../ui/edge.js";
 import { showAbout } from "./about.js";
 import { wireKeys } from "./keys.js";
@@ -254,29 +255,48 @@ export function createShell(store, root) {
   }
 
   /**
-   * A small dialog under its anchor, shut by pressing the anchor again, pressing elsewhere, or Esc.
+   * A small dialog by its anchor, as a non-modal popover does it: one at a time; pressing the
+   * anchor again, pressing elsewhere or Esc shuts it; it follows its anchor when the window is
+   * resized or the page scrolls, kept inside the window (under the anchor if it fits, else over
+   * it); and it shuts if its anchor goes (the frame rebuilt for another screen).
    * @param {HTMLElement} anchor
    * @param {string} id
    * @param {string} name
    * @param {HTMLElement[]} rows
+   * @param {string} [cls]
+   * @param {() => void} [onShut] what to undo when it shuts
+   * @param {HTMLElement | null} [clear] what it should keep in view, if the window has room
+   *   beside it (the cloth, while its colours are chosen)
    */
-  function popover(anchor, id, name, rows, cls = "") {
+  function popover(anchor, id, name, rows, cls = "", onShut = () => {}, clear = null) {
     const old = /** @type {HTMLElement | null} */ (document.querySelector(".popover"));
-    old?.remove();
+    old?.dispatchEvent(new Event("shut"));
     if (old?.dataset.for === id) return;
     const pop = el("div", { class: `popover ${cls}`.trim(), role: "dialog", "aria-label": name }, rows);
     pop.dataset.for = id;
     document.body.appendChild(pop);
-    const r = anchor.getBoundingClientRect();
-    const b = pop.getBoundingClientRect();
-    // below the button if it fits, else above it, else as high as the window allows (it scrolls)
-    const below = r.bottom + 6 + b.height <= window.innerHeight - 8;
-    pop.style.top = `${below ? r.bottom + 6 : Math.max(8, r.top - 6 - b.height)}px`;
-    pop.style.left = `${Math.max(8, Math.min(window.innerWidth - b.width - 8, r.left))}px`;
+    const place = () => {
+      if (!anchor.isConnected) return shut();
+      const r = anchor.getBoundingClientRect();
+      const b = pop.getBoundingClientRect();
+      const below = r.bottom + 6 + b.height <= window.innerHeight - 8;
+      pop.style.top = `${below ? r.bottom + 6 : Math.max(8, r.top - 6 - b.height)}px`;
+      const beside = clear ? clear.getBoundingClientRect().left - b.width - 6 : -1;
+      pop.style.left = `${beside >= 8 ? beside : Math.max(8, Math.min(window.innerWidth - b.width - 8, r.left))}px`;
+    };
+    let frame = 0;
+    const follow = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(place);
+    };
     const shut = () => {
+      cancelAnimationFrame(frame);
       pop.remove();
       document.removeEventListener("pointerdown", away);
       document.removeEventListener("keydown", esc);
+      window.removeEventListener("resize", follow);
+      window.removeEventListener("scroll", follow, true);
+      onShut();
     };
     const away = (/** @type {PointerEvent} */ e) => {
       if (!pop.contains(/** @type {Node} */ (e.target)) && !anchor.contains(/** @type {Node} */ (e.target))) shut();
@@ -286,8 +306,12 @@ export function createShell(store, root) {
       shut();
       anchor.focus();
     };
+    pop.addEventListener("shut", shut, { once: true });
+    place();
     document.addEventListener("pointerdown", away);
     document.addEventListener("keydown", esc);
+    window.addEventListener("resize", follow);
+    window.addEventListener("scroll", follow, true);
     /** @type {HTMLElement | null} */ (pop.querySelector("select, input, button"))?.focus();
   }
 
@@ -305,24 +329,38 @@ export function createShell(store, root) {
     popover(anchor, "setup", t("setup.tip"), [el("label", { for: "setup-hooks", text: t("setup.hooks") }), hooks, el("label", { for: "setup-tie", text: t("setup.tie") }), tie]);
   }
 
-  /** The cloth's colours, from the palette over the cloth. @param {HTMLElement} anchor */
+  /**
+   * The cloth's colours, from the button over the cloth: the two threads, one of them chosen
+   * for the picker below them (the page's own: js/ui/colourPicker.js), a swap, ready-made pairs
+   * and Reset, all in one popover.
+   * @param {HTMLElement} anchor
+   */
   function coloursPopover(anchor) {
+    /** @type {"warp" | "weft"} */
+    let editing = "warp";
+    const picker = colourPicker({
+      value: ls().warp,
+      onInput: (hex) => act.setColours(store, { [editing]: hex }),
+      names: { area: t("colours.area"), hue: t("colours.hue"), hex: t("colours.hex"), areaValue: (sat, val) => t("colours.areaValue", { s: sat, v: val }) },
+    });
     /**
-     * One thread's row: its swatch (the colour picker itself), its name and what it is, and its
-     * value as hex.
+     * One thread's row, a button that gives it to the picker: its swatch, its name and what it
+     * is, and its value as hex.
      * @param {"warp" | "weft"} thread
      */
     const row = (thread) => {
-      const input = el("input", { type: "color", id: `colour-${thread}`, class: "swatch-input", "aria-label": t(`setup.${thread}`) });
-      input.addEventListener("input", () => act.setColours(store, { [thread]: input.value }));
+      const swatch = el("span", { class: "swatch", "aria-hidden": "true" });
       const hex = el("span", { class: "hex" });
-      const swatch = el("label", { class: "swatch", for: `colour-${thread}` }, [input]);
-      const line = el("div", { class: "colour-row" }, [
+      const line = el("button", { type: "button", class: "colour-row", id: `colour-${thread}` }, [
         swatch,
-        el("div", { class: "colour-text" }, [el("label", { class: "colour-name", for: `colour-${thread}`, text: t(`setup.${thread}`) }), el("span", { class: "colour-hint", text: t(`colours.${thread}Hint`) })]),
+        el("span", { class: "colour-text" }, [el("span", { class: "colour-name", text: t(`setup.${thread}`) }), el("span", { class: "colour-hint", text: t(`colours.${thread}Hint`) })]),
         hex,
       ]);
-      return { line, input, swatch, hex, thread };
+      line.addEventListener("click", () => {
+        editing = thread;
+        show();
+      });
+      return { line, swatch, hex, thread };
     };
     const rows = [row("warp"), row("weft")];
     const swap = el("button", { type: "button", class: "btn icon-only swap" }, [icon("swap_vert")]);
@@ -338,6 +376,21 @@ export function createShell(store, root) {
     }
     const again = el("button", { type: "button", class: "btn", text: t("colours.reset") });
     again.addEventListener("click", () => act.setColours(store, { warp: act.WARP, weft: act.WEFT }));
+    // the panel follows the colours however they change: the picker, the swap, a pair, Reset
+    const show = () => {
+      const s = ls();
+      for (const r of rows) {
+        r.swatch.style.background = s[r.thread];
+        r.hex.textContent = s[r.thread].toUpperCase();
+        r.line.setAttribute("aria-pressed", String(r.thread === editing));
+      }
+      picker.set(s[editing]);
+      for (const b of /** @type {HTMLElement[]} */ ([...pairs.children])) {
+        const [w, f] = COLOUR_PAIRS[/** @type {string} */ (b.dataset.pair)];
+        b.setAttribute("aria-pressed", String(w === s.warp && f === s.weft));
+      }
+    };
+    const unwatch = store.watch((st) => [st.looms[st.current].warp, st.looms[st.current].weft], show);
     popover(
       anchor,
       "colours",
@@ -345,30 +398,16 @@ export function createShell(store, root) {
       [
         el("h3", { class: "popover-title", text: t("colours.title") }),
         el("div", { class: "colour-threads" }, [rows[0].line, swap, rows[1].line]),
+        picker.element,
         el("p", { class: "popover-sub", text: t("colours.pairs") }),
         pairs,
         el("div", { class: "popover-foot" }, [again]),
       ],
       "colours-pop",
+      unwatch,
+      anchor.closest(".panel"),
     );
-    // the panel follows the colours however they change: a swatch, the swap, a pair, Reset
-    const show = () => {
-      const s = ls();
-      for (const r of rows) {
-        r.input.value = s[r.thread];
-        r.swatch.style.background = s[r.thread];
-        r.hex.textContent = s[r.thread].toUpperCase();
-      }
-      for (const b of /** @type {HTMLElement[]} */ ([...pairs.children])) {
-        const [w, f] = COLOUR_PAIRS[/** @type {string} */ (b.dataset.pair)];
-        b.setAttribute("aria-pressed", String(w === s.warp && f === s.weft));
-      }
-    };
     show();
-    const unwatchColours = store.watch((st) => [st.looms[st.current].warp, st.looms[st.current].weft], () => {
-      if (!document.body.contains(pairs)) return unwatchColours();
-      show();
-    });
   }
 
   /**
@@ -839,7 +878,7 @@ export function createShell(store, root) {
     for (const u of unwatch) u();
     placed = [];
     unwatch = [];
-    document.querySelector(".popover")?.remove();
+    document.querySelector(".popover")?.dispatchEvent(new Event("shut"));
     mode = modeOf();
     root.className = `app ${mode}`;
     root.dataset.ws = store.state.workspace;

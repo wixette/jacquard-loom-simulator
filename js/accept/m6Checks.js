@@ -151,12 +151,20 @@ async function settings({ store }) {
   }
   const palette = /** @type {HTMLElement | null} */ ($('.panel.right .panel-head [aria-haspopup="dialog"]'));
   palette?.click();
-  const warp = /** @type {HTMLInputElement | null} */ (document.getElementById("colour-warp"));
-  if (!warp) bad.push("no colours over the cloth");
+  /** @param {string} v */
+  const typeHex = (v) => {
+    const hex = /** @type {HTMLInputElement | null} */ (document.getElementById("colour-hex"));
+    if (!hex) return false;
+    hex.value = v;
+    hex.dispatchEvent(new Event("input"));
+    return true;
+  };
+  if (!typeHex("#336699")) bad.push("no colours over the cloth");
   else {
-    warp.value = "#336699";
-    warp.dispatchEvent(new Event("input"));
-    if (ls().warp !== "#336699") bad.push("the warp colour does not change the cloth");
+    if (ls().warp !== "#336699") bad.push("the picker does not set the warp");
+    /** @type {HTMLElement | null} */ ($("#colour-weft"))?.click();
+    typeHex("abc");
+    if (ls().weft !== "#aabbcc" || ls().warp !== "#336699") bad.push("the weft's row does not give the picker the weft");
     await frames();
     // the button shows the pair itself, warp in front; a ready-made pair sets both; swap swaps
     const front = () => palette?.querySelector(".pair-swatch .warp")?.getAttribute("fill");
@@ -168,9 +176,28 @@ async function settings({ store }) {
     if (pair?.getAttribute("aria-pressed") !== "true") bad.push("the pair chosen is not marked");
     /** @type {HTMLElement | null} */ ($(".colours-pop .swap"))?.click();
     if (ls().warp !== "#e8c16a" || ls().weft !== "#9b2d30") bad.push("swap does not swap the colours");
+    if (/** @type {HTMLInputElement | null} */ (document.getElementById("colour-hex"))?.value !== "#9B2D30") bad.push("the picker does not follow the colours");
+    // a non-modal popover: it follows its button when the layout moves, its button and a press
+    // elsewhere and Esc shut it
+    const pop = () => /** @type {HTMLElement | null} */ ($(".colours-pop"));
+    const work = /** @type {HTMLElement} */ ($(".work"));
+    const was = pop()?.getBoundingClientRect().left ?? 0;
+    work.style.setProperty("--right", "440px");
+    window.dispatchEvent(new Event("resize"));
     await frames();
-    if (/** @type {HTMLInputElement | null} */ (document.getElementById("colour-warp"))?.value !== "#e8c16a") bad.push("the panel does not follow the colours");
+    await frames();
+    const moved = pop()?.getBoundingClientRect().left ?? 0;
+    if (Math.abs(was - moved - 100) > 2) bad.push(`the panel did not follow its button (${Math.round(was)} → ${Math.round(moved)})`);
+    work.style.removeProperty("--right");
+    window.dispatchEvent(new Event("resize"));
     palette?.click();
+    if (pop()) bad.push("its button does not shut it");
+    palette?.click();
+    document.body.dispatchEvent(new PointerEvent("pointerdown", { bubbles: true }));
+    if (pop()) bad.push("a press elsewhere does not shut it");
+    palette?.click();
+    document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+    if (pop()) bad.push("Esc does not shut it");
     act.setColours(store, { warp: act.WARP, weft: act.WEFT });
   }
   const loopButton = () => /** @type {HTMLElement} */ ($('.panel.left .panel-head [aria-pressed]'));
@@ -185,7 +212,7 @@ async function settings({ store }) {
     if (ls().loom.deck.loop !== want) bad.push("the chain's end does not lace or open the chain");
     if ($(".chain-end.lace")?.getAttribute("aria-checked") !== String(want) || loopButton()?.getAttribute("aria-pressed") !== String(want)) bad.push("the chain's end and the loop button disagree");
   }
-  return result("S-2", "The machine's settings sit with what they change: the head and tie-up over the cards, the colours over the cloth, the loop at the chain's end; the top bar holds only the app's own", bad.length === 0, bad.slice(0, 4).join("; ") || "top bar: Share, language, About; head 16 → 32 → 16 from its chip; warp, a pair and swap from the colours button, which shows them; the chain laced and opened from its end");
+  return result("S-2", "The machine's settings sit with what they change: the head and tie-up over the cards, the colours over the cloth, the loop at the chain's end; the top bar holds only the app's own", bad.length === 0, bad.slice(0, 4).join("; ") || "top bar: Share, language, About; head 16 → 32 → 16 from its chip; warp and weft from the page's own picker, a pair and swap, the button showing them; the panel follows its button and shuts as a popover does; the chain laced and opened from its end");
 }
 
 /**

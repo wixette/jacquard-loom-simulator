@@ -10,7 +10,8 @@ What changed in each release. Versions follow `package.json` and are tagged `vX.
 - The view menu in two groups, 2D drawings and 3D models, with the units by name (no "U1"…"U5"); a view on show is never shown twice (choosing it swaps the panes), the four-view grid holds one 3D model, and going to two or four views keeps those on show.
 - The link format agreed, with tests for every field and value.
 - The section labels the griffe and its knives beside the griffe, wherever it is in its lift.
-- The cloth's colours: the button shows the warp and weft themselves; its panel has a swatch, name and hex value for each, a swap, six ready-made pairs, and Reset.
+- The cloth's colours: the button shows the warp and weft themselves; its panel has a row for each thread, the page's own colour picker (in place of the browser's), a swap, six ready-made pairs and Reset, and opens beside the cloth so each change shows on it.
+- The popovers follow their button when the window is resized, and shut as popovers do (their button, a press elsewhere, Esc).
 
 **M7, the tutorial, parts 1 to 3 (2026-10-27)** ([notes](design/m7-notes.md))
 - Learn: 21 steps in three parts. The story (the draw loom; Bouchon, Falcon and Vaucanson; Jacquard; the woven portrait), with four historical pictures and their credits; how it works (the loom in 3D, the head cut through, a light card and a heavy lift, one card one row, the chain as a program and a loop, what the loom is not); weaving by hand (punch a card, plain weave, twill, satin and why stepping by two fails, the tie-up's repeats, a picture woven bottom-up).
