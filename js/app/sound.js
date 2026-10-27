@@ -1,10 +1,11 @@
 // The machine's sounds (design/public-app.md §3, Sound; after the sibling Stepped Reckoner's).
 // Only the machine makes sound; the interface is silent. One observer watches the loom the views
-// show and sounds each moment of a pick it passes going forward, played or stepped alike:
+// show and sounds each motion of a pick it passes going forward, played or stepped alike, at the
+// motion itself (SOUND_AT), one in each step of the transport:
 // - hooks taken (the griffe rising): the knives' clunk and the harness lifting;
 // - shed open (the cylinder swung out and turned): the card chain's knock;
-// - shuttle across: the swish of the shuttle;
-// - beaten up: the batten's clack, the loudest;
+// - shuttle across: the swish of the shuttle, as it is thrown;
+// - beaten up: the batten's clack, the loudest, as it strikes;
 // - shed closed (the griffe falling): a softer thud;
 // - next card pressed: the cylinder's clack against the needles;
 // and a dull stop when the loom refuses. Going back, or jumping (a reset, a link, a tutorial step
@@ -14,7 +15,8 @@
 // once, played with no delay (from where each sound starts in its file), overlapping, each a
 // little different in pitch and loudness.
 
-import { STOPS } from "../sim/loom.js";
+import { BATTEN_STRIKE } from "../sim/cycle.js";
+import { P } from "../sim/params.js";
 /** @import { AppStore, LoomState } from "./looms.js" */
 
 /** The version this module was loaded with (?v=), for the files it loads. */
@@ -34,8 +36,19 @@ export const FILES = /** @type {const} */ ({
 const ONSET = 0.03;
 /** @typedef {keyof typeof FILES} SoundName */
 
-/** The sound of each stop of a pick (STOPS, STOP_KEYS), in order. */
-const STOP_SOUNDS = /** @type {const} */ (["lift", "turn", "shuttle", "beat", "fall", "press"]);
+/**
+ * When in a pick (0 to 1) each sound is heard: on the motion that makes it, not on the moment
+ * the transport names after it (the shuttle's swish as it is thrown, not when it has arrived).
+ * Each falls within one step of the transport, so a step sounds once (js/sim/cycle.js).
+ */
+export const SOUND_AT = /** @type {const} */ ([
+  ["lift", P.stops[0]], // the knives take the hooks: hooks taken
+  ["turn", P.cylinderTurn[1]], // the cylinder's quarter turn ends on its catch: before the shed is open
+  ["shuttle", P.shuttle[0]], // the shuttle is thrown: as it starts across
+  ["beat", BATTEN_STRIKE], // the batten strikes the weft: before it swings back to rest
+  ["fall", P.stops[4]], // the griffe lands: shed closed
+  ["press", P.cylinderBack[1]], // the cylinder presses the next card on the needles: before the next pick
+]);
 /** Faster than this (picks a minute), only the batten sounds. */
 const FAST = 30;
 /** The files are levelled to full scale: play them at this. */
@@ -85,10 +98,10 @@ export class Sound {
         const fast = ls.speed > FAST && ls.playing;
         const rate = ls.playing ? Math.min(1.5, Math.max(1, ls.speed / 20)) : 1;
         for (let p = Math.floor(before.at); p <= Math.floor(at); p++) {
-          STOPS.forEach((s, i) => {
-            const x = p + s;
-            if (x > before.at + 1e-9 && x <= at + 1e-9 && (!fast || STOP_SOUNDS[i] === "beat")) this.play(STOP_SOUNDS[i], rate);
-          });
+          for (const [name, when] of SOUND_AT) {
+            const x = p + when;
+            if (x > before.at + 1e-9 && x <= at + 1e-9 && (!fast || name === "beat")) this.play(name, rate);
+          }
         }
       },
     );

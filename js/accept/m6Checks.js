@@ -461,7 +461,7 @@ async function sounds({ store, shell }) {
       bad.push(`${file} does not load`);
     }
   }
-  return result("S-9", "Each moment passed going forward sounds its own sound, once; back, a reset and a link are silent; a refusal sounds; every file loads, heard from where it starts", bad.length === 0, bad.slice(0, 4).join("; ") || `lift, turn, shuttle, beat, fall, press; silent back, reset and link; the refusal heard; started past ${starts.join(", ")}`);
+  return result("S-9", "Each motion of a pick passed going forward sounds its own sound, once, as it happens; back, a reset and a link are silent; a refusal sounds; every file loads, heard from where it starts", bad.length === 0, bad.slice(0, 4).join("; ") || `lift, turn, shuttle, beat, fall, press; silent back, reset and link; the refusal heard; started past ${starts.join(", ")}`);
 }
 
 /**
