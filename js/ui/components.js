@@ -69,8 +69,10 @@ export function setText(e, text) {
 export function onPress(svg, run) {
   /** @type {{ target: Element; x: number; y: number; id: number } | null} */
   let down = null;
-  let handled = false;
+  /** Where and when the last press was let go (it counted), to know its click again. @type {{ x: number; y: number; at: number } | null} */
+  let counted = null;
   const press = (/** @type {PointerEvent} */ e) => {
+    counted = null;
     down = e.button === 0 ? { target: /** @type {Element} */ (e.target), x: e.clientX, y: e.clientY, id: e.pointerId } : null;
   };
   const release = (/** @type {PointerEvent} */ e) => {
@@ -78,12 +80,16 @@ export function onPress(svg, run) {
     down = null;
     if (!d || e.pointerId !== d.id || Math.hypot(e.clientX - d.x, e.clientY - d.y) > 6) return;
     run(d.target);
-    // the click that follows, when the part was not redrawn, is the same press
-    handled = true;
-    setTimeout(() => (handled = false), 0);
+    counted = { x: e.clientX, y: e.clientY, at: e.timeStamp };
   };
+  // The click a press makes (when the part was not redrawn) is that press again: known by where
+  // and soon after it was let go, however late the browser sends it (a tap's comes later than a
+  // mouse's), and taken once. A click no pointer made (a key's: detail 0) always counts.
   const click = (/** @type {MouseEvent} */ e) => {
-    if (!handled) run(/** @type {Element} */ (e.target));
+    const c = counted;
+    counted = null;
+    if (c && e.detail > 0 && e.timeStamp - c.at < 1000 && Math.hypot(e.clientX - c.x, e.clientY - c.y) <= 10) return;
+    run(/** @type {Element} */ (e.target));
   };
   const root = /** @type {HTMLElement} */ (svg);
   root.addEventListener("pointerdown", press);

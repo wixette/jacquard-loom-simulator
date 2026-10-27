@@ -570,9 +570,13 @@ async function clicksWhilePlaying({ store }) {
   const at = { bubbles: true, button: 0, pointerId: 8, clientX: r.left + 2, clientY: r.top + 2 };
   once.dispatchEvent(new PointerEvent("pointerdown", at));
   once.dispatchEvent(new PointerEvent("pointerup", at));
-  once.click();
-  await sleep(10);
+  // the click a press makes, sent late, as a tap's can be
+  await sleep(60);
+  once.dispatchEvent(new MouseEvent("click", { ...at, detail: 1 }));
   if (ls().loom.deck.cards[card][0] !== before) bad.push("a plain click on a hole counted twice");
+  // a key's click (Enter on a hole) counts, even just after a press
+  /** @type {HTMLElement} */ (document.querySelector(`.chain [data-card="${card}"] .hole`)).click();
+  if (ls().loom.deck.cards[card][0] === before) bad.push("a key's click on a hole after a press did not count");
   act.loadPreset(store, "plain");
-  return result("S-13", "While the loom plays no click is lost: no control is replaced, and a press on a part drawn anew counts once", bad.length === 0, bad.slice(0, 4).join("; ") || "0.8 s of playing: no control replaced; a hook and a hole pressed across a redraw, and a plain click counted once");
+  return result("S-13", "While the loom plays no click is lost: no control is replaced, and a press on a part drawn anew counts once", bad.length === 0, bad.slice(0, 4).join("; ") || "0.8 s of playing: no control replaced; a hook and a hole pressed across a redraw; a click sent late counted once, a key's counted");
 }

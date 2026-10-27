@@ -64,8 +64,6 @@ function viewComponent(store, v, onMode) {
   return unitsView(store, { unit: UNIT_VIEWS[v].unit, onMode });
 }
 
-/** The views each arrangement opens with, when the stage is split. */
-
 /** The side panels' sizes (px): the smallest, the largest and the default (design/ui-layout.md §4). */
 const PANEL = { left: { min: 260, max: 480, size: 320 }, right: { min: 280, max: 520, size: 340 } };
 /** What the stage keeps at least beside the panels (px). */
@@ -124,10 +122,13 @@ function twillSample(warp, weft) {
 }
 
 /**
- * A view's name on its chip: a 2D drawing by its short name, a 3D model as "3D · its name".
+ * A view's name: on its chip, a 2D drawing by its short name and a 3D model as "3D · its name";
+ * in the view menu (long), under its group's heading, a 2D drawing by its full name and a 3D
+ * model by its own.
  * @param {StageView} v
+ * @param {boolean} [long]
  */
-const viewName = (v) => (is3d(v) ? t("view.in3d", { name: t(`view.${v}`) }) : t(`view.${v}`));
+const viewName = (v, long = false) => (is3d(v) ? (long ? t(`view.${v}`) : t("view.in3d", { name: t(`view.${v}`) })) : long ? t(`comp.${v}`) : t(`view.${v}`));
 
 /**
  * The views Weave opens with when no link names them: two where the stage holds them, else one.
@@ -320,14 +321,15 @@ export function createShell(store, root) {
     const esc = (/** @type {KeyboardEvent} */ e) => {
       if (e.key !== "Escape") return;
       shut();
-      anchor.focus();
+      if (anchor.isConnected) anchor.focus();
     };
     pop.addEventListener("shut", shut, { once: true });
-    place();
+    // listening first, so that a popover whose anchor has already gone shuts all it set up
     document.addEventListener("pointerdown", away);
     document.addEventListener("keydown", esc);
     window.addEventListener("resize", follow);
     window.addEventListener("scroll", follow, true);
+    place();
     /** @type {HTMLElement | null} */ (pop.querySelector("select, input, button"))?.focus();
   }
 
@@ -352,6 +354,9 @@ export function createShell(store, root) {
    * @param {HTMLElement} anchor
    */
   function coloursPopover(anchor) {
+    // pressed again, its button shuts it, before anything (a watcher) is set up for a new one
+    const open = document.querySelector('.popover[data-for="colours"]');
+    if (open) return void open.dispatchEvent(new Event("shut"));
     /** @type {"warp" | "weft"} */
     let editing = "warp";
     const picker = colourPicker({
@@ -541,7 +546,6 @@ export function createShell(store, root) {
     colours.dataset.l10nTip = "colours.tip";
     colours.addEventListener("click", () => (colours.classList.contains("locked") ? act.say(store, msg("learn.locked"), true) : coloursPopover(colours)));
     follow((s) => [s.looms[s.current].warp, s.looms[s.current].weft], () => colours.replaceChildren(pairSwatch(ls().warp, ls().weft)));
-    colours.setAttribute("aria-haspopup", "dialog");
     return [el("div", { class: "seg", role: "group" }, [front, back]), bits, colours];
   }
 
@@ -639,7 +643,7 @@ export function createShell(store, root) {
         chip,
         STAGE_VIEWS.map((x) => {
           const at = views.indexOf(x);
-          const name = is3d(x) ? t(`view.${x}`) : t(`comp.${x}`);
+          const name = viewName(x, true);
           return {
             label: at >= 0 && at !== i ? `${name} · ${t(placeKey(at, views.length))}` : name,
             checked: x === v,

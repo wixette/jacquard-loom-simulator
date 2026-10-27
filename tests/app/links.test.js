@@ -47,6 +47,11 @@ describe("a Weave link", () => {
     assert.equal(b.state.looms.mine.loom.pick, 1);
     assert.equal(b.state.looms.mine.loom.phi, STOPS[2]);
   });
+  it("a link's views are kept to the stage's rules: four hold one 3D model at most", async () => {
+    const b = store();
+    await openLink(b, "#v=2&view=3d,u1,u2,u3");
+    assert.deepEqual(b.state.views, ["3d", "section", "front", "side"]);
+  });
   it("a link that names no views leaves the stage's as they are", async () => {
     const b = store();
     act.setViews(b, ["u3"]);

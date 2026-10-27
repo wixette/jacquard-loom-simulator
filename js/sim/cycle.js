@@ -81,10 +81,9 @@ export const BATTEN_STRIKE = P.beat[0] + (P.beat[1] - P.beat[0]) * 0.6;
 export function battenSwing(phi) {
   const back = ease(phi, [P.griffeRise[1], P.shuttle[0]]);
   const [a, b] = P.beat;
-  const strike = BATTEN_STRIKE;
   if (phi < a) return back > 0 ? -back : 0;
-  if (phi < strike) return -1 + 2 * ease(phi, [a, strike]);
-  return 1 - ease(phi, [strike, b]);
+  if (phi < BATTEN_STRIKE) return -1 + 2 * ease(phi, [a, BATTEN_STRIKE]);
+  return 1 - ease(phi, [BATTEN_STRIKE, b]);
 }
 
 /** True once this pick's weft has been beaten into the cloth. */
