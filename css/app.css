@@ -28,10 +28,20 @@ select { padding: 4px 8px; border-radius: var(--radius-s); border: 1px solid var
   grid-template-columns: var(--left, 320px) 1px minmax(0, 1fr) 1px var(--right, 340px);
   min-height: 0;
 }
-.work.left-closed { grid-template-columns: 0 0 minmax(0, 1fr) 1px var(--right, 340px); }
-.work.right-closed { grid-template-columns: var(--left, 320px) 1px minmax(0, 1fr) 0 0; }
-.work.left-closed.right-closed { grid-template-columns: 0 0 minmax(0, 1fr) 0 0; }
-.edge { background: var(--md-outline-variant); }
+.work.left-closed { grid-template-columns: var(--rail) 1px minmax(0, 1fr) 1px var(--right, 340px); }
+.work.right-closed { grid-template-columns: var(--left, 320px) 1px minmax(0, 1fr) 1px var(--rail); }
+.work.left-closed.right-closed { grid-template-columns: var(--rail) 1px minmax(0, 1fr) 1px var(--rail); }
+.app { --rail: 52px; }
+/* the edges: 1 px drawn, 11 px to grab; blue while hovered, dragged or focused */
+.edge { position: relative; z-index: 6; background: var(--md-outline-variant); cursor: col-resize; touch-action: none; outline: none; transition: background 120ms var(--ease); }
+.edge::before { content: ""; position: absolute; inset: 0 -5px; }
+.edge:hover, .edge:focus-visible, .edge:active { background: var(--md-primary); }
+body.resizing { cursor: col-resize; }
+body.resizing .stage { pointer-events: none; }
+/* a closed panel is a rail, with the button that opens it */
+.panel .rail { display: none; }
+.panel.closed > :not(.rail) { display: none !important; }
+.panel.closed > .rail { display: inline-flex; align-self: center; margin-top: 8px; }
 
 /* ---- the top bar ---------------------------------------------------------------------------- */
 .topbar { display: flex; align-items: center; gap: 4px; padding: 0 8px 0 12px; background: var(--md-surface-low); border-bottom: 1px solid var(--md-outline-variant); min-width: 0; }

@@ -13,6 +13,7 @@ import { encodeLink, LONG_LINK, STAGE_VIEWS } from "../sim/link.js";
 import { tieLabel } from "../sim/tieup.js";
 import { printDocument } from "../teach/printCards.js";
 import { applyIcons, el, icon, setTip, showMenu, tabs } from "../ui/components.js";
+import { wireEdge } from "../ui/edge.js";
 import { place } from "./components/component.js";
 import { benchPanel, chainPanel, clothPanel, statusPanel, tracePanel, transportPanel } from "./components/panels.js";
 import { frontView, sectionView, sideView, unitsView } from "./components/views.js";
@@ -22,6 +23,7 @@ import { TIES, tieKey } from "./looms.js";
 /** @import { AppStore, StageView, Workspace } from "./looms.js" */
 /** @import { Component, Placed } from "./components/component.js" */
 /** @import { IconName } from "../ui/components.js" */
+/** @import { Edge } from "../ui/edge.js" */
 
 /** @typedef {"desktop" | "phone" | "landscape"} Mode */
 
@@ -54,6 +56,11 @@ function viewComponent(store, v) {
 /** The views each arrangement opens with, when the stage is split. */
 const SPLIT = /** @type {Record<1 | 2 | 4, StageView[]>} */ ({ 1: ["section"], 2: ["section", "3d"], 4: ["section", "front", "side", "3d"] });
 
+/** The side panels' sizes (px): the smallest, the largest and the default (design/ui-layout.md §4). */
+const PANEL = { left: { min: 260, max: 480, size: 320 }, right: { min: 280, max: 520, size: 340 } };
+/** What the stage keeps at least beside the panels (px). */
+const STAGE_MIN = 560;
+
 /** The narrowest stage that holds two views side by side (each about as wide as a laptop's one). */
 const TWO_VIEWS = 1040;
 
@@ -62,7 +69,7 @@ const TWO_VIEWS = 1040;
  * @returns {StageView[]}
  */
 export function openingViews() {
-  const stage = window.innerWidth - 320 - 340 - 2;
+  const stage = window.innerWidth - PANEL.left.size - PANEL.right.size - 2;
   return modeOf() === "desktop" && stage >= TWO_VIEWS ? SPLIT[2] : SPLIT[1];
 }
 
@@ -94,6 +101,8 @@ export function createShell(store, root) {
     run();
   };
   const ls = () => store.state.looms[store.state.current];
+  /** The side panels' edges, while the desktop frame is up. @type {Partial<Record<"left" | "right", Edge>>} */
+  let edges = {};
 
   /**
    * An icon button with its tooltip and name.
@@ -125,6 +134,7 @@ export function createShell(store, root) {
   function relabel() {
     for (const e of /** @type {NodeListOf<HTMLElement>} */ (root.querySelectorAll("[data-l10n]"))) e.textContent = t(/** @type {string} */ (e.dataset.l10n));
     for (const e of /** @type {NodeListOf<HTMLElement>} */ (root.querySelectorAll("[data-l10n-tip]"))) setTip(e, t(/** @type {string} */ (e.dataset.l10nTip)));
+    for (const e of /** @type {NodeListOf<HTMLElement>} */ (root.querySelectorAll("[data-l10n-name]"))) e.setAttribute("aria-label", t(/** @type {string} */ (e.dataset.l10nName)));
     document.title = t("app.title");
   }
 
@@ -338,6 +348,26 @@ export function createShell(store, root) {
     return [el("div", { class: "seg", role: "group" }, [front, back]), bits, colours];
   }
 
+  /**
+   * What a closed panel leaves: a rail with the button that opens it again.
+   * @param {"left" | "right"} side
+   */
+  function rail(side) {
+    const b = iconButton(side === "left" ? "left_panel_open" : "right_panel_open", `panel.open.${side}`, () => edges[side]?.close(false), "btn icon-only rail");
+    return b;
+  }
+
+  /**
+   * The edge between a side panel and the stage, a window splitter.
+   * @param {"left" | "right"} side
+   */
+  function edge(side) {
+    const e = el("div", { class: "edge", role: "separator", tabindex: "0", "aria-orientation": "vertical" });
+    e.dataset.l10nName = `panel.edge.${side}`;
+    e.dataset.l10nTip = "panel.edge.tip";
+    return e;
+  }
+
   /** The head and its tie-up, shown as they are, over the cards; pressed, they can be changed. */
   function setupRow() {
     const text = el("span");
@@ -357,7 +387,7 @@ export function createShell(store, root) {
     const bench = el("div", { class: "bench-slot" });
     const chain = el("div", { class: "chain-slot" });
     const head = el("div", { class: "panel-head" }, [label("h2", "cards.title"), ...cardTools()]);
-    const panel = el("aside", { class: "panel left" }, [...(store.state.workspace === "learn" ? [guide()] : []), head, setupRow(), bench, chain]);
+    const panel = el("aside", { class: "panel left" }, [rail("left"), ...(store.state.workspace === "learn" ? [guide()] : []), head, setupRow(), bench, chain]);
     put(benchPanel(store), bench);
     put(chainPanel(store), chain);
     return panel;
@@ -367,7 +397,7 @@ export function createShell(store, root) {
   function outputPanel() {
     const cloth = el("div", { class: "cloth-slot" });
     const trace = el("div", { class: "trace-slot" });
-    const panel = el("aside", { class: "panel right" }, [el("div", { class: "panel-head" }, [label("h2", "cloth.title"), ...clothTools()]), cloth, trace]);
+    const panel = el("aside", { class: "panel right" }, [rail("right"), el("div", { class: "panel-head" }, [label("h2", "cloth.title"), ...clothTools()]), cloth, trace]);
     put(clothPanel(store), cloth);
     put(tracePanel(store), trace);
     return panel;
@@ -558,9 +588,19 @@ export function createShell(store, root) {
     mode = modeOf();
     root.className = `app ${mode}`;
     root.replaceChildren();
+    edges = {};
     if (mode === "desktop") {
       const centre = el("div", { class: "centre" }, [stage(), ...time()]);
-      root.append(topbar(), el("div", { class: "work" }, [programPanel(), el("div", { class: "edge" }), centre, el("div", { class: "edge" }), outputPanel()]));
+      const [left, right] = [programPanel(), outputPanel()];
+      const [edgeLeft, edgeRight] = [edge("left"), edge("right")];
+      const work = el("div", { class: "work" }, [left, edgeLeft, centre, edgeRight, right]);
+      root.append(topbar(), work);
+      // the left panel starts closed where the stage would be narrow (§4, medium screens)
+      const narrow = window.innerWidth - PANEL.left.size - PANEL.right.size < STAGE_MIN;
+      edges = {
+        left: wireEdge({ work, panel: left, edge: edgeLeft, side: "left", sizes: PANEL.left, stageMin: STAGE_MIN, startClosed: narrow }),
+        right: wireEdge({ work, panel: right, edge: edgeRight, side: "right", sizes: PANEL.right, stageMin: STAGE_MIN, startClosed: false }),
+      };
     } else {
       const under = el("div", { class: "under-stage" }, time());
       if (mode === "phone") root.append(appbar(), smallStage(), under, sheet());
