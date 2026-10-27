@@ -391,7 +391,7 @@ export default {
   "learn.next.wait": "먼저 과제를 하세요. 주황색 상자 안에 있습니다",
   "learn.next.answer": "먼저 질문에 답하세요",
   "learn.taskDone": "해냈습니다!",
-  "learn.toWeave": "짜기로 가기",
+  "learn.go.weave": "짜기로 가기",
   "learn.ask.step": "한 단계 앞으로",
   "learn.ask.play": "재생",
   "learn.ask.loop": "사슬을 고리로 잇기",

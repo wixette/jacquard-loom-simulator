@@ -3,7 +3,7 @@
 // counts as done; the place and the steps done are remembered on this device, so leaving Learn
 // and coming back resumes it. The steps themselves are in js/teach/tutorial.js.
 
-import { loomAt, shownAt, stepIndex, STEPS } from "../teach/tutorial.js";
+import { loomAt, pictureAt, shownAt, stepIndex, STEPS } from "../teach/tutorial.js";
 import * as act from "./looms.js";
 /** @import { AppStore } from "./looms.js" */
 
@@ -76,7 +76,10 @@ export function goTo(store, i) {
   const n = Math.max(0, Math.min(STEPS.length - 1, i));
   const { loom, follow } = loomAt(n);
   // the step and its loom in one update: the step done is never judged on the other's loom
-  act.setLoom(store, loom, follow === null ? null : { hook: follow, end: null, pick: null }, "tutorial", { learn: { ...store.state.learn, step: n } });
+  // a step on a picture gives the picture tool its picture, in the same update
+  const picture = pictureAt(n);
+  const pictures = picture ? { pictures: { ...store.state.pictures, tutorial: picture } } : {};
+  act.setLoom(store, loom, follow === null ? null : { hook: follow, end: null, pick: null }, "tutorial", { learn: { ...store.state.learn, step: n }, ...pictures });
   act.setViews(store, shownAt(n).views);
   act.setSectionView(store, "whole");
   remember(store);

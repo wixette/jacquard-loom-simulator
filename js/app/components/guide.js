@@ -5,7 +5,7 @@
 // follow the loom as the learner works it.
 
 import { say, t } from "../../l10n/l10n.js";
-import { endsPart, opensPart, placeInPart, STEPS } from "../../teach/tutorial.js";
+import { endsPart, opensPart, placeInPart, STEPS, targetCloth } from "../../teach/tutorial.js";
 import { el, icon, setTip, showMenu } from "../../ui/components.js";
 import { answer, goTo, stepDone } from "../learn.js";
 /** @import { AppStore, AppState } from "../looms.js" */
@@ -36,6 +36,32 @@ export const ASKED = {
 const params = (step) => Object.fromEntries(Object.entries(step.params ?? {}).map(([k, m]) => [k, say(m)]));
 
 /**
+ * A challenge's target cloth, small, in the loom's own colours: what the cards should weave.
+ * @param {import("../../teach/tutorial.js").Target} target
+ * @param {{ warp: string; weft: string }} c
+ */
+function targetFigure(target, c) {
+  const cloth = targetCloth(target);
+  const ends = cloth[0]?.length ?? 8;
+  const px = Math.max(6, Math.min(14, Math.floor(240 / ends)));
+  const canvas = el("canvas", { class: "target-cloth", role: "img", "aria-label": t("learn.target") });
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = ends * px * dpr;
+  canvas.height = cloth.length * px * dpr;
+  canvas.style.width = `${ends * px}px`;
+  canvas.style.height = `${cloth.length * px}px`;
+  const g = /** @type {CanvasRenderingContext2D} */ (canvas.getContext("2d"));
+  g.scale(dpr, dpr);
+  cloth.forEach((row, p) =>
+    row.forEach((up, e) => {
+      g.fillStyle = up ? c.warp : c.weft;
+      g.fillRect(e * px, (cloth.length - 1 - p) * px, px - 1, px - 1);
+    }),
+  );
+  return el("figure", { class: "step-target" }, [canvas, el("figcaption", { text: t("learn.target") })]);
+}
+
+/**
  * A text as paragraphs: blank lines between them.
  * @param {string} text
  * @param {string} [cls]
@@ -44,7 +70,7 @@ const paragraphs = (text, cls) => text.split(/\n\n+/).map((p) => el("p", { class
 
 /**
  * @param {AppStore} store
- * @param {{ onWeave: () => void }} o what "Go to Weave" does
+ * @param {{ onGo: (w: "weave" | "create") => void }} o what a step's "Go to" button does
  * @returns {Component}
  */
 export function guidePanel(store, o) {
@@ -96,6 +122,7 @@ export function guidePanel(store, o) {
       );
     }
     card.append(...paragraphs(text("text")));
+    if (step.target) card.append(targetFigure(step.target, s.looms.tutorial));
 
     /** @type {HTMLInputElement[]} */
     const choices = [];
@@ -126,10 +153,11 @@ export function guidePanel(store, o) {
     const done = step.done ? el("div", { class: "step-done" }, paragraphs(text("done"))) : null;
     const recap = endsPart(i) ? el("p", { class: "step-recap", text: t(`tut.part${step.part}.recap`) }) : null;
     card.append(...[task, done, recap].filter((x) => x !== null));
-    if (i === STEPS.length - 1) {
-      const weave = el("button", { type: "button", class: "btn filled" }, [icon("open_in_new"), el("span", { text: t("learn.toWeave") })]);
-      weave.addEventListener("click", o.onWeave);
-      card.append(el("p", { class: "step-actions" }, [weave]));
+    if (step.go) {
+      const go = /** @type {"weave" | "create"} */ (step.go);
+      const b = el("button", { type: "button", class: "btn filled" }, [icon("open_in_new"), el("span", { text: t(`learn.go.${go}`) })]);
+      b.addEventListener("click", () => o.onGo(go));
+      card.append(el("p", { class: "step-actions" }, [b]));
     }
 
     const back = el("button", { type: "button", class: "btn" }, [icon("chevron_left"), el("span", { text: t("learn.back") })]);

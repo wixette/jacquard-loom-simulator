@@ -393,7 +393,7 @@ export default {
   "learn.next.wait": "Primero haz la tarea: está en el recuadro naranja",
   "learn.next.answer": "Primero responde a la pregunta",
   "learn.taskDone": "¡Hecho!",
-  "learn.toWeave": "Ir a Tejer",
+  "learn.go.weave": "Ir a Tejer",
   "learn.ask.step": "Paso",
   "learn.ask.play": "Reproducir",
   "learn.ask.loop": "Atar la cadena en lazo",

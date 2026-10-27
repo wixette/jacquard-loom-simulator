@@ -391,7 +391,7 @@ export default {
   "learn.next.wait": "先に課題をしてください：オレンジ色の枠の中にあります",
   "learn.next.answer": "先に問いに答えてください",
   "learn.taskDone": "できました！",
-  "learn.toWeave": "「織る」へ",
+  "learn.go.weave": "「織る」へ",
   "learn.ask.step": "一歩進む",
   "learn.ask.play": "再生",
   "learn.ask.loop": "紋紙の列を輪につなぐ",

@@ -391,7 +391,7 @@ export default {
   "learn.next.wait": "Erledige zuerst die Aufgabe: Sie steht im orangen Kasten",
   "learn.next.answer": "Beantworte zuerst die Frage",
   "learn.taskDone": "Geschafft!",
-  "learn.toWeave": "Zu „Weben“",
+  "learn.go.weave": "Zu „Weben“",
   "learn.ask.step": "Schritt",
   "learn.ask.play": "Abspielen",
   "learn.ask.loop": "Kette schnüren",

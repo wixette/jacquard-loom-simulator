@@ -391,7 +391,7 @@ export default {
   "learn.next.wait": "先完成任務：它在橘色框裡",
   "learn.next.answer": "先回答問題",
   "learn.taskDone": "完成了！",
-  "learn.toWeave": "前往「織造」",
+  "learn.go.weave": "前往「織造」",
   "learn.ask.step": "前進一步",
   "learn.ask.play": "播放",
   "learn.ask.loop": "把紋板鏈連成環",

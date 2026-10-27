@@ -47,8 +47,9 @@ export const blankPicture = (n) => [...Array(n)].map(() => new Array(n).fill(fal
 
 /** The ready-made pictures, by name (their names are pic.<name> in js/l10n). */
 export const PICTURE_NAMES = /** @type {const} */ (["heart", "arrow", "letter", "face"]);
+/** @typedef {(typeof PICTURE_NAMES)[number]} PictureName */
 
-/** A ready-made picture. @param {(typeof PICTURE_NAMES)[number]} name @returns {Picture} */
+/** A ready-made picture. @param {PictureName} name @returns {Picture} */
 export const presetPicture = (name) => pictureFromStrings(PICTURES[name].rows);
 
 /** The picture a reading starts from, and Create opens with. @returns {PictureSpec} */

@@ -662,7 +662,7 @@ export function createShell(store, root) {
   /** The guide: the tutorial's step (js/app/components/guide.js). */
   function guide() {
     const host = el("div", { class: "guide" });
-    put(guidePanel(store, { onWeave: () => goWorkspace("weave") }), host);
+    put(guidePanel(store, { onGo: (w) => goWorkspace(w) }), host);
     return host;
   }
 

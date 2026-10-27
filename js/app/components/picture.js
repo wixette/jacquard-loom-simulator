@@ -213,13 +213,13 @@ export function picturePanel(store, o) {
       Object.assign(ui, { size, ready, open, invert, clear, level, threshold, direct, damask, per, block, note: el("p", { class: "pic-note", "aria-live": "polite" }) });
       ui.perField = field("pic.perRow", per);
       ui.blockField = field("pic.block", block);
+      // how it is read first, above the paper, where a short panel still shows it
       box = el("div", { class: "pic-box" }, [
+        el("div", { class: "pic-reading" }, [el("span", { class: "pic-label", "data-key": "pic.reading.label" }), el("div", { class: "seg", role: "group" }, [direct, damask]), ui.perField, ui.blockField]),
         el("div", { class: "pic-tools" }, [field("pic.size", size), el("span", { class: "spacer" }), ready, open, invert, clear, file]),
         grid,
         threshold,
         ui.note,
-        el("div", { class: "pic-reading" }, [el("span", { class: "pic-label", "data-key": "pic.reading.label" }), el("div", { class: "seg", role: "group" }, [direct, damask])]),
-        el("div", { class: "pic-options" }, [ui.perField, ui.blockField]),
       ]);
       h.appendChild(box);
     },
