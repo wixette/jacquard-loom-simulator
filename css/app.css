@@ -194,3 +194,13 @@ dialog::backdrop { background: var(--md-scrim); }
 .dialog-body a { color: var(--md-primary); }
 .dialog-logo { width: 80px; height: auto; display: block; margin: 0 0 12px; }
 .dialog-source { display: flex; align-items: center; gap: 10px; margin-top: 14px !important; }
+
+/* ---- a 3D view's note: which unit it shows, and the idea it teaches -------------------------- */
+.unit-note { position: static; }
+.unit-note > summary { list-style: none; padding: 0 7px; color: var(--md-on-surface); }
+.unit-note > summary::-webkit-details-marker { display: none; }
+.unit-note > summary .icon { width: 18px; height: 18px; color: var(--md-primary); }
+.unit-note[open] > summary { border-color: transparent; background: var(--md-secondary-container); color: var(--md-on-secondary-container); }
+.unit-card { position: absolute; top: calc(100% + 6px); left: 0; z-index: 5; width: min(380px, 100%); padding: 12px 14px; border-radius: var(--radius-m); background: var(--md-surface-highest); box-shadow: 0 8px 28px rgba(0, 0, 0, 0.5); }
+.unit-card h3 { margin: 0 0 6px; font-size: 14px; font-weight: 620; color: var(--md-on-surface); }
+.unit-card p { margin: 0; font-size: 13px; line-height: 1.5; color: var(--md-on-surface-variant); user-select: text; -webkit-user-select: text; }

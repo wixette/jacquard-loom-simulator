@@ -18,11 +18,12 @@ import { wireKeys } from "./keys.js";
 import { Sound } from "./sound.js";
 import { place } from "./components/component.js";
 import { benchPanel, chainPanel, clothPanel, statusPanel, tracePanel, transportPanel } from "./components/panels.js";
-import { frontView, sectionView, sideView, unitsView } from "./components/views.js";
+import { frontView, sectionView, sideView, UNIT_VIEWS, unitsView } from "./components/views.js";
 import { chooseLanguage } from "./language.js";
 import * as act from "./looms.js";
 import { TIES, tieKey } from "./looms.js";
 /** @import { AppStore, StageView, Workspace } from "./looms.js" */
+/** @import { UnitId } from "../scene/units.js" */
 /** @import { Component, Placed } from "./components/component.js" */
 /** @import { IconName } from "../ui/components.js" */
 /** @import { Edge } from "../ui/edge.js" */
@@ -45,14 +46,14 @@ const WORKSPACES = /** @type {const} */ (["learn", "weave"]);
  * A view's component.
  * @param {AppStore} store
  * @param {StageView} v
+ * @param {(unit: "machine" | UnitId) => void} [onMode] a 3D view's: what it shows, as that changes
  * @returns {Component}
  */
-function viewComponent(store, v) {
+function viewComponent(store, v, onMode) {
   if (v === "section") return sectionView(store);
   if (v === "side") return sideView(store);
   if (v === "front") return frontView(store);
-  const units = { "3d": "machine", u1: "selector", u2: "cylinder", u3: "griffe", u4: "harness", u5: "shed" };
-  return unitsView(store, { unit: /** @type {any} */ (units[v]) });
+  return unitsView(store, { unit: UNIT_VIEWS[v].unit, onMode });
 }
 
 /** The views each arrangement opens with, when the stage is split. */
@@ -431,8 +432,35 @@ export function createShell(store, root) {
     );
     const tools = el("div", { class: "pane-tools" }, mode === "desktop" ? [chip] : []);
     if (v === "section") tools.append(...sectionTools());
-    put(viewComponent(store, v), host);
+    /** @type {((unit: "machine" | UnitId) => void) | undefined} */
+    let onMode;
+    if (v in UNIT_VIEWS) {
+      const note = unitNote();
+      tools.append(note.element);
+      onMode = note.show;
+      note.show(UNIT_VIEWS[/** @type {keyof typeof UNIT_VIEWS} */ (v)].unit);
+    }
+    put(viewComponent(store, v, onMode), host);
     return el("div", { class: "pane" }, [host, tools]);
+  }
+
+  /**
+   * What a 3D view shows, and the idea it teaches: a chip that opens a short card.
+   */
+  function unitNote() {
+    const title = el("h3");
+    const idea = el("p");
+    const summary = el("summary", { class: "chip" }, [icon("info")]);
+    summary.dataset.l10nTip = "unit.note";
+    summary.dataset.l10nName = "unit.note";
+    const element = el("details", { class: "unit-note" }, [summary, el("div", { class: "unit-card" }, [title, idea])]);
+    /** @param {"machine" | UnitId} unit */
+    const show = (unit) => {
+      const code = Object.values(UNIT_VIEWS).find((u) => u.unit === unit)?.code;
+      title.textContent = code ? `${code} · ${t(`unit.${unit}`)}` : t(`unit.${unit}`);
+      idea.textContent = t(`unit.${unit}.idea`);
+    };
+    return { element, show };
   }
 
   /** The section's tools: how close it looks, and which cross-row it cuts. */

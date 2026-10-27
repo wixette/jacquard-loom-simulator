@@ -7,6 +7,7 @@ import * as THREE from "three";
 import { t } from "../l10n/l10n.js";
 import { P, PARAMS } from "../sim/params.js";
 import { anchors, gltfName } from "./rig.js";
+import { partName } from "./partNames.js";
 import { Unit, UNITS } from "./units.js";
 import { Viewer } from "./viewer.js";
 /** @import { Snapshot } from "../sim/loom.js" */
@@ -284,6 +285,17 @@ export class UnitsView {
   }
 
   /**
+   * A part's name in the page's language, or as the model has it if no message names it.
+   * @private
+   * @param {THREE.Object3D} o
+   */
+  nameOf(o) {
+    const m = partName(o.name);
+    const name = t(m.key, m.params);
+    return name === m.key ? /** @type {string} */ (o.userData.label_en) : name;
+  }
+
+  /**
    * Names the part under the pointer.
    * @private
    * @param {PointerEvent} e
@@ -293,11 +305,13 @@ export class UnitsView {
     /** @type {THREE.Object3D | null} */
     let o = hit ? hit.object : null;
     while (o && !o.userData.label_en) o = o.parent;
-    let label = o?.userData.label_en ?? (hit?.object.parent?.name === "cards" ? "a card of the chain: the dark discs are its holes" : null);
-    if (o?.userData.band) label = `${label}: ${o.userData.note_en} (click to open it)`;
+    /** @type {string | null} */
+    let label = o ? this.nameOf(o) : hit?.object.parent?.name === "cards" ? t("p3d.card") : null;
+    const band = o ? this.bands.find((b) => b.node === o) : undefined;
+    if (band) label = t("p3d.open", { label: t("p3d.band", { label: band.label, note: band.note }) });
     else if (this.mode === "machine" && hit && o && !isGhost(o)) {
       const spec = UNITS.find((u) => u.id === this.unitAt(e));
-      if (spec) label = `${spec.code} · ${spec.title}: ${label} (click to open it)`;
+      if (spec) label = t("p3d.open", { label: t("p3d.inUnit", { code: spec.code, title: t(spec.title), label: label ?? "" }) });
     }
     if (!label) {
       this.tip.hidden = true;

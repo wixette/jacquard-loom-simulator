@@ -72,11 +72,12 @@ hookSelect.addEventListener("change", () => {
 });
 
 // The list: the whole loom, then each unit.
-$("unit-list").innerHTML = [`<li><button type="button" data-unit="machine"><span class="code">◎</span><span>The whole loom</span></button></li>`, ...UNITS.map((u) => `<li><button type="button" data-unit="${u.id}"><span class="code">${u.code}</span><span>${u.title}</span></button></li>`)].join("");
+$("unit-list").innerHTML = [`<li><button type="button" data-unit="machine"><span class="code">◎</span><span>The whole loom</span></button></li>`, ...UNITS.map((u) => `<li><button type="button" data-unit="${u.id}"><span class="code">${u.code}</span><span>${t(u.title)}</span></button></li>`)].join("");
 /** @param {"machine" | UnitId} mode */
 function mark(mode) {
   for (const b of document.querySelectorAll("[data-unit]")) b.classList.toggle("on", /** @type {HTMLElement} */ (b).dataset.unit === mode);
-  $("unit-idea").textContent = UNITS.find((u) => u.id === mode)?.idea ?? MACHINE_IDEA;
+  const spec = UNITS.find((u) => u.id === mode);
+  $("unit-idea").textContent = spec ? t(spec.idea) : MACHINE_IDEA;
 }
 /** @param {"machine" | UnitId} mode */
 function showUnit(mode) {

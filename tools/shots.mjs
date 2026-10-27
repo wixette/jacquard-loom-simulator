@@ -51,6 +51,7 @@ const SHOTS = [
   { name: "app-about", path: "index.html", ready: APP_READY, setup: `document.querySelector('.topbar .btn.icon-only').click(); await sleep(300);`, size: [1366, 768] },
   { name: "app-phone-full", path: "index.html", ready: APP_READY, setup: `${APP} const g = document.querySelector('.grab'); g.dispatchEvent(new PointerEvent('pointerdown', { clientY: 400, bubbles: true })); g.dispatchEvent(new PointerEvent('pointerup', { clientY: 400, bubbles: true })); await sleep(400);`, size: [390, 844] },
   { name: "app-phone-peek", path: "index.html", ready: APP_READY, setup: `${APP} const g = document.querySelector('.grab'); g.dispatchEvent(new PointerEvent('pointerdown', { clientY: 400, bubbles: true })); g.dispatchEvent(new PointerEvent('pointerup', { clientY: 480, bubbles: true })); await sleep(400);`, size: [390, 844] },
+  { name: "app-unit-note", path: "index.html#v=2&view=section,u1", ready: APP_READY, setup: `${APP} await sleep(1500); document.querySelector('.unit-note summary').click(); await sleep(300);`, size: [1366, 768] },
   { name: "app-tablet", path: "index.html", ready: APP_READY, setup: APP, size: [820, 1180] },
   { name: "app-phone", path: "index.html", ready: APP_READY, setup: APP, size: [390, 844] },
   { name: "app-phone-cloth", path: "index.html", ready: APP_READY, setup: `${APP} document.getElementById('sheet-cloth')?.click(); await sleep(400);`, size: [390, 844] },
