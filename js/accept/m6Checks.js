@@ -1,7 +1,8 @@
 // M6's checks on the app (design/m6-notes.md), run by index.html?selftest: S-1 the frame at every
 // size (the phone's and the tablet's in frames of their sizes), S-2 the machine's settings beside
 // what they change, S-3 the transport and its stepper, S-4 the keyboard, S-5 the panels' edges,
-// S-6 every view in every arrangement, S-7 links, S-8 the languages, S-9 the sounds. S-10, the 3D
+// S-6 every view in every arrangement, S-7 links, S-8 the languages, S-9 the sounds, S-12 the
+// griffe's labels. S-10, the 3D
 // parts' names, needs no page (tests/scene/partNames.test.js).
 
 import { linkOf, openLink } from "../app/links.js";
@@ -51,7 +52,7 @@ export async function runM6Checks(page) {
   const { store } = page;
   act.setWorkspace(store, "weave");
   const out = [];
-  for (const check of [frame, settings, transport, keyboard, edges, views, links, languages, sounds]) {
+  for (const check of [frame, settings, transport, keyboard, edges, views, links, languages, sounds, griffeLabels]) {
     act.reset(store);
     act.follow(store, null);
     out.push(await check(page));
@@ -401,4 +402,37 @@ async function sounds({ store, shell }) {
     act.loadPreset(store, "plain");
   }
   return result("S-9", "Each moment passed going forward sounds its own sound, once; back, a reset and a link are silent; a refusal sounds", bad.length === 0, bad.slice(0, 4).join("; ") || "lift, turn, shuttle, beat, fall, press; silent back, reset and link; the refusal heard");
+}
+
+/**
+ * S-12: at every moment of a pick, the section labels the griffe and its knives beside the
+ * griffe's frame where it is (not at the top of its travel), and on the same side throughout.
+ * @param {AppPage} page
+ * @returns {Promise<CheckResult>}
+ */
+async function griffeLabels({ store }) {
+  /** @type {string[]} */
+  const bad = [];
+  act.setViews(store, ["section"]);
+  const { t } = await import("../l10n/l10n.js");
+  /** @type {Set<string>} */
+  const sides = new Set();
+  for (let k = 0; k <= 6; k++) {
+    await frames();
+    const frameBox = document.querySelector(".stage svg.section .griffe-frame")?.getBoundingClientRect();
+    const find = (/** @type {string} */ key) => [...document.querySelectorAll(".stage svg.section .lbl")].find((e) => e.textContent === t(key))?.getBoundingClientRect();
+    const [griffe, knives] = [find("part.griffe"), find("part.knives")];
+    if (!frameBox || !griffe || !knives) {
+      bad.push(`moment ${k}: ${!griffe ? "no griffe label" : "no knives label"}`);
+    } else {
+      for (const [name, r] of /** @type {const} */ ([["griffe", griffe], ["knives", knives]])) {
+        if (r.bottom < frameBox.top - 4 || r.top > frameBox.bottom + 4) bad.push(`moment ${k}: the ${name} label is not beside the griffe`);
+        sides.add(`${name}:${r.left >= frameBox.right ? "right" : "left"}`);
+      }
+    }
+    act.step(store);
+  }
+  if (sides.size !== 2) bad.push(`the labels change sides: ${[...sides].join(", ")}`);
+  act.reset(store);
+  return result("S-12", "The griffe and its knives are labelled beside the griffe at every moment, on one side", bad.length === 0, bad.slice(0, 4).join("; ") || "7 moments, rest to shed closed and the next card");
 }

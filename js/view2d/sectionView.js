@@ -274,9 +274,16 @@ function sectionLabels(L, frame, bx0, bx1) {
     out.push(withLeader);
   }
   out.push(labels.placeAt(t("part.springBox"), [[sb.x + sb.w / 2, sb.y + sb.h + 4, "middle"], [sb.x + sb.w / 2, sb.y - 4 - s, "middle"], [sb.x + sb.w + 4, mid(sb)]], "lbl p-needles"));
-  const knivesRest = KNIFE_REST_TOP - P.knifeHeight / 2 - s * 0.35;
-  out.push(labels.placeAt(t("part.knives"), [[griffeRange.x - 4, knivesRest, "end"], [griffeRange.x - 4, griffeRange.y + griffeRange.h / 2, "end"], [griffeRange.x + griffeRange.w + 4, knivesRest]], "lbl p-knives"));
-  out.push(labels.placeAt(t("part.griffe"), [[griffeRange.x + griffeRange.w / 2, griffeRange.y + griffeRange.h + 4, "middle"], [griffeRange.x + griffeRange.w + 4, griffeRange.y + griffeRange.h - s * 1.5], [griffeRange.x - 4, griffeRange.y + griffeRange.h - s * 1.5, "end"]], "lbl p-griffe"));
+  // The knives and the griffe are labelled where they are now, beside the frame, so the labels
+  // rise and fall with them (the space above, kept for the lift, has nothing in it at rest).
+  const knivesNow = L.knives[0].y + L.knives[0].h / 2 - s * 0.35;
+  const gx0 = Math.min(g0.x, hooksRange.x) - 4;
+  // past the frame, and past the hooks' crooks, which lean out beyond it
+  const gx1 = Math.max(g0.x + g0.w, hooksRight) + 4;
+  // Both on the right, the side kept clear of the other labels all through the lift, so neither
+  // changes sides as the griffe rises: the knives beside them, the griffe over its top corner.
+  out.push(labels.placeAt(t("part.knives"), [[gx1, knivesNow], [gx0, knivesNow, "end"]], "lbl p-knives"));
+  out.push(labels.placeAt(t("part.griffe"), [[gx1, g0.y + g0.h + 3], [gx0, g0.y + g0.h + 3, "end"]], "lbl p-griffe"));
   const beyond = hooksRight + s * 0.3 + 1;
   out.push(labels.placeAt(t("part.hooks"), [[beyond, 200], [beyond, 120], [beyond, 60], [hooksRange.x - 4, 120, "end"]], "lbl p-hooks"));
   out.push(labels.placeAt(t("part.bottomBoard"), [[bottom.x + bottom.w + 4, mid(bottom)], [bottom.x - 4, mid(bottom), "end"]]));
