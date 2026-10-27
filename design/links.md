@@ -100,7 +100,7 @@ The game Play opens on (design/m9-notes.md), and what it needs; each game starts
 |---|---|---|---|
 | `game` | `name`, `byte`, `guess`, `drawboy` | `name` | The game. A name this release does not know opens the name game |
 | `text` | up to 64 characters | the game's own | With `game=name`: the text to weave, its lines joined by a line break |
-| `mode` | `damask`, `direct` | `damask` | With `game=name`: real cloth (damask) or quick (square by square) |
+| `mode` | `damask`, `direct` | `damask` | With `game=name`: how the name is read, as damask or square by square (`direct`), as Design reads a picture |
 | `seed` | 1 … 1,000,000,000 | `1` | With `game=guess`: the puzzle |
 
 **One byte per card's secret** carries the message as cards only, in `h=8` and `c` (as in Weave), so the friend it is sent to reads it from the holes or the cloth: the link never holds the text.

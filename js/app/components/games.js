@@ -35,14 +35,15 @@ export function gamesPanel(store) {
   /** What follows the state, set by the game laid out. @type {(s: AppState) => void} */
   let follow = () => {};
 
-  /** The name game: a name, its reading, Weave it all, and the cloth read back. */
+  /** The name game: a name, how it is read (as Design reads a picture), Weave to the end, and the cloth read back. */
   const nameGame = () => {
     const text = el("textarea", { class: "game-input", rows: String(MAX_LINES), spellcheck: "false", "aria-label": t("name.label") });
     text.value = store.state.play.name.text;
     text.addEventListener("input", () => play.setName(store, { text: text.value }));
     const modes = el("div", { class: "seg", role: "group" });
-    for (const m of /** @type {const} */ (["damask", "direct"])) {
-      const b = el("button", { type: "button", "data-mode": m, text: t(`name.${m}`) });
+    // the same two readings as Design's, by the same names, in the same order
+    for (const m of /** @type {const} */ (["direct", "damask"])) {
+      const b = el("button", { type: "button", "data-mode": m, text: t(`pic.${m}`) });
       b.addEventListener("click", () => play.setName(store, { mode: m }));
       modes.append(b);
     }
@@ -55,7 +56,7 @@ export function gamesPanel(store) {
       const cloth = s.looms.game.loom.cloth;
       setText(read, !r.ok ? "" : cloth.length < r.plan.deck.cards.length ? t("name.weaving", { rows: cloth.length, of: r.plan.deck.cards.length }) : t("name.reads", { text: decodeCloth(cloth, r.plan).join(" / ") }));
     };
-    return [p("name.about", { most: MAX_CHARS, lines: MAX_LINES }), text, el("div", { class: "game-row" }, [el("span", { class: "game-label", text: t("name.how") }), modes]), p("name.modes"), el("div", { class: "game-row" }, [all]), read];
+    return [p("name.about", { most: MAX_CHARS, lines: MAX_LINES }), text, el("div", { class: "game-row" }, [el("span", { class: "game-label", text: t("pic.reading.label") }), modes]), p("name.modes"), el("div", { class: "game-row" }, [all]), read];
   };
 
   /** One byte a card: a message typed, its rows read back; or a friend's secret to read. */
