@@ -446,7 +446,22 @@ async function sounds({ store, shell }) {
     sound.play = play;
     act.loadPreset(store, "plain");
   }
-  return result("S-9", "Each moment passed going forward sounds its own sound, once; back, a reset and a link are silent; a refusal sounds", bad.length === 0, bad.slice(0, 4).join("; ") || "lift, turn, shuttle, beat, fall, press; silent back, reset and link; the refusal heard");
+  // every file loads and decodes, and starts within a fifth of a second of its file's start
+  const { FILES, onset } = await import("../app/sound.js");
+  const ctx = new OfflineAudioContext(1, 1, 44100);
+  /** @type {string[]} */
+  const starts = [];
+  for (const [name, file] of Object.entries(FILES)) {
+    try {
+      const buffer = await ctx.decodeAudioData(await (await fetch(`audio/${file}`)).arrayBuffer());
+      const at = onset(buffer);
+      if (buffer.duration < 0.1 || at > 0.2) bad.push(`${file}: ${buffer.duration.toFixed(2)} s, starting at ${at.toFixed(2)} s`);
+      starts.push(`${name} ${Math.round(at * 1000)} ms`);
+    } catch {
+      bad.push(`${file} does not load`);
+    }
+  }
+  return result("S-9", "Each moment passed going forward sounds its own sound, once; back, a reset and a link are silent; a refusal sounds; every file loads, heard from where it starts", bad.length === 0, bad.slice(0, 4).join("; ") || `lift, turn, shuttle, beat, fall, press; silent back, reset and link; the refusal heard; started past ${starts.join(", ")}`);
 }
 
 /**

@@ -77,6 +77,6 @@ The work runs in milestones as before (M5 onward, each with its notes, acceptanc
 | **1.0.0: release** | **M11, the release review:** accessibility, the phone and tablet layouts in all ten languages at 320 and 375 px, the 3D view on weak devices, the README with screenshots, the feedback from the test with learners. | The same app, reviewed |
 
 - **Links** (docs/ui-design.md, P8): every link type the app supports (the loom, a workspace and view, a tutorial step, the picture tool's picture, each game's state) is designed in M5 with the store, in one module and one design note, compressed where a state is large (a 400-hook deck, a picture), and frozen from 0.1.0: a later release may add fields or link types, never rename, drop or reread one. The format is reviewed before 0.1.0 ships. The prototype's links (0.0.1) are not kept.
-- **Placeholders:** the sound files, the logo and the other artwork are provided later; until then each has a placeholder at its final path and name, so the real file drops in without a code change.
+- **Placeholders:** the sound files, the logo and the other artwork are provided later; until then each has a placeholder at its final path and name, so the real file drops in without a code change. The sounds came on 2026-10-27, edited from Pixabay sound effects (`audio/SOURCES.md`, the Pixabay Content License).
 - **Translations:** written and reviewed by Claude; native speakers check them by hand before each release.
 - **The test with learners:** run by the project's author with friends; their feedback goes into the next milestone.

@@ -71,7 +71,7 @@ Start with **[docs/development.md](docs/development.md)**: requirements, page op
 | `params/` | `machine.json`: every dimension and angle, each with a source and a confidence |
 | `blender/scripts/` | Headless build scripts (params → parts → `.glb`) |
 | `assets/` | The generated `.glb` models (Git LFS, always rebuildable) |
-| `audio/` | The machine's sounds (placeholders for now, `pnpm sounds`) |
+| `audio/` | The machine's sounds, edited from Pixabay sound effects (their sources in `audio/SOURCES.md`) |
 | `tests/` | `node --test` tests, including acceptance tests on the `.glb` |
 | `research/` | Sources, notes, data and reference images, with [REPORT.md](research/REPORT.md) as the entry point |
 | `design/` | The plan, the decision records, each stage's notes, and the public app's design |

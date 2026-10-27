@@ -11,7 +11,8 @@
 // setting the loom up), is silent. Playing fast the sounds shorten, and above FAST picks a minute
 // only the batten sounds.
 // Sound starts after the learner's first press or key, as browsers require. Web Audio: decoded
-// once, played with no delay, overlapping, each a little different in pitch and loudness.
+// once, played with no delay (from where each sound starts in its file), overlapping, each a
+// little different in pitch and loudness.
 
 import { STOPS } from "../sim/loom.js";
 /** @import { AppStore, LoomState } from "./looms.js" */
@@ -19,16 +20,18 @@ import { STOPS } from "../sim/loom.js";
 /** The version this module was loaded with (?v=), for the files it loads. */
 const V = new URL(import.meta.url).search;
 
-/** The files in audio/: placeholders until the recorded sounds take their names (tools/sounds.mjs). */
-const FILES = /** @type {const} */ ({
-  lift: "lift.wav",
-  turn: "turn.wav",
-  shuttle: "shuttle.wav",
-  beat: "beat.wav",
-  fall: "fall.wav",
-  press: "press.wav",
-  refuse: "refuse.wav",
+/** The files in audio/ (their sources: audio/SOURCES.md). */
+export const FILES = /** @type {const} */ ({
+  lift: "lift.mp3",
+  turn: "turn.mp3",
+  shuttle: "shuttle.mp3",
+  beat: "beat.mp3",
+  fall: "fall.mp3",
+  press: "press.mp3",
+  refuse: "refuse.mp3",
 });
+/** Quieter than this (a share of the file's loudest sample) counts as silence before it starts. */
+const ONSET = 0.03;
 /** @typedef {keyof typeof FILES} SoundName */
 
 /** The sound of each stop of a pick (STOPS, STOP_KEYS), in order. */
@@ -45,6 +48,8 @@ export class Sound {
   ctx = null;
   /** @private @type {Partial<Record<SoundName, AudioBuffer>>} */
   buffers = {};
+  /** Where each sound starts in its file (s): past the silence before it, so it is heard on its moment. @private @type {Partial<Record<SoundName, number>>} */
+  starts = {};
   /** @private @type {GainNode | null} */
   out = null;
   /** Muted by the learner (remembered on this device). */
@@ -113,7 +118,9 @@ export class Sound {
         try {
           const res = await fetch(new URL(`../../audio/${file}${V}`, import.meta.url));
           const data = await res.arrayBuffer();
-          this.buffers[/** @type {SoundName} */ (name)] = await /** @type {AudioContext} */ (this.ctx).decodeAudioData(data);
+          const buffer = await /** @type {AudioContext} */ (this.ctx).decodeAudioData(data);
+          this.buffers[/** @type {SoundName} */ (name)] = buffer;
+          this.starts[/** @type {SoundName} */ (name)] = onset(buffer);
         } catch {
           // a sound that cannot load stays silent; the loom works without it
         }
@@ -137,6 +144,21 @@ export class Sound {
     const gain = ctx.createGain();
     gain.gain.value = 0.88 + Math.random() * 0.24;
     src.connect(gain).connect(out);
-    src.start();
+    src.start(0, this.starts[name] ?? 0);
   }
+}
+
+/**
+ * Where a sound starts: its first sample above ONSET of its loudest, less 5 ms, so a file's
+ * leading silence (and an MP3's encoder delay) does not make it late.
+ * @param {AudioBuffer} buffer
+ * @returns {number} seconds
+ */
+export function onset(buffer) {
+  const channels = [...Array(buffer.numberOfChannels).keys()].map((c) => buffer.getChannelData(c));
+  let peak = 0;
+  for (const d of channels) for (let i = 0; i < d.length; i++) peak = Math.max(peak, Math.abs(d[i]));
+  if (peak === 0) return 0;
+  for (let i = 0; i < buffer.length; i++) if (channels.some((d) => Math.abs(d[i]) >= peak * ONSET)) return Math.max(0, i / buffer.sampleRate - 0.005);
+  return 0;
 }

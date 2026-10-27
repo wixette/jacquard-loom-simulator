@@ -296,7 +296,7 @@ export default {
   "about.licence.three": "three.js：MIT",
   "about.licence.font": "Roboto Flex：SIL Open Font License 1.1",
   "about.licence.icons": "Material Symbols：Apache-2.0",
-  "about.licence.sounds": "声音：为本项目制作的占位音效，CC BY-SA 4.0",
+  "about.licence.sounds": "机器的声音：由 Pixabay 音效编辑而成，采用 Pixabay 内容许可",
   "about.source": "源代码",
   "about.close": "关闭",
 

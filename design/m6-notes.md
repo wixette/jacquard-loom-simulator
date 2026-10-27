@@ -14,7 +14,7 @@
 | The machine's settings | `js/app/shell.js`, `js/view2d/chainEditor.js` | The head and tie-up as a chip over the cards, showing their values; the colours as a palette over the cloth; the chain's end as a switch that laces it into a loop or opens it, beside the cards' loop button |
 | The panels' edges | `js/ui/edge.js` | Window splitters, as the sibling's dock edge: drag or arrow keys to resize, past the end or Enter to close to a rail; remembered on the device |
 | The keyboard | `js/app/keys.js` | Space, ← →, 1–4, F, Esc, never while a field that takes keys has the focus |
-| The sounds | `js/app/sound.js`, `audio/`, `tools/sounds.mjs` | One sound for each moment of a pick, played going forward; placeholders until the recorded ones take their names |
+| The sounds | `js/app/sound.js`, `audio/` | One sound for each moment of a pick, played going forward (synthesised placeholders in M6; since 2026-10-27, sounds edited from Pixabay's, `audio/SOURCES.md`) |
 | About | `js/app/about.js` | The app's one dialog, as the sibling's |
 | The 3D parts' names | `js/scene/partNames.js` | A message key for each named part of the models, made from its node's name; the units' titles and ideas as message keys |
 | The app's links | `js/app/links.js` | What the app shows, as a link (Share), and the app opened from one |

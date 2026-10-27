@@ -296,7 +296,7 @@ export default {
   "about.licence.three": "three.js：MIT",
   "about.licence.font": "Roboto Flex：SIL Open Font License 1.1",
   "about.licence.icons": "Material Symbols：Apache-2.0",
-  "about.licence.sounds": "音：このプロジェクトのために作った仮の音、CC BY-SA 4.0",
+  "about.licence.sounds": "機械の音：Pixabay の効果音を編集したもの。Pixabay コンテンツライセンス",
   "about.source": "ソースコード",
   "about.close": "閉じる",
 
