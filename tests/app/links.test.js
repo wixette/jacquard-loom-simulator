@@ -108,3 +108,32 @@ describe("a Create link (0.2.0)", () => {
     assert.equal(b.state.looms.mine.loom, mine);
   });
 });
+
+describe("a Play link (0.2.0)", () => {
+  it("one byte a card: the sender's message reaches the friend as cards, a secret to read", async () => {
+    const { openPlay, setMessage } = await import("../../js/app/play.js");
+    const a = store();
+    openPlay(a, "byte");
+    setMessage(a, "Hi!");
+    const fragment = await encodeLink(linkOf(a));
+    assert.doesNotMatch(fragment, /Hi/, "the words are not in the link");
+    const b = store();
+    await openLink(b, `#${fragment}`);
+    assert.equal(b.state.workspace, "play");
+    assert.equal(b.state.play.game, "byte");
+    assert.equal(b.state.play.byte.secret, true);
+    const { readMessage } = await import("../../js/game/byteGame.js");
+    assert.equal(readMessage(b.state.looms.game.loom.deck.cards), "Hi!");
+  });
+  it("guess the cloth: the same puzzle for the friend", async () => {
+    const { openPlay, nextPuzzle } = await import("../../js/app/play.js");
+    const a = store();
+    openPlay(a, "guess");
+    nextPuzzle(a);
+    nextPuzzle(a);
+    const b = store();
+    await openLink(b, `#${await encodeLink(linkOf(a))}`);
+    assert.equal(b.state.play.guess.seed, 3);
+    assert.deepEqual(b.state.looms.game.loom.deck, a.state.looms.game.loom.deck);
+  });
+});

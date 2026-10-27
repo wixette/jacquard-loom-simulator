@@ -420,3 +420,26 @@ describe("Create: a picture (design/links.md, Create; 0.2.0)", () => {
     assert.deepEqual((await read("#v=2&view=cloth,section")).views, ["cloth", "section"]);
   });
 });
+
+describe("Play: a game (design/links.md, Play; 0.2.0)", () => {
+  it("the name game's text and reading; the guessing game's puzzle; a game not known yet opens the first", async () => {
+    assert.deepEqual((await read("#v=2&w=play&game=name&text=Ada%0ALovelace&mode=direct")).game, { name: "name", text: "Ada\nLovelace", mode: "direct", seed: 1 });
+    assert.deepEqual((await read("#v=2&w=play&game=guess&seed=77")).game, { name: "guess", text: "", mode: "damask", seed: 77 });
+    assert.equal((await read("#v=2&w=play&game=chess")).game?.name, "name");
+  });
+  it("one byte a card carries its message as cards, so the friend has to read them", async () => {
+    const l = await read("#v=2&w=play&game=byte&h=8&c=x.48-69");
+    assert.equal(l.game?.name, "byte");
+    assert.deepEqual(l.deck?.cards.map((c) => c.map(Number).join("")), ["01001000", "01101001"]);
+  });
+  it("round-trips, writing only what each game needs", async () => {
+    for (const g of [{ name: /** @type {const} */ ("name"), text: "Jacquard", mode: /** @type {const} */ ("damask"), seed: 1 }, { name: /** @type {const} */ ("guess"), text: "", mode: /** @type {const} */ ("damask"), seed: 123456 }, { name: /** @type {const} */ ("drawboy"), text: "", mode: /** @type {const} */ ("damask"), seed: 1 }]) {
+      const f = await encodeLink({ workspace: "play", game: g });
+      assert.deepEqual((await read(f)).game, g);
+    }
+    assert.equal(await encodeLink({ workspace: "play", game: { name: "drawboy", text: "x", mode: "direct", seed: 9 } }), "v=2&w=play&game=drawboy");
+  });
+  it("a text too long, a reading or a seed out of range is refused", async () => {
+    for (const f of [`#v=2&w=play&game=name&text=${"x".repeat(65)}`, "#v=2&w=play&game=name&text=Ada&mode=fast", "#v=2&w=play&game=guess&seed=0"]) assert.ok(!(await decodeLink(f)).ok, f);
+  });
+});

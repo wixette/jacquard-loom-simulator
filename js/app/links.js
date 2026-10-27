@@ -11,6 +11,7 @@ import { STEPS } from "../teach/tutorial.js";
 import { arrange } from "./arrange.js";
 import { chooseLanguage } from "./language.js";
 import { openLearn } from "./learn.js";
+import { openSecret, setPlay } from "./play.js";
 import * as act from "./looms.js";
 /** @import { AppStore } from "./looms.js" */
 /** @import { AppLink } from "../sim/link.js" */
@@ -24,6 +25,16 @@ import * as act from "./looms.js";
  */
 export function linkOf(store) {
   if (store.state.workspace === "learn") return { workspace: "learn", step: STEPS[store.state.learn.step].id };
+  if (store.state.workspace === "play") {
+    const p = store.state.play;
+    const g = { name: p.game, text: p.name.text, mode: p.name.mode, seed: p.guess.seed };
+    // one byte a card is sent as its cards, a secret: the friend reads the cloth
+    if (p.game === "byte") {
+      const { deck } = store.state.looms.game.loom;
+      return { workspace: "play", game: g, deck, views: store.state.views };
+    }
+    return { workspace: "play", game: g, views: store.state.views };
+  }
   if (store.state.workspace === "create") {
     const { rows, mode, k, perRow } = store.state.pictures.create;
     const c = store.state.looms.create;
@@ -64,7 +75,16 @@ export async function openLink(store, fragment) {
     if (new URLSearchParams(fragment.replace(/^#/, "")).has("view")) act.setViews(store, arrange(l.views, /** @type {1 | 2 | 4} */ (l.views.length)));
     return true;
   }
-  // Play comes in a later milestone: its links open Weave until then.
+  // Play: the game the link names, with its own fields
+  if (l.workspace === "play") {
+    const g = l.game ?? { name: "name", text: "", mode: "damask", seed: 1 };
+    if (g.name === "byte" && l.deck) openSecret(store, l.deck);
+    else {
+      act.setWorkspace(store, "play");
+      setPlay(store, (p) => ({ ...p, game: g.name, name: g.text ? { text: g.text, mode: g.mode } : p.name, guess: g.name === "guess" ? { seed: g.seed, picked: null, right: 0, tried: 0 } : p.guess }));
+    }
+    return true;
+  }
   act.setWorkspace(store, "weave");
   if (l.deck) {
     act.open(store, { deck: l.deck, tie: l.tie, follow: l.follow });

@@ -107,11 +107,11 @@ export const CONTROLS = /** @type {const} */ (["punch", "cards", "loop", "setup"
  * @property {PictureSetup} [startPicture] a picture of its own to weave, in place of a loom setup
  * @property {Target} [target] the cloth it should weave, shown beside its text (a challenge)
  * @property {Control[]} [allow] controls it frees without a task (a task's own allow wins)
- * @property {"weave" | "create"} [go] a button to that workspace, under its text
+ * @property {"weave" | "create" | "play"} [go] a button to that workspace, under its text
  */
 
 /** The parts, by number: their names and what each teaches are tut.part<n>, .goal, .recap. */
-export const PARTS = /** @type {const} */ ([1, 2, 3, 4, 5]);
+export const PARTS = /** @type {const} */ ([1, 2, 3, 4, 5, 6]);
 
 const EPS = 1e-9;
 const TWILL = PRESETS.twill.rows;
@@ -409,6 +409,14 @@ export const STEPS = [
   },
   { id: "tools-share", part: 5 },
   { id: "tools-create", part: 5, go: "create" },
+  { id: "tools-games", part: 5, go: "play" },
+
+  // ---- 6. What came next ------------------------------------------------------------------------
+  { id: "next-babbage", part: 6, views: ["u2"], cards: false },
+  { id: "next-lovelace", part: 6 },
+  { id: "next-hollerith", part: 6 },
+  { id: "next-three-cards", part: 6, predict: { choices: 3, answer: 3 }, done: true },
+  { id: "next-computer", part: 6, views: ["3d"], go: "weave" },
 ];
 
 /**

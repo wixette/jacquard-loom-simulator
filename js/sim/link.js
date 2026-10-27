@@ -58,6 +58,13 @@ export const LONG_LINK = 2000;
  * @property {boolean} bits
  * @property {StageView[]} views one, two or four
  * @property {LinkPicture | null} picture Create's picture and how it is read, or null
+ * @property {LinkGame | null} game the game Play opens on, and its own fields, or null
+ */
+
+/**
+ * A game in a link (Play): which, and what it needs (the name game's text and reading, the
+ * guessing game's puzzle); one byte a card carries its message as cards (deck), a secret.
+ * @typedef {{ name: "name" | "byte" | "guess" | "drawboy"; text: string; mode: "damask" | "direct"; seed: number }} LinkGame
  */
 
 /**
@@ -83,7 +90,12 @@ export const DEFAULT_LINK = {
   bits: false,
   views: ["section"],
   picture: null,
+  game: null,
 };
+
+/** The games a link can open, and the longest name text it carries. */
+export const LINK_GAMES = /** @type {const} */ (["name", "byte", "guess", "drawboy"]);
+const MAX_TEXT = 64;
 
 // ---- decks: x. (hex), b. (packed), z. (compressed) -----------------------------------------------
 
@@ -253,6 +265,14 @@ export async function encodeLink(link) {
   if (l.face !== d.face) q.set("face", l.face);
   if (l.bits) q.set("bits", "1");
   if (l.views.join() !== d.views.join()) q.set("view", l.views.join(","));
+  if (l.game) {
+    q.set("game", l.game.name);
+    if (l.game.name === "name") {
+      q.set("text", l.game.text);
+      if (l.game.mode !== "damask") q.set("mode", l.game.mode);
+    }
+    if (l.game.name === "guess") q.set("seed", String(l.game.seed));
+  }
   if (l.picture) {
     // the picture as a deck of rows, each row a card as wide as the picture (0.2.0)
     const n = l.picture.rows.length;
@@ -336,6 +356,19 @@ export async function decodeLink(fragment) {
   if (bits !== null) {
     if (bits !== "0" && bits !== "1") return noBecause("link.value", { field: "bits", value: bits });
     l.bits = bits === "1";
+  }
+
+  // A game (Play, 0.2.0): which, and its own fields; a game not known yet opens the first.
+  const game = q.get("game");
+  if (game !== null) {
+    const name = /** @type {LinkGame["name"]} */ ((/** @type {readonly string[]} */ (LINK_GAMES)).includes(game) ? game : "name");
+    const text = q.get("text") ?? "";
+    if (text.length > MAX_TEXT) return noBecause("link.textLong", { most: MAX_TEXT });
+    const mode = q.get("mode") ?? "damask";
+    if (mode !== "damask" && mode !== "direct") return noBecause("link.value", { field: "mode", value: mode });
+    const seed = q.has("seed") ? int(q.get("seed"), 1, 1_000_000_000) : 1;
+    if (seed === null) return noBecause("link.range");
+    l.game = { name, text, mode, seed };
   }
 
   // A picture (Create, 0.2.0): its rows, as wide as they are many, and how it is read.

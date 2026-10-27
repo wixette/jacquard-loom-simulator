@@ -55,7 +55,7 @@ const paragraphs = (text, cls) => text.split(/\n\n+/).map((p) => el("p", { class
 
 /**
  * @param {AppStore} store
- * @param {{ onGo: (w: "weave" | "create") => void }} o what a step's "Go to" button does
+ * @param {{ onGo: (w: "weave" | "create" | "play") => void }} o what a step's "Go to" button does
  * @returns {Component}
  */
 export function guidePanel(store, o) {
@@ -139,7 +139,7 @@ export function guidePanel(store, o) {
     const recap = endsPart(i) ? el("p", { class: "step-recap", text: t(`tut.part${step.part}.recap`) }) : null;
     card.append(...[task, done, recap].filter((x) => x !== null));
     if (step.go) {
-      const go = /** @type {"weave" | "create"} */ (step.go);
+      const go = step.go;
       const b = el("button", { type: "button", class: "btn filled" }, [icon("open_in_new"), el("span", { text: t(`learn.go.${go}`) })]);
       b.addEventListener("click", () => o.onGo(go));
       card.append(el("p", { class: "step-actions" }, [b]));

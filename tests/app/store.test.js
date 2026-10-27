@@ -90,6 +90,7 @@ describe("the looms are apart (F-2)", () => {
       const others = LOOM_IDS.filter((o) => o !== id);
       const before = Object.fromEntries(others.map((o) => [o, store.state.looms[o]]));
       const decks = Object.fromEntries(others.map((o) => [o, JSON.stringify(store.state.looms[o].loom.deck)]));
+      const picks = Object.fromEntries(others.map((o) => [o, store.state.looms[o].loom.pick]));
       act.loadPreset(store, "twill", id);
       act.add(store, id);
       act.punch(store, 0, 3, id);
@@ -102,9 +103,10 @@ describe("the looms are apart (F-2)", () => {
       for (const o of others) {
         assert.equal(store.state.looms[o], before[o], `${o} was replaced`);
         assert.equal(JSON.stringify(store.state.looms[o].loom.deck), decks[o], `${o}'s cards changed`);
-        assert.equal(store.state.looms[o].loom.pick, 0);
+        assert.equal(store.state.looms[o].loom.pick, picks[o]);
       }
-      assert.equal(store.state.looms[id].loom.deck.hooks, 24);
+      // the create and game looms keep their cards for the picture tool and the games
+      if (id === "mine" || id === "tutorial") assert.equal(store.state.looms[id].loom.deck.hooks, 24);
     });
   }
 
