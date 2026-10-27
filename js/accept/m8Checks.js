@@ -1,7 +1,7 @@
-// M8's checks on the app (design/m8-notes.md), run by index.html?selftest after M7's: C-1 Create
+// M8's checks on the app (design/m8-notes.md), run by index.html?selftest after M7's: C-1 Design
 // opens on its picture and the large cloth, C-2 painting the paper weaves it again, C-3 the two
-// readings and what the status line says of them, C-4 Weave it, C-5 Create's link, C-6 what
-// Create's loom refuses. The picture's reading itself needs no page (tests/sim/picture.test.js).
+// readings and what the status line says of them, C-4 Weave it, C-5 Design's link, C-6 what
+// Design's loom refuses, C-7 an image opened. The picture's reading itself needs no page (tests/sim/picture.test.js).
 
 import { openCreate } from "../app/create.js";
 import { leaveLearn } from "../app/learn.js";
@@ -9,6 +9,7 @@ import { linkOf, openLink } from "../app/links.js";
 import * as act from "../app/looms.js";
 import { encodeLink } from "../sim/link.js";
 import { readPicture, startPicture } from "../sim/picture.js";
+import { t } from "../l10n/l10n.js";
 import { result } from "./harness.js";
 /** @import { AppPage } from "./m6Checks.js" */
 /** @import { CheckResult } from "./harness.js" */
@@ -28,7 +29,7 @@ const rowsKey = (rows) => rows.map((r) => r.map(Number).join("")).join("/");
 export async function runM8Checks(page) {
   const { store } = page;
   const out = [];
-  for (const check of [opens, paint, readings, weaveIt, link, refuses]) {
+  for (const check of [opens, paint, readings, weaveIt, link, refuses, image]) {
     act.setPicture(store, { rows: startPicture().rows, mode: "direct", k: 4, perRow: 1, invert: false }, "create");
     openCreate(store);
     await frames();
@@ -167,4 +168,50 @@ async function refuses({ store }) {
   act.setColours(store, { warp: "#336699" }, "create");
   if (store.state.looms.create.warp !== "#336699") bad.push("the colours are not free");
   return result("C-6", "Create's loom refuses a change to its cards and says why; its colours are free", bad.length === 0, bad.slice(0, 4).join("; ") || "add refused with pic.locked; the warp recoloured");
+}
+
+/**
+ * C-7: before the file dialog, the image button says what an image becomes (the formats, the
+ * paper's size it is shrunk to, the level of dark); an image opened is fitted in the paper, not
+ * stretched, and its level shows above the paper.
+ * @param {AppPage} page
+ * @returns {Promise<CheckResult>}
+ */
+async function image({ store }) {
+  /** @type {string[]} */
+  const bad = [];
+  /** @type {HTMLElement} */ ($('.pic-tools [aria-haspopup="dialog"]')).click();
+  await frames();
+  const pop = $(".popover.image-pop");
+  const n = store.state.pictures.create.rows.length;
+  if (!pop) bad.push("no word before the file dialog");
+  else {
+    const text = pop.textContent ?? "";
+    for (const key of ["pic.open.formats", "pic.open.best", "pic.open.private"]) if (!text.includes(t(key))) bad.push(`it does not say ${key}`);
+    if (!text.includes(t("pic.open.size", { n }))) bad.push("it does not say the paper's size");
+    if (!pop.querySelector(".popover-foot .btn")) bad.push("no Choose an image");
+  }
+  pop?.dispatchEvent(new Event("shut"));
+  // a wide image, twice as wide as tall, all dark: fitted, the paper's top and bottom quarters stay light
+  const c = document.createElement("canvas");
+  c.width = 200;
+  c.height = 100;
+  const g = /** @type {CanvasRenderingContext2D} */ (c.getContext("2d"));
+  g.fillStyle = "#000";
+  g.fillRect(0, 0, 200, 100);
+  const blob = await new Promise((r) => c.toBlob(r));
+  const files = new DataTransfer();
+  files.items.add(new File([/** @type {Blob} */ (blob)], "wide.png", { type: "image/png" }));
+  const input = /** @type {HTMLInputElement} */ ($(".pic-file"));
+  input.files = files.files;
+  input.dispatchEvent(new Event("change"));
+  for (let k = 0; k < 30 && !store.state.pictures.create.rows.some((r) => r.every(Boolean)); k++) await frames();
+  const rows = store.state.pictures.create.rows;
+  const dark = rows.map((r) => r.every(Boolean));
+  if (dark[0] || dark[n - 1] || !dark[Math.floor(n / 2)]) bad.push(`not fitted: dark rows ${dark.map(Number).join("")}`);
+  const level = $(".pic-threshold");
+  const paper = $(".pic-grid");
+  if (!level || level.hidden) bad.push("no level once opened");
+  else if (paper && level.getBoundingClientRect().top > paper.getBoundingClientRect().top) bad.push("the level is under the paper");
+  return result("C-7", "The image button says first what an image becomes (formats, the paper's size, the level of dark); an image opened is fitted in the paper, its level above it", bad.length === 0, bad.slice(0, 4).join("; ") || `a 2 : 1 image on ${n} × ${n}: ${dark.filter(Boolean).length} dark rows`);
 }

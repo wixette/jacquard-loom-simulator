@@ -315,8 +315,15 @@ dialog::backdrop { background: var(--md-scrim); }
 .pic-tools .icon { width: 20px; height: 20px; }
 .pic-grid { display: block; width: 100%; aspect-ratio: 1; border-radius: var(--radius-s); cursor: crosshair; touch-action: none; box-shadow: 0 0 0 1px var(--md-outline-variant); }
 .pic-field { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; color: var(--md-on-surface-variant); }
-.pic-threshold { display: flex; }
+.pic-threshold { display: flex; flex-direction: column; gap: 4px; }
+.pic-threshold .pic-field { display: flex; }
 .pic-threshold input { flex: 1; accent-color: var(--md-primary); }
+.pic-hint { margin: 0; font-size: 12px; line-height: 1.4; color: var(--md-on-surface-variant); }
+/* what an image becomes, before the file dialog */
+.popover.image-pop { display: flex; flex-direction: column; align-items: stretch; gap: 8px; width: min(340px, calc(100vw - 16px)); }
+.image-pop p { margin: 0 2px; font-size: 13px; line-height: 1.45; color: var(--md-on-surface); }
+.image-pop p.muted { font-size: 12px; color: var(--md-on-surface-variant); }
+.image-pop .popover-foot .btn { gap: 6px; }
 .pic-note { margin: 0; font-size: 12px; color: var(--md-on-surface-variant); }
 .pic-note:empty { display: none; }
 .pic-reading { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; }

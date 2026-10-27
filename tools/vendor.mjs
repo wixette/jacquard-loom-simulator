@@ -58,6 +58,7 @@ export const ICONS = [
   "delete",
   "download",
   "drag_handle",
+  "folder_open",
   "fullscreen",
   "grid_view",
   "history_edu",

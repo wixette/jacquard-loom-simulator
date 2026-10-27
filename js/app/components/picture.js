@@ -9,7 +9,7 @@
 import { t, tn } from "../../l10n/l10n.js";
 import { pictureFromPixels } from "../../sim/design.js";
 import { blankPicture, DAMASK_BLOCKS, PICKS_PER_ROW, PICTURE_NAMES, PICTURE_SIZES, pictureNeeds, presetPicture, resizePicture } from "../../sim/picture.js";
-import { el, icon, setTip, showMenu } from "../../ui/components.js";
+import { el, icon, setTip, showMenu, showPopover } from "../../ui/components.js";
 import { token } from "../../ui/theme.js";
 import { setPicture } from "../looms.js";
 /** @import { AppStore, PictureLoom } from "../looms.js" */
@@ -32,6 +32,7 @@ export function picturePanel(store, o) {
   let grid;
   /** @type {ImageData | null} the image opened, for the threshold to read again */
   let image = null;
+  let imageName = "";
   /** The picture while a stroke paints it: drawn at once, woven when the stroke ends. @type {Picture | null} */
   let stroke = null;
   const spec = () => store.state.pictures[o.loom];
@@ -105,13 +106,23 @@ export function picturePanel(store, o) {
     const url = URL.createObjectURL(file);
     const img = new Image();
     img.onload = () => {
-      const k = Math.min(1, IMAGE_PX / Math.max(img.naturalWidth, img.naturalHeight));
+      // fitted inside a square, light around it, so that an image that is not square keeps its
+      // shape on the square paper (an SVG with no size of its own is drawn at the square's)
+      const iw = img.naturalWidth || IMAGE_PX;
+      const ih = img.naturalHeight || IMAGE_PX;
+      const side = Math.min(IMAGE_PX, Math.max(iw, ih));
+      const k = side / Math.max(iw, ih);
       const c = document.createElement("canvas");
-      c.width = Math.max(1, Math.round(img.naturalWidth * k));
-      c.height = Math.max(1, Math.round(img.naturalHeight * k));
+      c.width = side;
+      c.height = side;
       const g = /** @type {CanvasRenderingContext2D} */ (c.getContext("2d"));
-      g.drawImage(img, 0, 0, c.width, c.height);
-      image = g.getImageData(0, 0, c.width, c.height);
+      g.fillStyle = "#ffffff";
+      g.fillRect(0, 0, side, side);
+      const w = Math.max(1, Math.round(iw * k));
+      const h = Math.max(1, Math.round(ih * k));
+      g.drawImage(img, Math.floor((side - w) / 2), Math.floor((side - h) / 2), w, h);
+      image = g.getImageData(0, 0, side, side);
+      imageName = file.name;
       URL.revokeObjectURL(url);
       ui.threshold.hidden = false;
       fromImage();
@@ -128,7 +139,28 @@ export function picturePanel(store, o) {
     const n = spec().rows.length;
     const level = Number(/** @type {HTMLInputElement} */ (ui.level).value);
     change({ rows: pictureFromPixels(image.data, image.width, image.height, n, n, level) });
-    ui.note.textContent = t("pic.imageOpened", { n });
+    ui.note.textContent = t("pic.imageOpened", { file: imageName, n });
+  };
+
+  /**
+   * Before the file dialog, what an image becomes: the formats, the paper's size it is shrunk
+   * to, and how its squares are made dark or light; then Choose an image… opens the dialog.
+   */
+  const aboutImage = () => {
+    const n = spec().rows.length;
+    const choose = el("button", { type: "button", class: "btn filled" }, [icon("folder_open"), el("span", { text: t("pic.open.choose") })]);
+    choose.addEventListener("click", () => {
+      document.querySelector(".popover")?.dispatchEvent(new Event("shut"));
+      /** @type {HTMLInputElement} */ (ui.file).click();
+    });
+    showPopover(ui.open, "image", t("pic.open.title"), [
+      el("h3", { class: "popover-title", text: t("pic.open.title") }),
+      el("p", { text: t("pic.open.formats") }),
+      el("p", { text: t("pic.open.size", { n }) }),
+      el("p", { text: t("pic.open.best") }),
+      el("p", { class: "muted", text: t("pic.open.private") }),
+      el("div", { class: "popover-foot" }, [choose]),
+    ], "image-pop");
   };
 
   return {
@@ -186,8 +218,8 @@ export function picturePanel(store, o) {
       );
       const file = el("input", { type: "file", accept: "image/*", class: "pic-file", hidden: true });
       file.addEventListener("change", () => openImage(file));
-      const open = el("button", { type: "button", class: "btn icon-only" }, [icon("image")]);
-      open.addEventListener("click", () => file.click());
+      const open = el("button", { type: "button", class: "btn icon-only", "aria-haspopup": "dialog" }, [icon("folder_open")]);
+      open.addEventListener("click", aboutImage);
       const invert = el("button", { type: "button", class: "btn icon-only" }, [icon("invert_colors")]);
       invert.addEventListener("click", () => change({ rows: spec().rows.map((r) => r.map((d) => !d)) }));
       const clear = el("button", { type: "button", class: "btn icon-only" }, [icon("delete")]);
@@ -198,7 +230,10 @@ export function picturePanel(store, o) {
       });
       const level = el("input", { type: "range", min: "16", max: "240", step: "1", value: "128" });
       level.addEventListener("input", fromImage);
-      const threshold = el("label", { class: "pic-field pic-threshold", hidden: true }, [el("span", { class: "pic-label", "data-key": "pic.threshold" }), level]);
+      const threshold = el("div", { class: "pic-threshold", hidden: true }, [
+        el("label", { class: "pic-field" }, [el("span", { class: "pic-label", "data-key": "pic.threshold" }), level]),
+        el("p", { class: "pic-hint", "data-key": "pic.threshold.hint" }),
+      ]);
 
       const direct = el("button", { type: "button", "data-mode": "direct" });
       const damask = el("button", { type: "button", "data-mode": "damask" });
@@ -210,16 +245,17 @@ export function picturePanel(store, o) {
       for (const k of DAMASK_BLOCKS) block.add(new Option("", String(k)));
       block.addEventListener("change", () => change({ k: Number(block.value) }));
 
-      Object.assign(ui, { size, ready, open, invert, clear, level, threshold, direct, damask, per, block, note: el("p", { class: "pic-note", "aria-live": "polite" }) });
+      Object.assign(ui, { file, size, ready, open, invert, clear, level, threshold, direct, damask, per, block, note: el("p", { class: "pic-note", "aria-live": "polite" }) });
       ui.perField = field("pic.perRow", per);
       ui.blockField = field("pic.block", block);
       // how it is read first, above the paper, where a short panel still shows it
       box = el("div", { class: "pic-box" }, [
         el("div", { class: "pic-reading" }, [el("span", { class: "pic-label", "data-key": "pic.reading.label" }), el("div", { class: "seg", role: "group" }, [direct, damask]), ui.perField, ui.blockField]),
         el("div", { class: "pic-tools" }, [field("pic.size", size), el("span", { class: "spacer" }), ready, open, invert, clear, file]),
-        grid,
-        threshold,
+        // what became of an image opened, and its level, above the paper, where they are seen
         ui.note,
+        threshold,
+        grid,
       ]);
       h.appendChild(box);
     },

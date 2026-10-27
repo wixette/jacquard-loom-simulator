@@ -13,7 +13,7 @@ import { encodeLink, LONG_LINK, STAGE_VIEWS } from "../sim/link.js";
 import { linkOf } from "./links.js";
 import { tieLabel } from "../sim/tieup.js";
 import { printDocument } from "../teach/printCards.js";
-import { applyIcons, applyL10n, el, icon, setText, setTip, showMenu, tabs } from "../ui/components.js";
+import { applyIcons, applyL10n, el, icon, setText, setTip, showMenu, showPopover, tabs } from "../ui/components.js";
 import { colourPicker } from "../ui/colourPicker.js";
 import { wireEdge } from "../ui/edge.js";
 import { showAbout } from "./about.js";
@@ -279,68 +279,6 @@ export function createShell(store, root) {
     act.say(store, w ? { key: "share.printed", n: deck.cards.length } : { key: "share.blocked" }, !w);
   }
 
-  /**
-   * A small dialog by its anchor, as a non-modal popover does it: one at a time; pressing the
-   * anchor again, pressing elsewhere or Esc shuts it; it follows its anchor when the window is
-   * resized or the page scrolls, kept inside the window (under the anchor if it fits, else over
-   * it); and it shuts if its anchor goes (the frame rebuilt for another screen).
-   * @param {HTMLElement} anchor
-   * @param {string} id
-   * @param {string} name
-   * @param {HTMLElement[]} rows
-   * @param {string} [cls]
-   * @param {() => void} [onShut] what to undo when it shuts
-   */
-  function popover(anchor, id, name, rows, cls = "", onShut = () => {}) {
-    const old = /** @type {HTMLElement | null} */ (document.querySelector(".popover"));
-    old?.dispatchEvent(new Event("shut"));
-    if (old?.dataset.for === id) return;
-    const pop = el("div", { class: `popover ${cls}`.trim(), role: "dialog", "aria-label": name }, rows);
-    pop.dataset.for = id;
-    document.body.appendChild(pop);
-    const place = () => {
-      if (!anchor.isConnected) return shut();
-      const r = anchor.getBoundingClientRect();
-      const b = pop.getBoundingClientRect();
-      const below = r.bottom + 6 + b.height <= window.innerHeight - 8;
-      pop.style.top = `${below ? r.bottom + 6 : Math.max(8, r.top - 6 - b.height)}px`;
-      // hung from its button: from the button's left edge, or its right edge on the window's right
-      // half, as the menus open (js/ui/components.js)
-      const left = r.left + r.width / 2 > window.innerWidth / 2 ? r.right - b.width : r.left;
-      pop.style.left = `${Math.max(8, Math.min(window.innerWidth - b.width - 8, left))}px`;
-    };
-    let frame = 0;
-    const follow = () => {
-      cancelAnimationFrame(frame);
-      frame = requestAnimationFrame(place);
-    };
-    const shut = () => {
-      cancelAnimationFrame(frame);
-      pop.remove();
-      document.removeEventListener("pointerdown", away);
-      document.removeEventListener("keydown", esc);
-      window.removeEventListener("resize", follow);
-      window.removeEventListener("scroll", follow, true);
-      onShut();
-    };
-    const away = (/** @type {PointerEvent} */ e) => {
-      if (!pop.contains(/** @type {Node} */ (e.target)) && !anchor.contains(/** @type {Node} */ (e.target))) shut();
-    };
-    const esc = (/** @type {KeyboardEvent} */ e) => {
-      if (e.key !== "Escape") return;
-      shut();
-      if (anchor.isConnected) anchor.focus();
-    };
-    pop.addEventListener("shut", shut, { once: true });
-    // listening first, so that a popover whose anchor has already gone shuts all it set up
-    document.addEventListener("pointerdown", away);
-    document.addEventListener("keydown", esc);
-    window.addEventListener("resize", follow);
-    window.addEventListener("scroll", follow, true);
-    place();
-    /** @type {HTMLElement | null} */ (pop.querySelector("select, input, button"))?.focus();
-  }
-
   /** The head and its tie-up, from the chip over the cards. @param {HTMLElement} anchor */
   function setupPopover(anchor) {
     const s = ls();
@@ -352,7 +290,7 @@ export function createShell(store, root) {
     for (const [key, ti] of Object.entries(TIES)) tie.add(new Option(words(tieLabel(ti)), key));
     tie.value = tieKey(s.loom.tie);
     tie.addEventListener("change", () => act.setTie(store, TIES[tie.value]));
-    popover(anchor, "setup", t("setup.tip"), [el("label", { for: "setup-hooks", text: t("setup.hooks") }), hooks, el("label", { for: "setup-tie", text: t("setup.tie") }), tie]);
+    showPopover(anchor, "setup", t("setup.tip"), [el("label", { for: "setup-hooks", text: t("setup.hooks") }), hooks, el("label", { for: "setup-tie", text: t("setup.tie") }), tie]);
   }
 
   /**
@@ -424,7 +362,7 @@ export function createShell(store, root) {
       }
     };
     const unwatch = store.watch((st) => [st.looms[st.current].warp, st.looms[st.current].weft], show);
-    popover(
+    showPopover(
       anchor,
       "colours",
       t("colours.tip"),
