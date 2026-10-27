@@ -1,6 +1,6 @@
 # M6 notes: the shell and Weave
 
-- **Status:** built 2026-10-27, on the branch `m6-shell`. The second milestone of release 0.1.0 ([public-app.md](public-app.md) §4). The spec below passes on the app with `?selftest` (S-1 to S-9) and in `pnpm test` (S-10); `pnpm selftest` runs the app's checks with every developer page's (S-11).
+- **Status:** built 2026-10-27, on the branch `m6-shell`; every check passes. The second milestone of release 0.1.0 ([public-app.md](public-app.md) §4). The spec below passes on the app with `?selftest` (S-1 to S-9) and in `pnpm test` (S-10); `pnpm selftest` runs the app's checks with every developer page's (S-11).
 - **Page:** [`index.html`](../index.html), the main app, replacing M5's placeholder: the Weave workspace, and Learn's frame with a sample step (the tutorial itself is M7).
 - **Reviewed on the way (2026-10-27):** the layout at five sizes (laptop, desktop with two and four views, tablet, phone upright and on its side), then a second pass on the controls; the changes from [ui-layout.md](ui-layout.md)'s first draft are recorded there (§4, §5).
 
@@ -49,4 +49,16 @@
 
 ### Results (2026-10-27)
 
-Filled in when the branch's checks pass.
+| ID | Result |
+|---|---|
+| S-1 | 5 sizes: 1366 × 768 and 1920 × 1080 desktops, an 820 × 1180 tablet, a 390 × 844 phone and the same on its side: every part there, no scrolling, nothing past the right edge |
+| S-2 | The top bar's controls: Share, the language, About; the head 16 → 32 → 16 from its chip; the warp from the palette; the chain laced and opened from its end, the loop button agreeing |
+| S-3 | Play 3,136 px², reset and the steps 1,936 px² each; six moments, no control among them; three steps mark the third moment |
+| S-4 | Space, ←, →, 1, 2, 3, F and Esc act; the speed slider keeps its arrows |
+| S-5 | The cards panel: 320 → 336 → 260 px by the keyboard, remembered; closed to its rail and opened; 320 px again on a double-click |
+| S-6 | 12 arrangements, 17 views, each filling its pane; no canvas left behind |
+| S-7 | A twill at pick 2, at its third moment, hook 4 followed, a warp colour, the section and U2: a 70-character link opens it all again; `lang=fr` taken |
+| S-8 | 9 languages × 344 keys: no English left in the frame's texts, names and tooltips |
+| S-9 | A pick sounds lift, turn, shuttle, beat, fall, press; back, a reset and a link are silent; running out of cards sounds the refusal |
+| S-10 | 6 models, 60 part names (87 named parts): every one's English is its key's; the 5 units' titles and ideas are messages |
+| S-11 | `pnpm selftest`: all 8 pages pass (the app's 9 checks, the developer pages' 120) |

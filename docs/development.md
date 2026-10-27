@@ -12,7 +12,7 @@ pnpm serve
 
 `pnpm serve` (`tools/serve.mjs`) is a small static server that turns caching off, so a changed file is always fetched again while you work; any static server works too (`python3 -m http.server 8000`), but a browser may then keep an old stylesheet until a hard reload.
 
-- <http://localhost:8000/> is the main app (`index.html`; until M6, a page that points to the prototypes).
+- <http://localhost:8000/> is the main app (`index.html`).
 - <http://localhost:8000/dev/> lists the developer pages, one per milestone, the prototype learner page among them (`dev/03-learner/`). The main app does not link to them.
 
 Pages cannot be opened from `file://`, because browsers do not load modules from there.
@@ -21,6 +21,8 @@ Pages cannot be opened from `file://`, because browsers do not load modules from
 
 | Option | Where | What it does |
 |---|---|---|
+| `#v=2&…` (a copied link) | `index.html` | Open the app as the link says: the workspace, the language, the cards and the moment, the thread followed, the colours, the views ([design/links.md](../design/links.md)) |
+| `?lang=fr` | `index.html` | Open the app in that language (one of the ten), whatever the browser prefers |
 | `?lesson=L3` | `dev/03-learner/` | Open a lesson (L1 to L10) |
 | `?view=3d` | `dev/03-learner/` | Open the mechanism pane on the parts in 3D |
 | `#v=2&…` (a copied link) | `dev/03-learner/`, `dev/02-loom/` | Open the loom with those cards, at that moment, in the format the main app will use ([design/links.md](../design/links.md), a contract from 0.1.0) |
@@ -46,6 +48,7 @@ Pages cannot be opened from `file://`, because browsers do not load modules from
 | `pnpm selftest` | Every page's `?selftest`, run in headless Chrome: the browser half of the checks |
 | `pnpm shots` | Screenshots of every view, from headless Chrome, into `shots/` (`--out`, `--only`): for reviewing a change of the theme or the layout side by side |
 | `pnpm stamp` | Writes the version into every file name the pages load |
+| `pnpm sounds` | Writes the placeholder sounds into `audio/` (a recorded sound replaces one by taking its name, `js/app/sound.js`) |
 | `reuse lint` | Every file's licence is declared (REUSE; CI runs it) |
 
 Before a commit: `pnpm check:refs`, `pnpm typecheck`, `pnpm test`, and `pnpm selftest` (or the `?selftest` of the pages a change touches). After a change to `params/` or `blender/scripts/`: `pnpm build:model`, and commit the new `.glb` files with it.
