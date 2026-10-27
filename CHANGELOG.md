@@ -14,6 +14,7 @@ What changed in each release. Versions follow `package.json` and are tagged `vX.
 - The tutorial's place is on the step's card only: the Learn tab no longer grows with it.
 - The machine's sounds: edited from Pixabay sound effects (audio/SOURCES.md), in place of the placeholders. Each is heard on the motion that makes it (the swish as the shuttle is thrown, the clack as the batten strikes), past any silence at its file's start. Every sound plays at every speed: faster than 30 picks a minute each is cut short with a fade, near its own pitch, the batten loudest.
 - Clicks are never lost while the loom plays: Pause, a hook in a drawing, a hole in the chain or on the bench, the cross-row menu and the 3D bands' labels (each had been redrawn every frame, between a click's press and its release).
+- The logo is the favicon too, in place of a square card that read as a Go board.
 - The popovers follow their button when the window is resized, and shut as popovers do (their button, a press elsewhere, Esc).
 
 **M7, the tutorial, parts 1 to 3 (2026-10-27)** ([notes](design/m7-notes.md))

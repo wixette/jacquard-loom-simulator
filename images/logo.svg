@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 32">
-  <!-- A placeholder for the app's logo (the project's author provides the real one, at this
-       path): a punched card over three warp threads. -->
+  <!-- The app's logo, and its favicon too (every page's <link rel="icon">), for 0.1.0 to 1.0.0,
+       until a logo and favicon are drawn as a pair: a punched card over three warp threads. -->
   <g stroke="#9483bf" stroke-width="2" stroke-linecap="round"><path d="M10 2v28M20 2v28M30 2v28"/></g>
   <rect x="3" y="8" width="34" height="16" rx="2" fill="#d6c296" stroke="#8f7444" stroke-width="1"/>
   <g fill="#0d1116"><circle cx="10" cy="13" r="2"/><circle cx="20" cy="19" r="2"/><circle cx="30" cy="13" r="2"/></g>
