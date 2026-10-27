@@ -19,8 +19,3 @@ export function token(name, fallback = "#ff00ff") {
   }
   return v || fallback;
 }
-
-/** Forget the tokens read so far, for a page whose theme has changed. */
-export function forgetTokens() {
-  cache.clear();
-}

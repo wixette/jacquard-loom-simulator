@@ -13,7 +13,7 @@ import { encodeLink, LONG_LINK, STAGE_VIEWS } from "../sim/link.js";
 import { linkOf } from "./links.js";
 import { tieLabel } from "../sim/tieup.js";
 import { printDocument } from "../teach/printCards.js";
-import { applyIcons, el, icon, setText, setTip, showMenu, tabs } from "../ui/components.js";
+import { applyIcons, applyL10n, el, icon, setText, setTip, showMenu, tabs } from "../ui/components.js";
 import { colourPicker } from "../ui/colourPicker.js";
 import { wireEdge } from "../ui/edge.js";
 import { showAbout } from "./about.js";
@@ -213,9 +213,7 @@ export function createShell(store, root) {
 
   /** The frame's own texts and tooltips, in the store's language. */
   function relabel() {
-    for (const e of /** @type {NodeListOf<HTMLElement>} */ (root.querySelectorAll("[data-l10n]"))) e.textContent = t(/** @type {string} */ (e.dataset.l10n));
-    for (const e of /** @type {NodeListOf<HTMLElement>} */ (root.querySelectorAll("[data-l10n-tip]"))) setTip(e, t(/** @type {string} */ (e.dataset.l10nTip)));
-    for (const e of /** @type {NodeListOf<HTMLElement>} */ (root.querySelectorAll("[data-l10n-name]"))) e.setAttribute("aria-label", t(/** @type {string} */ (e.dataset.l10nName)));
+    applyL10n(root);
     document.title = t("app.title");
   }
 

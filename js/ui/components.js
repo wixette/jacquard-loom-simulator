@@ -108,16 +108,13 @@ export function applyIcons(root) {
 
 /**
  * Translate the texts under root: data-l10n sets the text, data-l10n-tip the tooltip and the
- * screen-reader name (an icon button's only name).
+ * screen-reader name (an icon button's only name), data-l10n-name the name alone.
  * @param {ParentNode} root
  */
 export function applyL10n(root) {
-  for (const e of /** @type {NodeListOf<HTMLElement>} */ (root.querySelectorAll("[data-l10n]"))) {
-    e.textContent = t(/** @type {string} */ (e.dataset.l10n));
-  }
-  for (const e of /** @type {NodeListOf<HTMLElement>} */ (root.querySelectorAll("[data-l10n-tip]"))) {
-    setTip(e, t(/** @type {string} */ (e.dataset.l10nTip)));
-  }
+  for (const e of /** @type {NodeListOf<HTMLElement>} */ (root.querySelectorAll("[data-l10n]"))) setText(e, t(/** @type {string} */ (e.dataset.l10n)));
+  for (const e of /** @type {NodeListOf<HTMLElement>} */ (root.querySelectorAll("[data-l10n-tip]"))) setTip(e, t(/** @type {string} */ (e.dataset.l10nTip)));
+  for (const e of /** @type {NodeListOf<HTMLElement>} */ (root.querySelectorAll("[data-l10n-name]"))) e.setAttribute("aria-label", t(/** @type {string} */ (e.dataset.l10nName)));
 }
 
 // ---- tooltips ---------------------------------------------------------------------------------

@@ -268,8 +268,5 @@ function ownMaterials(nodes) {
   return out;
 }
 
-/** Where U1's needles run, off the hooks' line along Y (mm): beside the hooks, each looping round its own (build_units.py, needle_dy). */
-export const NEEDLE_DY = -(P.hookWire / 2 + 1 + P.needleWire / 2);
-
 /** The griffe's full lift less the rest gap: how far a caught hook rises (mm). */
 export const HOOK_LIFT = P.griffeLift - P.restGap;

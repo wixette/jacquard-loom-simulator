@@ -135,14 +135,10 @@ export default {
 
   // ---- turning the loom ----------------------------------------------------------------------
   "transport.name": "Turn the loom",
-  "transport.back": "Step back",
   "transport.back.tip": "Back to the previous moment (←)",
   "transport.play": "Play (Space)",
   "transport.pause": "Pause (Space)",
-  "transport.play.tip": "Play or pause",
-  "transport.fwd": "Step",
   "transport.fwd.tip": "On to the next moment (→)",
-  "transport.reset": "Reset",
   "transport.reset.tip": "Back to the first card, with no cloth",
   "transport.speed.one": "Speed: {n} pick a minute",
   "transport.speed.other": "Speed: {n} picks a minute",
@@ -155,7 +151,6 @@ export default {
   "where.other": "Pick {pick} ({card}) · {percent} % through · {n} rows woven · {ends} warp ends",
 
   // ---- the status line -----------------------------------------------------------------------
-  "status.name": "What the loom just did",
   "status.start": "The first card is pressed against the needles. Press Step ▸ to turn the loom to the next moment, or Play.",
   "status.step": "Step: {what}",
   "status.reset": "Reset: back at the first card, with no cloth.",
@@ -174,8 +169,6 @@ export default {
   "status.moved": "Card {from} is now card {card}.",
   "status.loopOn": "The chain is laced into a loop: after the last card, the first comes round again.",
   "status.loopOff": "The chain is open: the loom stops after the last card.",
-  "status.following": "Following hook {hook} through the machine.",
-  "status.unfollowed": "No thread followed.",
   "status.linkCopied": "Link copied: it opens the loom with these cards, at this moment.",
   "status.linkReady": "Link ready in the address bar: {n} characters.",
   "status.linkLong": "Link copied ({n} characters): some email programs and chat apps cut links this long.",
