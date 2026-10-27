@@ -25,7 +25,7 @@ export const WORKSPACES = /** @type {const} */ (["weave", "learn", "create", "pl
 /** @typedef {(typeof WORKSPACES)[number]} Workspace */
 
 /** The stage's views a link may name. */
-export const STAGE_VIEWS = /** @type {const} */ (["section", "side", "front", "3d", "u1", "u2", "u3", "u4", "u5"]);
+export const STAGE_VIEWS = /** @type {const} */ (["section", "side", "front", "3d", "u1", "u2", "u3", "u4", "u5", "cloth"]);
 /** @typedef {(typeof STAGE_VIEWS)[number]} StageView */
 
 /** The locales a link may name (js/l10n/l10n.js, LOCALES; repeated so this module stays pure). */

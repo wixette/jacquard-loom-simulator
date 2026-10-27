@@ -299,3 +299,25 @@ dialog::backdrop { background: var(--md-scrim); }
 .cp-hex-row { display: flex; align-items: center; gap: 10px; font-size: 12px; color: var(--md-on-surface-variant); }
 .cp-hex { width: 96px; padding: 5px 8px; border: 1px solid var(--md-outline-variant); border-radius: var(--radius-s); background: var(--md-surface-high); color: var(--md-on-surface); font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: 12.5px; text-transform: uppercase; }
 .cp-hex:focus { outline: 2px solid var(--md-primary); outline-offset: -1px; }
+
+/* ---- Create: the picture on point paper, and how it is read (js/app/components/picture.js) ---- */
+.picture-slot { flex: 1 1 auto; min-height: 0; overflow-y: auto; }
+.panel.left.on-picture > .guide { flex: 0 1 auto; max-height: 55%; }
+.pic-box { display: flex; flex-direction: column; gap: 10px; padding: 10px 12px 14px; }
+.pic-tools { display: flex; align-items: center; gap: 4px; }
+.pic-tools .spacer { flex: 1; }
+.pic-tools .btn.icon-only { width: 34px; height: 34px; }
+.pic-tools .icon { width: 20px; height: 20px; }
+.pic-grid { display: block; width: 100%; aspect-ratio: 1; border-radius: var(--radius-s); cursor: crosshair; touch-action: none; box-shadow: 0 0 0 1px var(--md-outline-variant); }
+.pic-field { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; color: var(--md-on-surface-variant); }
+.pic-threshold { display: flex; }
+.pic-threshold input { flex: 1; accent-color: var(--md-primary); }
+.pic-note { margin: 0; font-size: 12px; color: var(--md-on-surface-variant); }
+.pic-note:empty { display: none; }
+.pic-reading { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; }
+.pic-label { font-size: 12px; color: var(--md-on-surface-variant); }
+.pic-options { display: flex; flex-wrap: wrap; gap: 10px; }
+.weave-it-row { flex: none; padding: 10px 12px; border-bottom: 1px solid var(--md-outline-variant); }
+.weave-it-row .btn { width: 100%; justify-content: center; gap: 6px; }
+/* the cloth as a view on the stage: centred, as large as the pane holds it */
+.cloth-box.large { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; padding: 56px 12px 12px; overflow: auto; }

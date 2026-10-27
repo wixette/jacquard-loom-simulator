@@ -21,9 +21,9 @@ import { STRAIGHT } from "../sim/tieup.js";
 /**
  * The controls that change the cards or the loom. A step locks those its task does not ask
  * for; the transport, the views, the cloth's face and following a thread are always free.
- * @typedef {"punch" | "cards" | "loop" | "setup" | "colours"} Control
+ * @typedef {"punch" | "cards" | "loop" | "setup" | "colours" | "picture"} Control
  */
-export const CONTROLS = /** @type {const} */ (["punch", "cards", "loop", "setup", "colours"]);
+export const CONTROLS = /** @type {const} */ (["punch", "cards", "loop", "setup", "colours", "picture"]);
 
 /**
  * What a task line offers as buttons, each working the real control (which glows): the
@@ -81,6 +81,8 @@ export const CONTROLS = /** @type {const} */ (["punch", "cards", "loop", "setup"
  * @property {Task} [task]
  * @property {boolean} [done] it has a text for when its task is done (tut.<name>.done)
  * @property {Record<string, Msg>} [params] the values of its texts' placeholders
+ * @property {boolean} [picture] it works on a picture: the picture tool under the guide, and its
+ *   cloth's loose threads marked
  */
 
 /** The parts, by number: their names and what each teaches are tut.part<n>, .goal, .recap. */

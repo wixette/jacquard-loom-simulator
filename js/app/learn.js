@@ -11,8 +11,6 @@ const KEY = "jacquard.tutorial";
 /** The workspace last used on this device (design/ui-layout.md §3: the app opens where it was left). */
 const WORKSPACE = "jacquard.workspace";
 
-/** Weave's views, kept while Learn shows the steps' own, to give back on leaving. @type {WeakMap<AppStore, import("../sim/link.js").StageView[]>} */
-const weaveViews = new WeakMap();
 
 /**
  * The workspace the app opens on, without a link: the one last used on this device, or Learn
@@ -93,7 +91,6 @@ export function goTo(store, i) {
 export function openLearn(store, name = null) {
   const r = remembered();
   act.setLearn(store, { done: [...new Set([...store.state.learn.done, ...r.done])] });
-  if (store.state.workspace !== "learn") weaveViews.set(store, store.state.views);
   act.setWorkspace(store, "learn");
   const at = name ?? r.step;
   const i = at === null ? 0 : stepIndex(at);
@@ -105,11 +102,7 @@ export function openLearn(store, name = null) {
  * Leave Learn for Weave, keeping the tutorial's place: Weave's loom and views as they were.
  * @param {AppStore} store
  */
-export function leaveLearn(store) {
-  act.setWorkspace(store, "weave");
-  const views = weaveViews.get(store);
-  if (views) act.setViews(store, views);
-}
+export const leaveLearn = (store) => act.setWorkspace(store, "weave");
 
 /**
  * Answer the step's question (predict, then weave): a choice, 1-based.

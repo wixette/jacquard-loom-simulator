@@ -8,6 +8,7 @@ import { addCard, duplicateCard, invertCard, moveCard, presetDeck, PRESETS, remo
 import { Loom, STOPS } from "../sim/loom.js";
 import { endCount, hookOfEnd, STRAIGHT, tieLabel } from "../sim/tieup.js";
 import { followCell } from "../sim/trace.js";
+import { describeReading, readPicture, startPicture } from "../sim/picture.js";
 import { allowedAt } from "../teach/tutorial.js";
 import { Store } from "./store.js";
 /** @import { Locale, Msg } from "../l10n/l10n.js" */
@@ -15,11 +16,12 @@ import { Store } from "./store.js";
 /** @import { Tie } from "../sim/tieup.js" */
 /** @import { Follow } from "../sim/trace.js" */
 /** @import { Control } from "../teach/tutorial.js" */
+/** @import { PictureSpec } from "../sim/picture.js" */
 
-/** @typedef {"mine" | "tutorial" | "game"} LoomId */
+/** @typedef {"mine" | "tutorial" | "create" | "game"} LoomId */
 /** @typedef {"whole" | "needles" | "crooks"} SectionView */
 /** @typedef {"front" | "back"} Face */
-/** @typedef {"learn" | "weave"} Workspace the workspaces of release 0.1.0 (Create and Play come in 0.2.0) */
+/** @typedef {"learn" | "weave" | "create"} Workspace the workspaces so far (Play comes in M9) */
 /** @typedef {import("../sim/link.js").StageView} StageView */
 
 /**
@@ -48,8 +50,12 @@ import { Store } from "./store.js";
  * @property {Locale} locale
  * @property {Workspace} workspace
  * @property {StageView[]} views the stage's views: one, two or four
+ * @property {Partial<Record<Workspace, StageView[]>>} viewsBy each workspace's views, kept while another is on
  * @property {LearnState} learn where the tutorial is
+ * @property {Record<PictureLoom, PictureSpec>} pictures the picture each picture loom is woven from
  */
+
+/** The looms a picture is read onto: Create's, and the tutorial's in its picture steps. @typedef {"create" | "tutorial"} PictureLoom */
 
 /**
  * The tutorial's place (js/teach/tutorial.js): the step on show, the answers given to its
@@ -62,7 +68,7 @@ import { Store } from "./store.js";
 
 /** @typedef {Store<AppState>} AppStore */
 
-export const LOOM_IDS = /** @type {const} */ (["mine", "tutorial", "game"]);
+export const LOOM_IDS = /** @type {const} */ (["mine", "tutorial", "create", "game"]);
 
 /** The cloth's colours until the learner chooses others (the theme's --warp and --weft). */
 export const WARP = "#5b3f8c";
@@ -91,19 +97,35 @@ export function loomState(deck, tie = STRAIGHT) {
 }
 
 /**
+ * A loom woven from a picture: its cards, woven to the end, so the cloth shows the picture
+ * (Reset and Play weave it again, pick by pick), and what the reading made in its status line.
+ * A picture that cannot be read leaves a loom with no cards, and says why.
+ * @param {PictureSpec} spec
+ * @returns {LoomState}
+ */
+export function pictureLoom(spec) {
+  const r = readPicture(spec);
+  const ls = loomState(r.ok ? r.cards.deck : { hooks: 8, cards: [], loop: false });
+  if (r.ok) ls.loom.moveTo(r.cards.deck.cards.length, 0);
+  return { ...ls, status: { msg: describeReading(spec, r), warn: !r.ok } };
+}
+
+/**
  * The app as it opens.
  * @param {Partial<AppState>} [o]
  * @returns {AppState}
  */
 export function appState(o = {}) {
   return {
-    looms: { mine: loomState(presetDeck("arrow", 16)), tutorial: loomState(presetDeck("plain", 8)), game: loomState(presetDeck("blank", 8)) },
+    looms: { mine: loomState(presetDeck("arrow", 16)), tutorial: loomState(presetDeck("plain", 8)), create: pictureLoom(startPicture()), game: loomState(presetDeck("blank", 8)) },
     current: "mine",
     sectionView: "whole",
     locale: "en",
     workspace: "weave",
     views: ["section"],
+    viewsBy: {},
     learn: { step: 0, answers: {}, done: [] },
+    pictures: { create: startPicture(), tutorial: startPicture() },
     ...o,
   };
 }
@@ -148,13 +170,19 @@ function fresh(ls, deck, tie) {
 const cur = (store) => store.state.current;
 
 /**
- * Whether a control is locked on this loom: in Learn, the tutorial's loom leaves free only what
- * its step uses (design/public-app.md §1, P6), and says why it refused.
+ * Whether a control is locked on this loom, and if so it says why: in Learn, the tutorial's loom
+ * leaves free only what its step uses (design/public-app.md §1, P6); Create's leaves free only
+ * its colours, its cards being read from its picture.
  * @param {AppStore} store
  * @param {LoomId} id
  * @param {Control} control
  */
 function locked(store, id, control) {
+  // Create's cards are read from its picture: they change with it, and only their colours by hand
+  if (id === "create" && control !== "colours" && control !== "picture") {
+    say(store, msg("pic.locked"), true, id);
+    return true;
+  }
   if (id !== "tutorial" || store.state.workspace !== "learn" || allowedAt(store.state.learn.step).includes(control)) return false;
   say(store, msg("learn.locked"), true, id);
   return true;
@@ -189,12 +217,18 @@ export const setCurrent = (store, id) => store.set({ current: id });
 export const setSectionView = (store, v) => store.set({ sectionView: v });
 
 /**
- * Open a workspace. Learn works on the tutorial's loom, Weave on the learner's (design/ui-layout.md
- * §2, rule 3).
+ * Open a workspace, on its own loom (design/ui-layout.md §2, rule 3): Learn the tutorial's,
+ * Weave the learner's, Create the picture's; and with its own views, as it left them.
  * @param {AppStore} store
  * @param {Workspace} w
  */
-export const setWorkspace = (store, w) => store.set({ workspace: w, current: w === "learn" ? "tutorial" : "mine" });
+export function setWorkspace(store, w) {
+  const s = store.state;
+  if (w === s.workspace) return;
+  // each workspace keeps its own views: Create opens on the cloth, large, the first time
+  const views = s.viewsBy[w] ?? (w === "create" ? /** @type {StageView[]} */ (["cloth"]) : s.views);
+  store.set({ workspace: w, current: /** @type {const} */ ({ learn: "tutorial", weave: "mine", create: "create" })[w], viewsBy: { ...s.viewsBy, [s.workspace]: s.views }, views });
+}
 
 /**
  * The stage's views: one, two or four.
@@ -516,6 +550,42 @@ export function setLoom(store, loom, f, id, also = {}) {
     const next = { ...ls, loom, selected: 0, playing: false, follow: f, crossRow: f ? Math.floor(f.hook / 8) : 0, status: said(msg("status.start")), rev: ls.rev + 1 };
     return { ...also, looms: { ...s.looms, [id]: next } };
   });
+}
+
+/**
+ * Change a picture (a square painted, another size, another reading) and weave it again on its
+ * loom: the cards it makes, woven to the end. The loom's colours and face are kept.
+ * @param {AppStore} store
+ * @param {Partial<PictureSpec>} patch
+ * @param {PictureLoom} id
+ */
+export function setPicture(store, patch, id) {
+  if (id === "tutorial" && locked(store, id, "picture")) return;
+  const spec = { ...store.state.pictures[id], ...patch };
+  const made = pictureLoom(spec);
+  store.set((s) => {
+    const ls = s.looms[id];
+    return { pictures: { ...s.pictures, [id]: spec }, looms: { ...s.looms, [id]: { ...made, warp: ls.warp, weft: ls.weft, face: ls.face, bits: ls.bits, speed: ls.speed, rev: ls.rev + 1 } } };
+  });
+}
+
+/**
+ * Weave a picture's cards on the learner's own loom ("Weave it"), from the start, and go to
+ * Weave: the picture's head, its cards on an open chain.
+ * @param {AppStore} store
+ * @param {PictureLoom} from
+ * @returns {boolean} whether the picture could be read
+ */
+export function weavePicture(store, from) {
+  const r = readPicture(store.state.pictures[from]);
+  if (!r.ok) {
+    say(store, r.reason, true, from);
+    return false;
+  }
+  const { deck } = r.cards;
+  change(store, "mine", (ls) => ({ ...fresh(ls, deck, STRAIGHT), status: said(msg("pic.woven", { cards: deck.cards.length, hooks: deck.hooks })) }));
+  setWorkspace(store, "weave");
+  return true;
 }
 
 /**

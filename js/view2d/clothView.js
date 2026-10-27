@@ -11,6 +11,7 @@ import { hookOfEnd } from "../sim/tieup.js";
 import { token } from "../ui/theme.js";
 /** @import { Snapshot } from "../sim/loom.js" */
 /** @import { Trace } from "../sim/trace.js" */
+/** @import { Float } from "../sim/design.js" */
 
 /**
  * @typedef {object} ClothCell
@@ -109,7 +110,9 @@ export class ClothView {
 
   /**
    * @param {Snapshot} snap
-   * @param {{ face: "front" | "back", warp: string, weft: string, bits: boolean, trace: Trace | null }} o
+   * @param {{ face: "front" | "back", warp: string, weft: string, bits: boolean, trace: Trace | null, floats?: Float[], fit?: boolean }} o
+   *   floats: the loose threads to mark (on the front's ends and picks); fit: the whole cloth in
+   *   the host's height as well as its width, with larger squares (the cloth as a view, large)
    */
   render(snap, o) {
     // The newest rows only, when the cloth gets long (a looped chain can weave for ever).
@@ -122,7 +125,11 @@ export class ClothView {
     // left beside a scrollbar that comes and goes made the cloth fit, then overflow, then fit
     // again at every redraw, so it blinked as it grew past its box.
     const width = Math.max(200, steadyWidth(this.host) - 4);
-    const cell = Math.max(3, Math.min(22, Math.floor((width - this.left - 6) / ends)));
+    const across = Math.floor((width - this.left - 6) / ends);
+    const hs = getComputedStyle(this.host);
+    const inside = this.host.clientHeight - parseFloat(hs.paddingTop) - parseFloat(hs.paddingBottom);
+    const down = o.fit ? Math.floor((inside - this.top - 22) / Math.max(cells.length, 1)) : Infinity;
+    const cell = Math.max(3, Math.min(o.fit ? 40 : 22, across, down));
     this.cell = cell;
     const rows = Math.max(cells.length, 1);
     const w = this.left + ends * cell + 6;
@@ -200,6 +207,35 @@ export class ClothView {
         g.strokeStyle = token("--md-primary", "#9ecaff");
         g.strokeRect(this.left + j * cell - 1, this.top + (rows - 1 - tp) * cell - 1, cell + 1, cell + 1);
       }
+    }
+    if (o.floats?.length) {
+      // the loose threads: a line along each float longer than the limit, in the fault's colour
+      // (on the back the same threads, seen from behind: left and right swapped)
+      const col = (/** @type {number} */ e) => (o.face === "front" ? e : ends - 1 - e);
+      g.strokeStyle = token("--fault", "#ff5449");
+      g.globalAlpha = 0.85;
+      g.lineWidth = Math.max(1.5, Math.min(4, cell * 0.16));
+      g.lineCap = "round";
+      g.beginPath();
+      for (const f of o.floats) {
+        const pick = f.pick - skipped;
+        if (f.kind === "weft") {
+          if (pick < 0 || pick >= rows) continue;
+          const y = this.top + (rows - 1 - pick) * cell + cell / 2;
+          const [a, b] = [col(f.end), col(f.end + f.length - 1)].sort((m, n) => m - n);
+          g.moveTo(this.left + a * cell + cell * 0.2, y);
+          g.lineTo(this.left + (b + 1) * cell - cell * 0.2, y);
+        } else {
+          const top = Math.min(rows - 1, pick + f.length - 1);
+          const from = Math.max(0, pick);
+          if (top < from) continue;
+          const x = this.left + col(f.end) * cell + cell / 2;
+          g.moveTo(x, this.top + (rows - 1 - from) * cell + cell * 0.8);
+          g.lineTo(x, this.top + (rows - 1 - top) * cell + cell * 0.2);
+        }
+      }
+      g.stroke();
+      g.globalAlpha = 1;
     }
     if (cells.length === 0) {
       g.fillStyle = token("--label", "#c9d0d9");
