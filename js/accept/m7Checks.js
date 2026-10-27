@@ -306,15 +306,15 @@ async function viewMenu({ store }) {
 }
 
 /**
- * L-9: without a link a newcomer opens on Learn, with the whole loom in 3D; once Weave is the
- * last workspace used, the app opens on Weave; a link decides for itself.
+ * L-9: without a link a newcomer opens on Learn, with the whole loom in 3D; after that the app
+ * opens on the last workspace used (Weave, Design, Games, on its game); a link decides for itself.
  * @returns {Promise<CheckResult>}
  */
 async function opening() {
   /** @type {string[]} */
   const bad = [];
-  const kept = { ws: localStorage.getItem("jacquard.workspace"), tut: localStorage.getItem("jacquard.tutorial") };
-  /** @param {string} url @returns {Promise<{ ws: string; views: string }>} */
+  const kept = { ws: localStorage.getItem("jacquard.workspace"), tut: localStorage.getItem("jacquard.tutorial"), game: localStorage.getItem("jacquard.game") };
+  /** @param {string} url @returns {Promise<{ ws: string; views: string; game: string }>} */
   const open = async (url) => {
     const f = document.createElement("iframe");
     f.style.cssText = "position: fixed; left: 0; top: 0; width: 1366px; height: 768px; border: 0; visibility: hidden; z-index: -1";
@@ -325,8 +325,9 @@ async function opening() {
     for (let k = 0; k < 50 && !doc.querySelector(".app .player"); k++) await sleep(100);
     const app = /** @type {HTMLElement} */ (doc.querySelector(".app"));
     const views = [...doc.querySelectorAll(".stage .view-chip .view-name")].map((e) => e.textContent).join(",");
+    const game = /** @type {HTMLElement | null} */ (doc.querySelector('.game-tabs [aria-selected="true"]'))?.dataset.game ?? "";
     f.remove();
-    return { ws: app.dataset.ws ?? "", views };
+    return { ws: app.dataset.ws ?? "", views, game };
   };
   localStorage.removeItem("jacquard.workspace");
   localStorage.removeItem("jacquard.tutorial");
@@ -335,12 +336,19 @@ async function opening() {
   localStorage.setItem("jacquard.workspace", "weave");
   const again = await open("index.html");
   if (again.ws !== "weave") bad.push(`after Weave the app opens on ${again.ws}`);
+  localStorage.setItem("jacquard.workspace", "create");
+  const design = await open("index.html");
+  if (design.ws !== "create") bad.push(`after Design the app opens on ${design.ws}`);
+  localStorage.setItem("jacquard.workspace", "play");
+  localStorage.setItem("jacquard.game", "guess");
+  const games = await open("index.html");
+  if (games.ws !== "play" || games.game !== "guess") bad.push(`after Games on guess the cloth the app opens on ${games.ws}, ${games.game}`);
   localStorage.setItem("jacquard.workspace", "learn");
   const linked = await open("index.html#v=2&w=weave");
   if (linked.ws !== "weave") bad.push(`a Weave link opens ${linked.ws}`);
-  for (const [k, v] of Object.entries({ "jacquard.workspace": kept.ws, "jacquard.tutorial": kept.tut })) {
+  for (const [k, v] of Object.entries({ "jacquard.workspace": kept.ws, "jacquard.tutorial": kept.tut, "jacquard.game": kept.game })) {
     if (v === null) localStorage.removeItem(k);
     else localStorage.setItem(k, v);
   }
-  return result("L-9", "A newcomer opens on Learn with the whole loom in 3D; after Weave, the app opens on Weave; a link decides for itself", bad.length === 0, bad.slice(0, 4).join("; ") || "newcomer: Learn, 3D; then Weave; a Weave link: Weave");
+  return result("L-9", "A newcomer opens on Learn with the whole loom in 3D; after that, on the workspace last used (Games on its game); a link decides for itself", bad.length === 0, bad.slice(0, 4).join("; ") || "newcomer: Learn, 3D; then Weave, Design, Games on guess the cloth; a Weave link: Weave");
 }

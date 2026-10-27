@@ -4,8 +4,10 @@
 
 import { chooseLanguage, initialLanguage } from "./app/language.js";
 import { openLearn, openingWorkspace, watchWorkspace } from "./app/learn.js";
+import { openCreate } from "./app/create.js";
 import { openLink } from "./app/links.js";
 import { appState, setViews } from "./app/looms.js";
+import { openPlay, rememberedGame, watchGame } from "./app/play.js";
 import { createShell, openingViews } from "./app/shell.js";
 import { Store } from "./app/store.js";
 
@@ -15,8 +17,14 @@ setViews(store, openingViews());
 // Without a link, the app opens where it was left on this device; a newcomer, on Learn. A link
 // that cannot be read opens Weave, whose status line says why.
 const linked = await openLink(store, location.hash);
-if (!linked && location.hash.length <= 1 && openingWorkspace() === "learn") openLearn(store);
+if (!linked && location.hash.length <= 1) {
+  const w = openingWorkspace();
+  if (w === "learn") openLearn(store);
+  else if (w === "create") openCreate(store);
+  else if (w === "play") openPlay(store, rememberedGame());
+}
 watchWorkspace(store);
+watchGame(store);
 const shell = createShell(store, /** @type {HTMLElement} */ (document.getElementById("app")));
 window.addEventListener("hashchange", () => openLink(store, location.hash));
 

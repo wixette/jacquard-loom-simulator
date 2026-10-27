@@ -30,7 +30,8 @@ install, on a computer or a phone, in ten languages.
 
 1. Open the simulator, [online](https://wixette.github.io/jacquard-loom-simulator/) or
    [on your own machine](#run-it-locally). The first time, it opens on **Learn**, the
-   tutorial, with the whole loom in 3D.
+   tutorial, with the whole loom in 3D; after that, on the tab you left it on, in the language
+   you chose.
 2. Click **Weave** in the top bar. The loom has eight cards on it: an arrow.
 3. Click **▶** under the drawings, or press Space.
 
@@ -131,7 +132,6 @@ picture as a link.
 
 ![Games: the name game has woven "Ada" in damask, and reads the cloth back; the head is in section on the right](./screenshots/readme-play.png)
 
-
 | Game | What you do |
 |---|---|
 | **The name game** | Type your name, or a message of up to 16 lines of 8 characters; the loom weaves it in a pixel font, square by square or as damask, and reads the cloth back |
@@ -200,8 +200,9 @@ browser.
 | [index.html](index.html), [css/](css/), [js/main.js](js/main.js) | The app: one page, one store |
 | [js/sim/](js/sim/) | The machine, as pure logic: the cards, the head, the pick's cycle, the cloth, the links |
 | [js/view2d/](js/view2d/), [js/scene/](js/scene/) | The 2D drawings (SVG) and the 3D models (three.js) |
-| [js/app/](js/app/) | The frame, the views and panels as components, the tutorial's mode, the keyboard, the sounds |
+| [js/app/](js/app/) | The frame, the views and panels as components, the four workspaces, the keyboard, the sounds |
 | [js/teach/](js/teach/) | The tutorial's steps, as data |
+| [js/game/](js/game/) | The four games' logic, and the name game's font |
 | [js/l10n/](js/l10n/) | Every text, in ten languages |
 | [params/](params/), [blender/scripts/](blender/scripts/), [assets/](assets/) | The dimensions, the headless Blender scripts that build the models from them, and the models (Git LFS) |
 | [dev/](dev/) | Developer pages, one for each stage of the work |
@@ -213,8 +214,9 @@ the design principles in [docs/ui-design.md](docs/ui-design.md).
 
 ### The link format
 
-A link opens the app in a state: a loom (its cards, head, tie-up, moment and views) or a step
-of the tutorial. The fields go after `#`, so they never reach the server:
+A link opens the app in a state: a loom (its cards, head, tie-up, moment and views), a step of
+the tutorial, a picture in Design, or a game. The fields go after `#`, so they never reach the
+server:
 
 ```
 https://wixette.github.io/jacquard-loom-simulator/#v=2&h=8&c=x.18-18-18-18-99-5a-3c-18&l=0
@@ -243,7 +245,8 @@ The tutorial's pictures are public domain or freely licensed, each credited wher
 The machine's sounds were edited from [Pixabay](https://pixabay.com/) sound effects
 ([audio/SOURCES.md](audio/SOURCES.md)). The interface and its languages follow the sibling
 [Stepped Reckoner](https://github.com/wixette/leibniz-stepped-reckoner) simulator. Built with
-[three.js](https://threejs.org); set in Roboto Flex, with Material Symbols icons.
+[three.js](https://threejs.org); set in Roboto Flex, with Material Symbols icons. The name game
+weaves in [Unscii](http://viznut.fi/unscii/) 8 × 16, Viznut's public-domain pixel font.
 
 ## Licence
 

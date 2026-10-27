@@ -9,6 +9,7 @@ What changed in each release. Versions follow `package.json` and are tagged `vX.
 - **Learn:** the tutorial's parts 4 (four debugging challenges, each with the cloth it should weave), 5 (your tools) and 6 (what came next: Babbage, Lovelace, Hollerith, the computer).
 - The cloth as a view of its own, last in the view menu.
 - The workspaces are Learn, Weave, Design and Games (the last two first called Create and Play; their links keep `w=create` and `w=play`).
+- The app opens on the tab it was left on, Design and Games too (0.1.0 remembered only Learn or Weave), and Games on the game last chosen; the language chosen is kept as before.
 
 ## 0.1.0
 

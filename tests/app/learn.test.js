@@ -135,8 +135,14 @@ describe("what the device keeps", () => {
     act.setWorkspace(s, "learn");
     act.setWorkspace(s, "weave");
     assert.equal(openingWorkspace(), "weave");
+    act.setWorkspace(s, "create");
+    assert.equal(openingWorkspace(), "create");
+    act.setWorkspace(s, "play");
+    assert.equal(openingWorkspace(), "play");
     act.setWorkspace(s, "learn");
     assert.equal(openingWorkspace(), "learn");
+    storage().setItem("jacquard.workspace", "elsewhere");
+    assert.equal(openingWorkspace(), "learn", "anything else kept opens Learn");
   });
   it("without storage (a private window) the app still opens, on Learn", () => {
     /** @type {any} */ (globalThis).localStorage = undefined;

@@ -11,6 +11,7 @@ import { msg } from "../l10n/l10n.js";
 import { Loom } from "../sim/loom.js";
 import { makeDeck } from "../sim/deck.js";
 import * as act from "./looms.js";
+import { GAMES } from "./playState.js";
 /** @import { AppStore } from "./looms.js" */
 /** @import { GameName, PlayState } from "./playState.js" */
 /** @import { Deck } from "../sim/deck.js" */
@@ -75,6 +76,37 @@ function make(store, p) {
  * @param {(p: PlayState) => PlayState} f
  */
 export const setPlay = (store, f) => make(store, f(store.state.play));
+
+/** The game last chosen on this device (the tab Games opens on), kept as the workspace is. */
+const GAME = "jacquard.game";
+
+/** @returns {GameName | undefined} */
+export function rememberedGame() {
+  try {
+    const g = localStorage.getItem(GAME);
+    return g !== null && /** @type {readonly string[]} */ (GAMES).includes(g) ? /** @type {GameName} */ (g) : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+/**
+ * Remember the game each time another is chosen.
+ * @param {AppStore} store
+ * @returns {() => void}
+ */
+export function watchGame(store) {
+  return store.watch(
+    (s) => [s.play.game],
+    () => {
+      try {
+        localStorage.setItem(GAME, store.state.play.game);
+      } catch {
+        // not remembered
+      }
+    },
+  );
+}
 
 /** Open Play, on a game (or the one on show). @param {AppStore} store @param {GameName} [game] */
 export function openPlay(store, game) {

@@ -4,6 +4,7 @@
 // and coming back resumes it. The steps themselves are in js/teach/tutorial.js.
 
 import { loomAt, pictureAt, shownAt, stepIndex, STEPS } from "../teach/tutorial.js";
+import { WORKSPACES } from "../sim/link.js";
 import * as act from "./looms.js";
 /** @import { AppStore } from "./looms.js" */
 
@@ -19,7 +20,8 @@ const WORKSPACE = "jacquard.workspace";
  */
 export function openingWorkspace() {
   try {
-    return localStorage.getItem(WORKSPACE) === "weave" ? "weave" : "learn";
+    const w = localStorage.getItem(WORKSPACE);
+    return w !== null && /** @type {readonly string[]} */ (WORKSPACES).includes(w) ? /** @type {import("./looms.js").Workspace} */ (w) : "learn";
   } catch {
     return "learn";
   }
