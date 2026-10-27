@@ -54,7 +54,7 @@ Four workspaces, as tabs in the top bar. The home slots stay the same; what chan
 
 The app opens on **Weave**, already weaving a pretty pattern, with a small banner the first time: "New here? Take the tour" (which opens Learn); after that it opens where the learner left it. A link can open any workspace and step: `?w=learn&step=weave-twill`, `?w=play&game=name&text=Ada`. Steps are named, not numbered, so a link survives a step added before it.
 
-**Learn is a mode,** as the sibling's lessons are (its U2 and U27): while it is on, the Learn tab carries the part and step ("Weave · 3/9"), the stage has a thin blue frame, and the controls a step does not use are greyed with the reason, which says the way out ("…to use it freely, go to Weave"). Leaving Learn keeps the place; coming back resumes it.
+**Learn is a mode,** as the sibling's lessons are (its U2 and U27): while it is on, the Learn tab carries the part and step ("Part 3 · 2/8": a part's name beside the Weave tab would read as that tab's), the stage has a thin blue frame, and the controls a step does not use (those that change the cards or the loom; the transport, the views and following stay free) are greyed, and pressed say the reason, which says the way out ("…to use everything freely, go to Weave"). Leaving Learn keeps the place, and gives Weave's loom and views back; coming back resumes it, with the step's loom as it starts.
 
 ## 4. Desktop layout (1024 px wide and up)
 
@@ -151,7 +151,7 @@ The developer pages wire their elements by id (`createLoomPage`); the public app
 
 - Whether a chain-as-timeline strip with a playhead (dropped from 0.1.0, §4) earns its height later, for scrubbing through long decks.
 - Whether the four-view arrangement is worth it below 1440 px wide.
-- How the tutorial points at things inside a view (a hook in the section, a part in 3D): the views would need to expose where their parts are on screen (the label placer knows already, for 2D; the sibling's callouts name 3D nodes). Settled in M7.
+- How the tutorial points at things inside a 3D view. Settled for 2D in M7: a step names the parts of the section it points at, which glow amber with their labels (`data-glow`, design/m7-notes.md); a 3D step points by showing one unit alone (U1 to U5), and its words name the parts, which hover names. A glow on 3D parts (the sibling's callouts and highlights on named nodes) comes with the parts that need it, in part 4 or 5.
 - How much of the 3D view the Play workspace needs: Draw boy against Jacquard probably wants the harness in 3D; the others do not.
 
 ## 8. Order of work

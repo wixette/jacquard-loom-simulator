@@ -125,3 +125,28 @@ describe("the looms are apart (F-2)", () => {
     assert.equal(store.state.looms.tutorial.loom.phi, 0);
   });
 });
+
+describe("in Learn a step locks what it does not use (design/m7-notes.md, decision 5)", () => {
+  it("the tutorial's loom refuses a locked control, says why and changes nothing; the step's own control works", async () => {
+    const { stepIndex } = await import("../../js/teach/tutorial.js");
+    const { store } = setup();
+    act.setWorkspace(store, "learn");
+    act.setLearn(store, { step: stepIndex("how-section") });
+    const deck = () => JSON.stringify(store.state.looms.tutorial.loom.deck);
+    const before = deck();
+    act.add(store, "tutorial");
+    act.punch(store, 0, 0, "tutorial");
+    act.lace(store, false, "tutorial");
+    act.setHooks(store, 16, "tutorial");
+    assert.equal(deck(), before);
+    assert.deepEqual(store.state.looms.tutorial.status, { msg: { key: "learn.locked" }, warn: true });
+    act.step(store, "tutorial");
+    assert.ok(store.state.looms.tutorial.loom.phi > 0, "the transport stays free");
+    act.add(store, "mine");
+    assert.equal(store.state.looms.mine.loom.deck.cards.length, 9, "the learner's own loom is never locked");
+    act.setLearn(store, { step: stepIndex("weave-punch") });
+    act.punch(store, 0, 0, "tutorial");
+    assert.notEqual(deck(), before, "punching is free in a step that asks for it");
+  });
+});
+

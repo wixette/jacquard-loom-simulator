@@ -4,6 +4,12 @@ What changed in each release. Versions follow `package.json` and are tagged `vX.
 
 ## Unreleased
 
+**M7, the tutorial, parts 1 to 3 (2026-10-27)** ([notes](design/m7-notes.md))
+- Learn: 21 steps in three parts. The story (the draw loom; Bouchon, Falcon and Vaucanson; Jacquard; the woven portrait), with four historical pictures and their credits; how it works (the loom in 3D, the head cut through, a light card and a heavy lift, one card one row, the chain as a program and a loop, what the loom is not); weaving by hand (punch a card, plain weave, twill, satin and why stepping by two fails, the tie-up's repeats, a picture woven bottom-up).
+- Each step on one card, with its part and place, the list of all the steps, a question to answer before weaving, and a task checked on the loom; its task line works the real controls, which glow; what the step does not use is greyed and says why.
+- The tutorial's place and the steps done kept on the device; a link to every step; the section's parts a step points at glow amber.
+- The tutorial in all ten languages.
+
 **M6, the main app's frame and Weave (2026-10-27)** ([notes](design/m6-notes.md))
 - The main app at `index.html`: the top bar (Learn and Weave, Share, the language, About), the cards on the left, the cloth on the right, the stage in the middle with one, two or four views (the section, the side and front views, the loom in 3D and its five units), what just happened under it, and the player along the whole bottom: the six moments as a stepper over the controls, centred; on a phone, the stage on top and a sheet with the rest.
 - The machine's settings beside what they change: the head and tie-up over the cards, the colours over the cloth, the chain's loop where it ends.

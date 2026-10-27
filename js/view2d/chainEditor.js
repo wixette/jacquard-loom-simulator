@@ -97,7 +97,7 @@ export class ChainList {
     if (deck.cards.length === 0) rows.push(`<p class="empty">${t("chain.empty")}</p>`);
     else if (this.laces)
       rows.push(
-        `<button type="button" class="chain-end lace" role="switch" aria-checked="${deck.loop}" data-lace="${deck.loop ? 1 : 0}" title="${t("cards.loop")}"><span class="switch" aria-hidden="true"></span><span>${t(deck.loop ? "chain.lace.on" : "chain.lace.off")}</span></button>`,
+        `<button type="button" class="chain-end lace" role="switch" aria-checked="${deck.loop}" data-control="loop" data-lace="${deck.loop ? 1 : 0}" title="${t("cards.loop")}"><span class="switch" aria-hidden="true"></span><span>${t(deck.loop ? "chain.lace.on" : "chain.lace.off")}</span></button>`,
       );
     else rows.push(`<p class="chain-end">${t(deck.loop ? "chain.loop" : "chain.open")}</p>`);
     this.list.innerHTML = rows.join("");

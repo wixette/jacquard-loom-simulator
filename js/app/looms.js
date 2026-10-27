@@ -8,11 +8,13 @@ import { addCard, duplicateCard, invertCard, moveCard, presetDeck, PRESETS, remo
 import { Loom, STOPS } from "../sim/loom.js";
 import { endCount, hookOfEnd, STRAIGHT, tieLabel } from "../sim/tieup.js";
 import { followCell } from "../sim/trace.js";
+import { allowedAt } from "../teach/tutorial.js";
 import { Store } from "./store.js";
 /** @import { Locale, Msg } from "../l10n/l10n.js" */
 /** @import { Deck } from "../sim/deck.js" */
 /** @import { Tie } from "../sim/tieup.js" */
 /** @import { Follow } from "../sim/trace.js" */
+/** @import { Control } from "../teach/tutorial.js" */
 
 /** @typedef {"mine" | "tutorial" | "game"} LoomId */
 /** @typedef {"whole" | "needles" | "crooks"} SectionView */
@@ -46,6 +48,16 @@ import { Store } from "./store.js";
  * @property {Locale} locale
  * @property {Workspace} workspace
  * @property {StageView[]} views the stage's views: one, two or four
+ * @property {LearnState} learn where the tutorial is
+ */
+
+/**
+ * The tutorial's place (js/teach/tutorial.js): the step on show, the answers given to its
+ * questions (by step name, the choice 1-based), and the steps done, by name.
+ * @typedef {object} LearnState
+ * @property {number} step
+ * @property {Record<string, number>} answers
+ * @property {string[]} done
  */
 
 /** @typedef {Store<AppState>} AppStore */
@@ -91,6 +103,7 @@ export function appState(o = {}) {
     locale: "en",
     workspace: "weave",
     views: ["section"],
+    learn: { step: 0, answers: {}, done: [] },
     ...o,
   };
 }
@@ -133,6 +146,19 @@ function fresh(ls, deck, tie) {
 
 /** The current loom's id. @param {AppStore} store */
 const cur = (store) => store.state.current;
+
+/**
+ * Whether a control is locked on this loom: in Learn, the tutorial's loom leaves free only what
+ * its step uses (design/public-app.md §1, P6), and says why it refused.
+ * @param {AppStore} store
+ * @param {LoomId} id
+ * @param {Control} control
+ */
+function locked(store, id, control) {
+  if (id !== "tutorial" || store.state.workspace !== "learn" || allowedAt(store.state.learn.step).includes(control)) return false;
+  say(store, msg("learn.locked"), true, id);
+  return true;
+}
 
 // ---- what the learner says to the app -------------------------------------------------------------
 
@@ -279,6 +305,7 @@ export function setSpeed(store, speed, id = cur(store)) {
 
 /** @param {AppStore} store @param {number} card @param {number} hook @param {LoomId} [id] */
 export function punch(store, card, hook, id = cur(store)) {
+  if (locked(store, id, "punch")) return;
   change(store, id, (ls) => {
     const was = ls.loom.deck.cards[card][hook];
     ls.loom.setDeck(toggleHole(ls.loom.deck, card, hook));
@@ -300,6 +327,7 @@ const clamp = (ls, selected) => Math.max(0, Math.min(selected, ls.loom.deck.card
 
 /** @param {AppStore} store @param {LoomId} [id] */
 export function add(store, id = cur(store)) {
+  if (locked(store, id, "cards")) return;
   change(store, id, (ls) => {
     ls.loom.setDeck(addCard(ls.loom.deck, ls.selected));
     const selected = clamp(ls, ls.selected + 1);
@@ -309,6 +337,7 @@ export function add(store, id = cur(store)) {
 
 /** @param {AppStore} store @param {LoomId} [id] */
 export function duplicate(store, id = cur(store)) {
+  if (locked(store, id, "cards")) return;
   change(store, id, (ls) => {
     if (!ls.loom.deck.cards.length) return null;
     ls.loom.setDeck(duplicateCard(ls.loom.deck, ls.selected));
@@ -318,6 +347,7 @@ export function duplicate(store, id = cur(store)) {
 
 /** @param {AppStore} store @param {LoomId} [id] */
 export function remove(store, id = cur(store)) {
+  if (locked(store, id, "cards")) return;
   change(store, id, (ls) => {
     if (!ls.loom.deck.cards.length) return null;
     ls.loom.setDeck(removeCard(ls.loom.deck, ls.selected));
@@ -332,6 +362,7 @@ export function remove(store, id = cur(store)) {
  * @param {LoomId} [id]
  */
 export function move(store, by, id = cur(store)) {
+  if (locked(store, id, "cards")) return;
   change(store, id, (ls) => {
     const to = ls.selected + by;
     if (to < 0 || to >= ls.loom.deck.cards.length) return null;
@@ -342,6 +373,7 @@ export function move(store, by, id = cur(store)) {
 
 /** @param {AppStore} store @param {LoomId} [id] */
 export function invert(store, id = cur(store)) {
+  if (locked(store, id, "cards")) return;
   change(store, id, (ls) => {
     if (!ls.loom.deck.cards.length) return null;
     ls.loom.setDeck(invertCard(ls.loom.deck, ls.selected));
@@ -351,6 +383,7 @@ export function invert(store, id = cur(store)) {
 
 /** @param {AppStore} store @param {boolean} loop @param {LoomId} [id] */
 export function lace(store, loop, id = cur(store)) {
+  if (locked(store, id, "loop")) return;
   change(store, id, (ls) => {
     if (ls.loom.deck.loop === loop) return null;
     ls.loom.setDeck(setLoop(ls.loom.deck, loop));
@@ -362,6 +395,7 @@ export function lace(store, loop, id = cur(store)) {
 
 /** @param {AppStore} store @param {number} hooks @param {LoomId} [id] */
 export function setHooks(store, hooks, id = cur(store)) {
+  if (locked(store, id, "setup")) return;
   change(store, id, (ls) => {
     const was = ls.loom.deck.hooks;
     if (was === hooks) return null;
@@ -372,6 +406,7 @@ export function setHooks(store, hooks, id = cur(store)) {
 
 /** @param {AppStore} store @param {string} name a key of PRESETS @param {LoomId} [id] */
 export function loadPreset(store, name, id = cur(store)) {
+  if (locked(store, id, "cards")) return;
   change(store, id, (ls) => {
     const hooks = ls.loom.deck.hooks;
     return { ...fresh(ls, presetDeck(name, hooks), ls.loom.tie), status: said(msg("status.loaded", { deck: msg(PRESETS[name].name), hooks })) };
@@ -380,6 +415,7 @@ export function loadPreset(store, name, id = cur(store)) {
 
 /** @param {AppStore} store @param {Tie} tie @param {LoomId} [id] */
 export function setTie(store, tie, id = cur(store)) {
+  if (locked(store, id, "setup")) return;
   change(store, id, (ls) => {
     if (tieKey(tie) === tieKey(ls.loom.tie)) return null;
     const hooks = ls.loom.deck.hooks;
@@ -459,8 +495,28 @@ export function setBits(store, bits, id = cur(store)) {
 
 /** @param {AppStore} store @param {{ warp?: string; weft?: string }} c @param {LoomId} [id] */
 export function setColours(store, c, id = cur(store)) {
+  if (locked(store, id, "colours")) return;
   change(store, id, (ls) => ((c.warp ?? ls.warp) === ls.warp && (c.weft ?? ls.weft) === ls.weft ? null : { warp: c.warp ?? ls.warp, weft: c.weft ?? ls.weft, keepRev: true }));
 }
+
+/**
+ * Put a loom in place of a loom's machine, as it is (a step of the tutorial): its cards, its
+ * moment and its cloth, the thread it follows. A new machine, so it sounds nothing.
+ * @param {AppStore} store
+ * @param {Loom} loom
+ * @param {Follow | null} f
+ * @param {LoomId} id
+ */
+export function setLoom(store, loom, f, id) {
+  change(store, id, () => ({ loom, selected: 0, playing: false, follow: f, crossRow: f ? Math.floor(f.hook / 8) : 0, status: said(msg("status.start")) }));
+}
+
+/**
+ * The tutorial's place: its step, an answer to its question, a step done.
+ * @param {AppStore} store
+ * @param {Partial<LearnState>} l
+ */
+export const setLearn = (store, l) => store.set({ learn: { ...store.state.learn, ...l } });
 
 /**
  * Move a loom to a moment of its pick, weaving or unweaving on the way (a link, a step).

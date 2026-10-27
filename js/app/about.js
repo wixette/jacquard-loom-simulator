@@ -8,7 +8,7 @@ import pkg from "../../package.json" with { type: "json" };
 
 const V = new URL(import.meta.url).search;
 
-const LICENCES = ["about.licence.code", "about.licence.content", "about.licence.three", "about.licence.font", "about.licence.icons", "about.licence.sounds"];
+const LICENCES = ["about.licence.code", "about.licence.content", "about.licence.pictures", "about.licence.three", "about.licence.font", "about.licence.icons", "about.licence.sounds"];
 
 /** Open the About dialog; it goes away when closed. */
 export function showAbout() {

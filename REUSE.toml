@@ -69,3 +69,29 @@ path = "research/images/pd-scans/**"
 precedence = "override"
 SPDX-FileCopyrightText = "E. A. Posselt (1887); A. Barlow (1878); A. Ure (1839) - public domain"
 SPDX-License-Identifier = "LicenseRef-PublicDomain"
+
+# The tutorial's pictures (js/teach/tutorial.js), scaled and re-encoded from research/images;
+# each one's credit is shown with it (js/l10n, img.*).
+[[annotations]]
+path = ["images/tutorial/draw-loom.jpg"]
+precedence = "override"
+SPDX-FileCopyrightText = "Alfred Barlow (1878), scan by the Internet Archive - public domain"
+SPDX-License-Identifier = "LicenseRef-PublicDomain"
+
+[[annotations]]
+path = ["images/tutorial/cards.jpg"]
+precedence = "override"
+SPDX-FileCopyrightText = "Robert-brook (Wikimedia Commons)"
+SPDX-License-Identifier = "CC0-1.0"
+
+[[annotations]]
+path = ["images/tutorial/model-1810.jpg"]
+precedence = "override"
+SPDX-FileCopyrightText = "MdeVicente (Wikimedia Commons)"
+SPDX-License-Identifier = "CC0-1.0"
+
+[[annotations]]
+path = ["images/tutorial/portrait.jpg"]
+precedence = "override"
+SPDX-FileCopyrightText = "Wellcome Collection (photograph of the woven portrait of J.-M. Jacquard, Lyon, 1839)"
+SPDX-License-Identifier = "CC-BY-4.0"

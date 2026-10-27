@@ -6,18 +6,22 @@ import { isLocale } from "../l10n/l10n.js";
 import { decodeLink } from "../sim/link.js";
 import { POSITIONS } from "../sim/loom.js";
 import { tieLabel } from "../sim/tieup.js";
+import { STEPS } from "../teach/tutorial.js";
 import { chooseLanguage } from "./language.js";
+import { openLearn } from "./learn.js";
 import * as act from "./looms.js";
 /** @import { AppStore } from "./looms.js" */
 /** @import { AppLink } from "../sim/link.js" */
 
 /**
- * What the app is showing, as the fields of a link: the current loom (its cards, tie-up, pick
- * and moment, the thread followed, its colours and face) and the stage's views.
+ * What the app is showing, as the fields of a link: in Learn, the tutorial's step (it sets up
+ * its own loom); in Weave, the loom (its cards, tie-up, pick and moment, the thread followed, its
+ * colours and face) and the stage's views.
  * @param {AppStore} store
  * @returns {Partial<AppLink>}
  */
 export function linkOf(store) {
+  if (store.state.workspace === "learn") return { workspace: "learn", step: STEPS[store.state.learn.step].id };
   const s = store.state.looms[store.state.current];
   const { loom } = s;
   const stop = POSITIONS.findIndex((p) => Math.abs(p - loom.phi) < 1e-9);
@@ -38,8 +42,13 @@ export async function openLink(store, fragment) {
   }
   const l = r.link;
   if (l.lang && isLocale(l.lang)) await chooseLanguage(store, l.lang);
+  // A step of the tutorial sets up its own loom and views (design/links.md, Learn).
+  if (l.workspace === "learn") {
+    openLearn(store, l.step);
+    return true;
+  }
   // Create and Play come in a later release: their links open Weave until then.
-  act.setWorkspace(store, l.workspace === "learn" ? "learn" : "weave");
+  act.setWorkspace(store, "weave");
   if (l.deck) {
     act.open(store, { deck: l.deck, tie: l.tie, follow: l.follow });
     if ((l.pick > 0 || l.stop > 0) && l.deck.cards.length > 0 && (l.deck.loop || l.pick < l.deck.cards.length)) act.moveTo(store, l.pick, POSITIONS[l.stop]);

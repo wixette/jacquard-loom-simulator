@@ -61,6 +61,24 @@ svg.section .break { fill: none; stroke: var(--guide); stroke-width: 0.8; }
 svg.section .shed { stroke: var(--guide); stroke-width: 0.6; stroke-dasharray: 4 3; }
 svg.section .lbl, svg.front .lbl, svg.side .lbl { fill: var(--label); font-family: var(--font); }
 svg.section .leader { stroke: var(--leader); stroke-width: 0.5; }
+/* what a step of the tutorial points at (data-glow, js/teach/tutorial.js): its parts with an
+   amber halo, keeping their own colours (lifted, followed), and their labels in amber */
+svg.section[data-glow~="cylinder"] :is(.cylinder, .card-strip.facing),
+svg.section[data-glow~="needles"] :is(.needle, .eye, .spring),
+svg.section[data-glow~="hooks"] .hook,
+svg.section[data-glow~="knives"] .knife,
+svg.section[data-glow~="griffe"] .griffe-frame,
+svg.section[data-glow~="harness"] .cord,
+svg.section[data-glow~="mails"] .mail,
+svg.section[data-glow~="lingoes"] .lingo { filter: drop-shadow(0 0 1.5px var(--attention)) drop-shadow(0 0 3px color-mix(in srgb, var(--attention) 60%, transparent)); }
+svg.section[data-glow~="cylinder"] .lbl.p-cylinder,
+svg.section[data-glow~="needles"] .lbl.p-needles,
+svg.section[data-glow~="hooks"] .lbl.p-hooks,
+svg.section[data-glow~="knives"] .lbl.p-knives,
+svg.section[data-glow~="griffe"] .lbl.p-griffe,
+svg.section[data-glow~="harness"] .lbl.p-harness,
+svg.section[data-glow~="mails"] .lbl.p-mails,
+svg.section[data-glow~="lingoes"] .lbl.p-lingoes { fill: var(--attention); font-weight: 650; }
 
 /* ---- the loom from the front: harness, shed and shuttle -------------------------------------- */
 svg.front .head-box { fill: var(--ghost-fill); stroke: var(--ghost-line); stroke-dasharray: 4 3; }

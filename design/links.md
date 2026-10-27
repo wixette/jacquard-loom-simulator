@@ -60,7 +60,15 @@ A deck holds up to 1,024 cards. **Length:** any deck of up to 64 cards on up to 
 |---|---|---|---|
 | `step` | a step's name: lower-case letters, digits and `-` | the tutorial's start, or where the learner left it | The step to open, by its name (`weave-twill`), not its number, so a step added before it moves nothing. A step that is renamed keeps its old name as an alias for ever. |
 
-The step sets up its own loom (design/ui-layout.md §2, rule 3), so a Learn link carries no loom.
+The step sets up its own loom (design/ui-layout.md §2, rule 3), so a Learn link carries no loom. A name no step has (or a step of a later release) opens the tutorial's start, and says so in the status line. *Copy link* in Learn writes the step on show: `#v=2&w=learn&step=how-loop`.
+
+The steps' names in 0.1.0, frozen with it (js/teach/tutorial.js, `STEPS`; a renamed step keeps its old name in `ALIASES`):
+
+| Part | Steps |
+|---|---|
+| 1. The story | `story-draw-loom`, `story-holes`, `story-jacquard`, `story-portrait` |
+| 2. How it works | `how-whole-loom`, `how-units`, `how-section`, `how-needles`, `how-griffe`, `how-one-row`, `how-program`, `how-loop`, `how-not-a-computer` |
+| 3. Weave | `weave-punch`, `weave-plain`, `weave-twill`, `weave-satin`, `weave-satin-by-two`, `weave-tie-up`, `weave-picture`, `weave-next` |
 
 ## Later link types
 

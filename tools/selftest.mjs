@@ -5,6 +5,7 @@
 //
 //     pnpm selftest
 //     pnpm selftest --only learner      (the pages whose path contains "learner")
+//     SELFTEST_DETAIL=1 pnpm selftest   (also what each passing check found, for the notes)
 
 import { parseArgs } from "node:util";
 import { openBrowser } from "./headless.mjs";
@@ -32,6 +33,7 @@ try {
     if (failed.length || browser.errors.length) bad++;
     console.log(`${failed.length || browser.errors.length ? "✗" : "✓"} ${page}: ${r.passed}/${r.results.length} (${secs} s)`);
     for (const f of failed) console.log(`    ✗ ${f.id}: ${f.detail}`);
+    if (process.env.SELFTEST_DETAIL) for (const x of r.results.filter((y) => y.passed)) console.log(`    ✓ ${x.id}: ${x.detail}`);
     for (const e of browser.errors) console.log(`    ! ${e.split("\n")[0]}`);
   }
 } finally {
