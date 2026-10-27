@@ -2,14 +2,30 @@
 
 What changed in each release. Versions follow `package.json` and are tagged `vX.Y.Z` ([docs/development.md](docs/development.md), *Versions and releases*). Each stage's details are in its notes in [design/](design/).
 
-## Unreleased (0.2.0)
+## 0.2.0
 
-- **Design:** the picture tool as a workspace: paint a picture on point paper, take a ready-made one or open an image, and read it square by square or as damask; the cloth large, its long floats marked; Open in Weave puts its cards on your loom; Share links to the picture.
-- **Games:** four games: the name game (a name or a message, wrapped into up to 16 lines), one byte per card (with a friend's secret to read), guess the cloth, and draw boy against Jacquard; each can be shared as a link.
-- **Learn:** the tutorial's parts 4 (four debugging challenges, each with the cloth it should weave), 5 (your tools) and 6 (what came next: Babbage, Lovelace, Hollerith, the computer).
-- The cloth as a view of its own, last in the view menu.
+Make and play (2026-10-28): the picture tool, four games and the whole tutorial, in ten languages.
+
+- **Design:** the picture tool as a workspace: paint a picture on point paper, take a ready-made
+  one or open an image, and read it square by square or as damask; the cloth large, its long
+  floats marked; Open in Weave puts its cards on your loom; Share links to the picture.
+- **Games:** four games: the name game (a name or a message, wrapped into up to 16 lines), one
+  byte per card (with a friend's secret to read), guess the cloth, and draw boy against Jacquard;
+  each can be shared as a link.
+- **Learn:** the tutorial's parts 4 (four debugging challenges, each with the cloth it should
+  weave), 5 (your tools) and 6 (what came next: Babbage, Lovelace, Hollerith, the computer): 37
+  steps in all.
+- The cloth as a view of its own, last in the view menu. Every 0.1.0 link opens as before.
+
+**Before the release (2026-10-28)**
 - The workspaces are Learn, Weave, Design and Games (the last two first called Create and Play; their links keep `w=create` and `w=play`).
+- Design's cards and Open in Weave under the picture, the machine on the right, as in Learn and Games; the view menu: 2D drawings, 3D models, then the cloth.
+- The cloth drawn at a fixed square size, by the pane's width, scrolled when long, in Design and Games as in Weave.
+- The image button says first what an image becomes (formats, the paper's size, the level of dark); an image not square is fitted in the paper, not stretched.
+- Buttons that say where they act: Open in Weave, Weave to the end; the name game reads its text as Design reads a picture (Square by square, As damask).
+- The name game takes a message: wrapped at the spaces into lines of 8, up to 16 lines, read back as typed; the cloth view draws a long cloth in a fourth of the time, and only when it changes while the loom plays.
 - The app opens on the tab it was left on, Design and Games too (0.1.0 remembered only Learn or Weave), and Games on the game last chosen; the language chosen is kept as before.
+- The status line at the end of an open chain says the chain is woven to its end.
 
 ## 0.1.0
 
