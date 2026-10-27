@@ -1,7 +1,7 @@
 /* The main app's frame (design/ui-layout.md): a top bar, the program on the left, the stage in
-   the middle with time under it (what just happened, the moments, the controls), the output on
-   the right; on a phone, the stage on top, time under it, and a bottom sheet with the rest. The page itself never scrolls; each
-   panel scrolls inside itself. Colours from css/theme.css, components from css/ui.css and
+   the middle with its caption under it, the output on the right, and the player (the moments,
+   the controls) along the whole bottom; on a phone, the stage on top, time under it, and a bottom
+   sheet with the rest. The page itself never scrolls; each panel scrolls inside itself. Colours from css/theme.css, components from css/ui.css and
    css/components.css, drawings from css/views.css. */
 
 * { box-sizing: border-box; }
@@ -23,6 +23,7 @@ select { padding: 4px 8px; border-radius: var(--radius-s); border: 1px solid var
 
 /* ---- the frame: desktop ------------------------------------------------------------------- */
 .app { display: grid; grid-template-rows: 56px minmax(0, 1fr); height: 100dvh; }
+.app.desktop { grid-template-rows: 56px minmax(0, 1fr) auto; }
 .work {
   display: grid;
   grid-template-columns: var(--left, 320px) 1px minmax(0, 1fr) 1px var(--right, 340px);
@@ -95,12 +96,12 @@ body.resizing .stage { pointer-events: none; }
 .chip select { border: 0; background: transparent; padding: 0; color: inherit; }
 .follow-chip { border-color: transparent; background: var(--md-primary-container); color: var(--md-on-primary-container); }
 
-/* ---- time, under the stage: the caption, then the player ----------------------------------------- */
-.centre { display: grid; grid-template-rows: minmax(0, 1fr) auto auto; min-width: 0; min-height: 0; }
+/* ---- time: the caption under the stage; the player along the window's bottom, centred on it ------ */
+.centre { display: grid; grid-template-rows: minmax(0, 1fr) auto; min-width: 0; min-height: 0; }
 .caption { padding: 8px 18px; border-top: 1px solid var(--md-outline-variant); background: var(--md-surface-low); }
 .caption .status-line { padding: 0; font-size: 14px; height: calc(2 * 1.45em); display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .player { border-top: 1px solid var(--md-outline-variant); background: var(--md-surface-mid); }
-.player .transport { padding: 10px 18px 8px; gap: 8px; }
+.player .transport { padding: 10px 20px 8px; gap: 8px; }
 .player .moments { width: 100%; max-width: 760px; margin: 0 auto; }
 @media (max-width: 1279px) {
   .work { --left: 280px; --right: 300px; }

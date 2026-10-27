@@ -5,7 +5,7 @@ What changed in each release. Versions follow `package.json` and are tagged `vX.
 ## Unreleased
 
 **M6, the main app's frame and Weave (2026-10-27)** ([notes](design/m6-notes.md))
-- The main app at `index.html`: the top bar (Learn and Weave, Share, the language, About), the cards on the left, the cloth on the right, the stage in the middle with one, two or four views (the section, the side and front views, the loom in 3D and its five units), and time under it: what just happened, the six moments as a stepper, and the controls; on a phone, the stage on top and a sheet with the rest.
+- The main app at `index.html`: the top bar (Learn and Weave, Share, the language, About), the cards on the left, the cloth on the right, the stage in the middle with one, two or four views (the section, the side and front views, the loom in 3D and its five units), what just happened under it, and the player along the whole bottom: the six moments as a stepper over the controls, centred; on a phone, the stage on top and a sheet with the rest.
 - The machine's settings beside what they change: the head and tie-up over the cards, the colours over the cloth, the chain's loop where it ends.
 - The panels resized by their edges and closed to a rail; the keyboard (Space, ← →, 1–4, F, Esc); the machine's sounds, placeholders until the recorded ones; About; Share's link keeps the moment within the pick.
 - The frame, the 3D parts' names and the units' ideas in all ten languages; the chain draws a wide card whole.

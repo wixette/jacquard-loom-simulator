@@ -70,24 +70,25 @@ The app opens on **Weave**, already weaving a pretty pattern, with a small banne
 │ ──────────   │       (one, two or four views: 2D or 3D)              │                 │
 │ the chain    │                                                       │                 │
 │ card 1 ●○●○  │                                                       │ ───────────     │
-│ card 2 ○●○●  │                                                       │ the thread      │
-│ …  (scrolls) │ [Following hook 13 ×]                                 │ followed,       │
-│              │───────────────────────────────────────────────────────│ in words        │
-│              │ Step: shed open — hooks 4 and 5 have lifted their     │                 │
+│ card 2 ○●○●  │ [Following hook 13 ×]                                 │ the thread      │
+│ …  (scrolls) │───────────────────────────────────────────────────────│ followed,       │
+│              │ Step: shed open — hooks 4 and 5 have lifted their     │ in words        │
 │              │ warp ends.                                 caption    │                 │
-│              │───────────────────────────────────────────────────────│                 │
-│              │ ●━━━━◉────○────○────○────○        moments (stepper)   │                 │
-│              │ Pick 5 (card 5)   ↺ |◂ (▶) ▸|   speed ─○──  ♪         │                 │
-└──────────────┴───────────────────────────────────────────────────────┴─────────────────┘
+├──────────────┴───────────────────────────────────────────────────────┴─────────────────┤
+│                     ●━━━━◉────○────○────○────○        moments (stepper)                 │
+│ Pick 5 (card 5) · 2 rows       ↺  |◂  (▶)  ▸|                      speed ─○──  ♪        │
+└────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
 - **Sizes.** Left 300–360 px, right 320–400 px, both resizable by dragging their edge or by the keyboard (the edge is a focusable window splitter, as the sibling's U17), and collapsible to a thin rail (a click brings them back, and dragging well past the smallest size collapses it); the stage takes the rest. Sizes are remembered per device (browser storage), and every view redraws to its new size.
 - **The stage.** One view, or two side by side where the stage is at least 1040 px wide (section and 3D, from about 1700 px of window). Each view names itself with a menu chip in its own top-left corner (`Section ▾`, `Loom in 3D ▾`), its own tools beside it (the section's zoom and cross-row); the arrangement, single, two side by side (any two: the section with the 3D selector is the classic pair) or four (CAD's quad view: section, front, side, 3D), floats at the stage's top right. The followed thread is a chip at the stage's bottom left (× to stop following), next to what it highlights. A double-click on any view makes it fill the stage; again to go back.
-- **Time sits under the stage,** not along the window's bottom, so the controls are centred under what they move and the panels run the full height. From the top:
-  - the **caption**, the status line: what the loom just did, or why it refused, in two lines at most (the full text in its tooltip), right under the drawing it explains;
-  - the **six moments of a pick as a stepper**, a state and not buttons: dots on a track, the moments passed filled, the one reached ringed and named in bold, no fill or border on the names (`aria-current="step"`);
-  - the **controls**, centred: reset (as large as the steps, and leading them, as stop does on a player), step back, play (the largest, 56 px, filled), step; where the loom is (pick, card, rows) at the left; the speed (6 to 60 picks a minute, 12 to start) and the sound switch at the right.
-  - No chain-as-timeline strip: the chain on the left and the stepper already show where the loom is. (Earlier drafts had a full-width band along the bottom, with the strip; it put the core controls in the window's corner, far from the machine, and its moments looked like buttons.)
+- **Time:** the caption sits under the stage it explains; the player (the moments and the controls) runs along the window's whole bottom, under the cards and the cloth too, since all three move with it: the current card in the chain, the machine, the rows of the cloth. A control's container shows what it drives; inside the centre column the player looked as though it ran the stage alone, and the window's bottom ended three ways (an empty panel, three bands, a hint). From the top:
+  - the **caption**, the status line: what the loom just did, or why it refused, in two lines at most (the full text in its tooltip), right under the drawing it explains, at a width a sentence reads well at (across a 1920 px window it would run to some 200 characters);
+  - the **player**, the full width, its two rows one group centred on the window (not on the stage, so it does not move when a panel is resized or closed):
+    - the **six moments of a pick as a stepper**, a state and not buttons: dots on a track, the moments passed filled, the one reached ringed and named in bold, no fill or border on the names (`aria-current="step"`); stacked over the controls, as stepping moves along the dots;
+    - the **controls**: reset (as large as the steps, and leading them, as stop does on a player), step back, play (the largest, 56 px, filled), step; where the loom is (pick, card, rows) at the window's left; the speed (6 to 60 picks a minute, 12 to start) and the sound switch at its right.
+  - No chain-as-timeline strip: the chain on the left and the stepper already show where the loom is. (The first draft had a full-width band with the strip and the moments as buttons, with the controls at its left, in the window's corner; the second put time under the stage, inside the centre column; this third keeps the second's stepper and controls, centred in a band across the window.)
+- **A floating player** over the stage, as the sibling's, was weighed and left: the sibling's stage is one canvas, the thing its bar drives; here the bar would cover the section's lingoes and straddle two views, and read again as the stage's alone. On a phone it could not float at all.
 - **The top bar** holds what belongs to the app, not to the machine: the logo and title, the workspaces (Learn carrying the tutorial's step while it is on), Share (copy link, save picture, print cards), the language menu (文A) and About (ⓘ, the app's one dialog: version, credits, licences, the source).
 - **The machine's settings sit with what they change.** The head and its tie-up are a chip over the cards that shows their values (`⚙ 16 hooks (2 cross-rows) · Straight tie ▾`, a popover to change them), since a card has a hole for each hook; the warp and weft colours are a palette button in the Cloth panel's header (a popover, with Reset), next to Front/Back and 0/1. The chain's loop is in the cards' toolbar and, where the chain ends, a switch that says it ("End of the chain: open", "Laced back to card 1: a closed loop"), so what the chain does at its end can be changed where it is read.
 - **Medium screens (1024–1279 px):** the left panel starts collapsed to its rail when the stage would fall under 560 px wide; the inspector shares the right panel by tab, as above.

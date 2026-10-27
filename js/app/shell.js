@@ -1,7 +1,8 @@
 // The main app's frame (design/ui-layout.md): where each component goes, on a desktop and on a
 // phone. The components are the same everywhere (js/app/components/); only their slots change.
 // A desktop (1024 px wide or more) has the top bar, the program on the left, the stage in the
-// middle, the output on the right and time along the bottom; a phone has the stage on top, the
+// middle with its caption under it, the output on the right, and the player (the moments and the
+// controls) along the whole window's bottom, as it drives all three; a phone has the stage on top, the
 // transport under it and a bottom sheet with the rest; a phone turned on its side has the stage
 // on the left and the sheet beside it. The frame is built again when the screen changes kind or
 // the workspace changes; its own texts follow the language without a rebuild.
@@ -577,7 +578,11 @@ export function createShell(store, root) {
     return b;
   }
 
-  /** Time, under the stage: what the loom just did, then the moments and the loom's controls. */
+  /**
+   * Time: the caption (what the loom just did), which stays under the stage it explains, and the
+   * player (the moments and the loom's controls), which on a desktop runs along the window's
+   * bottom, under the cards and the cloth as well, since all three move with it.
+   */
   function time() {
     const caption = el("div", { class: "caption" });
     const player = el("div", { class: "player" });
@@ -680,11 +685,12 @@ export function createShell(store, root) {
     root.replaceChildren();
     edges = {};
     if (mode === "desktop") {
-      const centre = el("div", { class: "centre" }, [stage(), ...time()]);
+      const [caption, player] = time();
+      const centre = el("div", { class: "centre" }, [stage(), caption]);
       const [left, right] = [programPanel(), outputPanel()];
       const [edgeLeft, edgeRight] = [edge("left"), edge("right")];
       const work = el("div", { class: "work" }, [left, edgeLeft, centre, edgeRight, right]);
-      root.append(topbar(), work);
+      root.append(topbar(), work, player);
       // the left panel starts closed where the stage would be narrow (§4, medium screens)
       const narrow = window.innerWidth - PANEL.left.size - PANEL.right.size < STAGE_MIN;
       edges = {

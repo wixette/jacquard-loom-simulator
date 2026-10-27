@@ -91,6 +91,16 @@ async function frame() {
       const e = doc.querySelector(p);
       if (!e || area(e) === 0) bad.push(`${where}: no ${p}`);
     }
+    // on a desktop the player runs along the whole bottom, under the panels too, its controls
+    // centred on the window
+    const player = doc.querySelector(".app.desktop > .player");
+    const controls = doc.querySelector(".app.desktop > .player .controls");
+    if (mode === "desktop" && (!player || !controls)) bad.push(`${where}: the player is not along the window's bottom`);
+    else if (player && controls) {
+      const [p, c] = [player.getBoundingClientRect(), controls.getBoundingClientRect()];
+      if (p.width < w - 1) bad.push(`${where}: the player is ${Math.round(p.width)} px wide`);
+      if (Math.abs((c.left + c.right) / 2 - w / 2) > 2) bad.push(`${where}: the controls are not centred on the window`);
+    }
     const root = doc.documentElement;
     if (root.scrollWidth > w + 1 || root.scrollHeight > h + 1) bad.push(`${where}: the page scrolls (${root.scrollWidth} × ${root.scrollHeight})`);
     for (const e of doc.querySelectorAll(".app *")) {
@@ -102,7 +112,7 @@ async function frame() {
     }
     f.remove();
   }
-  return result("S-1", "At every size the frame has its parts, and the page neither scrolls nor overflows sideways", bad.length === 0, bad.slice(0, 4).join("; ") || `${SIZES.length} sizes: 1366 and 1920 desktops, a tablet, a phone upright and on its side`);
+  return result("S-1", "At every size the frame has its parts, and the page neither scrolls nor overflows sideways", bad.length === 0, bad.slice(0, 4).join("; ") || `${SIZES.length} sizes: 1366 and 1920 desktops (the player along the whole bottom, its controls centred), a tablet, a phone upright and on its side`);
 }
 
 /**
