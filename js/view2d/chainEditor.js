@@ -15,6 +15,8 @@ import { realCard } from "./cardLayout.js";
  * @property {(card: number, hook: number) => void} onToggle
  * @property {(card: number) => void} onSelect
  * @property {(hook: number) => void} onFollow
+ * @property {(loop: boolean) => void} [onLace] given, the chain's end is a switch that laces it
+ *   into a loop or opens it, where the end is shown
  */
 
 const NS = "http://www.w3.org/2000/svg";
@@ -25,6 +27,11 @@ const NS = "http://www.w3.org/2000/svg";
  * @returns {(e: Event) => void}
  */
 const clicks = (events) => (e) => {
+  const lace = /** @type {Element} */ (e.target).closest("[data-lace]");
+  if (lace instanceof HTMLElement) {
+    events.onLace?.(lace.dataset.lace !== "1");
+    return;
+  }
   const head = /** @type {Element} */ (e.target).closest("[data-head]");
   if (head instanceof HTMLElement) {
     events.onFollow(Number(head.dataset.head));
@@ -47,6 +54,7 @@ export class ChainList {
     this.list.className = "chain";
     host.appendChild(this.list);
     this.key = "";
+    this.laces = events.onLace !== undefined;
     this.list.addEventListener("click", clicks(events));
   }
 
@@ -87,6 +95,10 @@ export class ChainList {
       rows.push(`<div class="${cls}" data-card="${i}"><span class="num">${i + 1}</span><span class="strip">${holes}</span><span class="tag">${tag}</span></div>`);
     });
     if (deck.cards.length === 0) rows.push(`<p class="empty">${t("chain.empty")}</p>`);
+    else if (this.laces)
+      rows.push(
+        `<button type="button" class="chain-end lace" role="switch" aria-checked="${deck.loop}" data-lace="${deck.loop ? 1 : 0}" title="${t("cards.loop")}"><span class="switch" aria-hidden="true"></span><span>${t(deck.loop ? "chain.lace.on" : "chain.lace.off")}</span></button>`,
+      );
     else rows.push(`<p class="chain-end">${t(deck.loop ? "chain.loop" : "chain.open")}</p>`);
     this.list.innerHTML = rows.join("");
   }

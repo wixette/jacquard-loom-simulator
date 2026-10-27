@@ -121,7 +121,7 @@ async function lifecycle(page) {
  * @param {Locale} locale
  * @returns {Set<string>}
  */
-function englishOnly(locale) {
+export function englishOnly(locale) {
   const words = (/** @type {string} */ s) => s.replace(/\{\w+\}/g, " ").match(/[A-Za-z]{4,}/g) ?? [];
   const theirs = new Set(Object.values(MESSAGES[locale]).flatMap(words).map((w) => w.toLowerCase()));
   return new Set(Object.values(MESSAGES.en).flatMap(words).filter((w) => !theirs.has(w.toLowerCase())));

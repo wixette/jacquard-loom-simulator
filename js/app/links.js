@@ -1,6 +1,6 @@
-// Opening the app from a link (design/links.md): every field the link holds, put into the store
-// at once, on the loom of the workspace it names; or, if it cannot be read, nothing of it, and
-// the reason in the status line.
+// The app's links (design/links.md): what the app is showing, as a link (Share's), and opening
+// the app from one: every field the link holds, put into the store at once, on the loom of the
+// workspace it names; or, if it cannot be read, nothing of it, and the reason in the status line.
 
 import { isLocale } from "../l10n/l10n.js";
 import { decodeLink } from "../sim/link.js";
@@ -9,6 +9,20 @@ import { tieLabel } from "../sim/tieup.js";
 import { chooseLanguage } from "./language.js";
 import * as act from "./looms.js";
 /** @import { AppStore } from "./looms.js" */
+/** @import { AppLink } from "../sim/link.js" */
+
+/**
+ * What the app is showing, as the fields of a link: the current loom (its cards, tie-up, pick
+ * and moment, the thread followed, its colours and face) and the stage's views.
+ * @param {AppStore} store
+ * @returns {Partial<AppLink>}
+ */
+export function linkOf(store) {
+  const s = store.state.looms[store.state.current];
+  const { loom } = s;
+  const stop = POSITIONS.findIndex((p) => Math.abs(p - loom.phi) < 1e-9);
+  return { deck: loom.deck, tie: loom.tie, pick: loom.pick, stop: Math.max(0, stop), follow: s.follow, crossRow: s.crossRow, warp: s.warp, weft: s.weft, face: s.face, bits: s.bits, sectionView: store.state.sectionView, views: store.state.views };
+}
 
 /**
  * @param {AppStore} store

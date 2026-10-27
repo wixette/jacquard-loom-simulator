@@ -9,7 +9,7 @@ import { traceOf } from "../../sim/trace.js";
 import { el, icon, setTip } from "../../ui/components.js";
 import { BenchCard, ChainList } from "../../view2d/chainEditor.js";
 import { ClothView } from "../../view2d/clothView.js";
-import { follow, followCloth, followHook, pause, play, punch, reset, select, setSpeed, step, stepBack } from "../looms.js";
+import { follow, followCloth, followHook, lace, pause, play, punch, reset, select, setSpeed, step, stepBack } from "../looms.js";
 import { loomOf, shown } from "./component.js";
 /** @import { AppStore, LoomId } from "../looms.js" */
 /** @import { Component } from "./component.js" */
@@ -74,6 +74,7 @@ export function chainPanel(store, o = {}) {
         onToggle: (card, hook) => punch(store, card, hook, o.loom),
         onSelect: (card) => select(store, card, o.loom),
         onFollow: (hook) => followHook(store, hook, o.loom),
+        onLace: (loop) => lace(store, loop, o.loom),
       });
     },
     watch(s) {
@@ -177,7 +178,7 @@ export function transportPanel(store, o = {}) {
         el("div", { class: "transport-row" }, [
           where,
           el("div", { class: "controls" }, [
-            button("reset", "restart_alt", "", () => {
+            button("reset", "restart_alt", "tonal", () => {
               pause(store, o.loom);
               reset(store, o.loom);
             }),

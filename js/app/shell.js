@@ -9,6 +9,7 @@
 import { LOCALE_NAMES, LOCALE_SHORT, LOCALES, say as words, t, tn } from "../l10n/l10n.js";
 import { HOOK_COUNTS, PRESETS } from "../sim/deck.js";
 import { encodeLink, LONG_LINK, STAGE_VIEWS } from "../sim/link.js";
+import { linkOf } from "./links.js";
 import { tieLabel } from "../sim/tieup.js";
 import { printDocument } from "../teach/printCards.js";
 import { applyIcons, el, icon, setTip, showMenu, tabs } from "../ui/components.js";
@@ -103,6 +104,21 @@ export function createShell(store, root) {
     unwatch.push(store.watch(select, run));
     run();
   };
+  /**
+   * Make the panes anew: the old ones' components and watchers are taken away first, and the new
+   * ones' are returned, to be taken away in their turn.
+   * @param {{ placed: Placed[]; unwatch: (() => void)[] }} old
+   * @param {() => HTMLElement[]} make
+   */
+  const remake = (old, make) => {
+    for (const p of old.placed) p.unmount();
+    for (const u of old.unwatch) u();
+    placed = placed.filter((x) => !old.placed.includes(x));
+    unwatch = unwatch.filter((x) => !old.unwatch.includes(x));
+    const [p0, u0] = [placed.length, unwatch.length];
+    const nodes = make();
+    return { nodes, mine: { placed: placed.slice(p0), unwatch: unwatch.slice(u0) } };
+  };
   const ls = () => store.state.looms[store.state.current];
   const sound = new Sound(store);
   /** The side panels' edges, while the desktop frame is up. @type {Partial<Record<"left" | "right", Edge>>} */
@@ -166,9 +182,7 @@ export function createShell(store, root) {
   }
 
   async function copyLink() {
-    const s = ls();
-    const { loom } = s;
-    const fragment = await encodeLink({ deck: loom.deck, tie: loom.tie, pick: loom.pick, follow: s.follow, crossRow: s.crossRow, warp: s.warp, weft: s.weft, face: s.face, bits: s.bits, sectionView: store.state.sectionView, views: store.state.views });
+    const fragment = await encodeLink(linkOf(store));
     history.replaceState(null, "", `#${fragment}`);
     const url = location.href;
     const done = url.length > LONG_LINK ? { key: "status.linkLong", params: { n: url.length } } : { key: "status.linkCopied" };
@@ -264,7 +278,7 @@ export function createShell(store, root) {
   }
 
   function topbar() {
-    const list = el("nav", { class: "workspaces tabs", role: "tablist", "aria-label": t("ws.name") });
+    const list = el("nav", { class: "workspaces tabs", role: "tablist", "data-l10n-name": "ws.name" });
     for (const w of WORKSPACES) {
       const tab = label("button", `ws.${w}`, { type: "button", role: "tab", class: "tab", id: `ws-${w}` });
       list.appendChild(tab);
@@ -283,8 +297,8 @@ export function createShell(store, root) {
   }
 
   function appbar() {
-    const ws = el("select", { class: "ws", "aria-label": t("ws.name") });
-    for (const w of WORKSPACES) ws.add(new Option(t(`ws.${w}`), w));
+    const ws = el("select", { class: "ws", "data-l10n-name": "ws.name" });
+    for (const w of WORKSPACES) ws.appendChild(label("option", `ws.${w}`, { value: w }));
     ws.value = store.state.workspace;
     ws.addEventListener("change", () => act.setWorkspace(store, /** @type {Workspace} */ (ws.value)));
     const menu = iconButton("menu", "bar.menu", () =>
@@ -414,7 +428,7 @@ export function createShell(store, root) {
    */
   function pane(i, v) {
     const host = el("div", { class: "pane-host" });
-    const chip = el("button", { type: "button", class: "chip view-chip", "aria-haspopup": "menu" }, [el("span", { text: t(`view.${v}`) }), icon("keyboard_arrow_down")]);
+    const chip = el("button", { type: "button", class: "chip view-chip", "aria-haspopup": "menu" }, [label("span", `view.${v}`), icon("keyboard_arrow_down")]);
     chip.addEventListener("click", () =>
       showMenu(
         chip,
@@ -435,10 +449,9 @@ export function createShell(store, root) {
     /** @type {((unit: "machine" | UnitId) => void) | undefined} */
     let onMode;
     if (v in UNIT_VIEWS) {
-      const note = unitNote();
+      const note = unitNote(/** @type {keyof typeof UNIT_VIEWS} */ (v));
       tools.append(note.element);
       onMode = note.show;
-      note.show(UNIT_VIEWS[/** @type {keyof typeof UNIT_VIEWS} */ (v)].unit);
     }
     put(viewComponent(store, v, onMode), host);
     return el("div", { class: "pane" }, [host, tools]);
@@ -446,19 +459,27 @@ export function createShell(store, root) {
 
   /**
    * What a 3D view shows, and the idea it teaches: a chip that opens a short card.
+   * @param {keyof typeof UNIT_VIEWS} v the view
    */
-  function unitNote() {
+  function unitNote(v) {
     const title = el("h3");
     const idea = el("p");
     const summary = el("summary", { class: "chip" }, [icon("info")]);
     summary.dataset.l10nTip = "unit.note";
     summary.dataset.l10nName = "unit.note";
     const element = el("details", { class: "unit-note" }, [summary, el("div", { class: "unit-card" }, [title, idea])]);
+    /** @type {"machine" | UnitId} */
+    let shown = UNIT_VIEWS[v].unit;
+    const write = () => {
+      const code = Object.values(UNIT_VIEWS).find((u) => u.unit === shown)?.code;
+      title.textContent = code ? `${code} · ${t(`unit.${shown}`)}` : t(`unit.${shown}`);
+      idea.textContent = t(`unit.${shown}.idea`);
+    };
+    follow((s) => [s.locale], write);
     /** @param {"machine" | UnitId} unit */
     const show = (unit) => {
-      const code = Object.values(UNIT_VIEWS).find((u) => u.unit === unit)?.code;
-      title.textContent = code ? `${code} · ${t(`unit.${unit}`)}` : t(`unit.${unit}`);
-      idea.textContent = t(`unit.${unit}.idea`);
+      shown = unit;
+      write();
     };
     return { element, show };
   }
@@ -471,7 +492,7 @@ export function createShell(store, root) {
       b.addEventListener("click", () => act.setSectionView(store, z));
       zoom.appendChild(b);
     }
-    const cross = el("select", { "aria-label": t("section.name") });
+    const cross = el("select", { "data-l10n-name": "section.name" });
     cross.addEventListener("change", () => act.setCrossRow(store, Number(cross.value)));
     const crossChip = el("label", { class: "chip" }, [cross]);
     follow((s) => [s.sectionView, s.looms[s.current].crossRow, s.looms[s.current].rev, s.locale], () => {
@@ -487,7 +508,7 @@ export function createShell(store, root) {
   /** The stage, split as the store says, with the arrangement and the thread followed. */
   function stage() {
     const st = el("main", { class: "stage" });
-    const arrangement = el("div", { class: "chip-row", role: "group", "aria-label": t("stage.views") });
+    const arrangement = el("div", { class: "chip-row", role: "group", "data-l10n-name": "stage.views" });
     for (const [n, name, tip] of /** @type {const} */ ([[1, "crop_square", "stage.one"], [2, "view_column_2", "stage.two"], [4, "grid_view", "stage.four"]])) {
       const b = el("button", { type: "button", class: "chip" }, [icon(name)]);
       b.dataset.l10nTip = tip;
@@ -498,17 +519,12 @@ export function createShell(store, root) {
     const chipFollow = el("button", { type: "button", class: "chip follow-chip" });
     chipFollow.addEventListener("click", () => act.follow(store, null));
     const panes = el("div", { class: "panes", style: "display: contents" });
-    /** @type {Placed[]} */
-    let mine = [];
+    let mine = { placed: /** @type {Placed[]} */ ([]), unwatch: /** @type {(() => void)[]} */ ([]) };
     follow((s) => [s.views], () => {
-      for (const p of mine) {
-        p.unmount();
-        placed = placed.filter((x) => x !== p);
-      }
-      const before = placed.length;
       st.dataset.n = String(store.state.views.length);
-      panes.replaceChildren(...store.state.views.map((v, i) => pane(i, v)));
-      mine = placed.slice(before);
+      const made = remake(mine, () => store.state.views.map((v, i) => pane(i, v)));
+      panes.replaceChildren(...made.nodes);
+      mine = made.mine;
       for (const b of arrangement.children) b.setAttribute("aria-pressed", String(/** @type {HTMLElement} */ (b).dataset.n === String(store.state.views.length)));
       relabel();
     });
@@ -524,25 +540,21 @@ export function createShell(store, root) {
   /** A phone's stage: one view at a time, chosen by chips. */
   function smallStage() {
     const st = el("main", { class: "stage" });
-    const chips = el("div", { class: "view-chips", role: "group", "aria-label": t("stage.views") });
+    const chips = el("div", { class: "view-chips", role: "group", "data-l10n-name": "stage.views" });
     for (const v of STAGE_VIEWS.filter((x) => !x.startsWith("u"))) {
       const b = label("button", `view.${v}`, { type: "button", class: "chip" });
       b.addEventListener("click", () => act.setViews(store, [v]));
       chips.appendChild(b);
     }
     const one = el("div", { class: "panes", style: "display: contents" });
-    /** @type {Placed[]} */
-    let mine = [];
+    let mine = { placed: /** @type {Placed[]} */ ([]), unwatch: /** @type {(() => void)[]} */ ([]) };
     follow((s) => [s.views[0]], () => {
-      for (const p of mine) {
-        p.unmount();
-        placed = placed.filter((x) => x !== p);
-      }
-      const before = placed.length;
       const v = store.state.views[0];
-      one.replaceChildren(pane(0, v));
-      mine = placed.slice(before);
+      const made = remake(mine, () => [pane(0, v)]);
+      one.replaceChildren(...made.nodes);
+      mine = made.mine;
       for (const b of chips.children) b.setAttribute("aria-pressed", String(/** @type {HTMLElement} */ (b).dataset.l10n === `view.${v}`));
+      relabel();
     });
     st.append(chips, one);
     return st;
@@ -695,5 +707,5 @@ export function createShell(store, root) {
   });
   store.watch((s) => [s.workspace], build);
   store.watch((s) => [s.locale], relabel);
-  return { build };
+  return { build, sound };
 }
