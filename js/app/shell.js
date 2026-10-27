@@ -14,6 +14,8 @@ import { tieLabel } from "../sim/tieup.js";
 import { printDocument } from "../teach/printCards.js";
 import { applyIcons, el, icon, setTip, showMenu, tabs } from "../ui/components.js";
 import { wireEdge } from "../ui/edge.js";
+import { wireKeys } from "./keys.js";
+import { Sound } from "./sound.js";
 import { place } from "./components/component.js";
 import { benchPanel, chainPanel, clothPanel, statusPanel, tracePanel, transportPanel } from "./components/panels.js";
 import { frontView, sectionView, sideView, unitsView } from "./components/views.js";
@@ -101,6 +103,7 @@ export function createShell(store, root) {
     run();
   };
   const ls = () => store.state.looms[store.state.current];
+  const sound = new Sound(store);
   /** The side panels' edges, while the desktop frame is up. @type {Partial<Record<"left" | "right", Edge>>} */
   let edges = {};
 
@@ -530,12 +533,29 @@ export function createShell(store, root) {
     return st;
   }
 
+  /** The machine's sound, on or off (remembered on this device). */
+  function soundSwitch() {
+    const b = el("button", { type: "button", class: "btn icon-only sound" });
+    const show = () => {
+      b.replaceChildren(icon(sound.muted ? "volume_off" : "volume_up"));
+      b.setAttribute("aria-pressed", String(!sound.muted));
+      b.dataset.l10nTip = sound.muted ? "sound.off" : "sound.on";
+      setTip(b, t(b.dataset.l10nTip));
+    };
+    b.addEventListener("click", () => {
+      sound.mute(!sound.muted);
+      show();
+    });
+    show();
+    return b;
+  }
+
   /** Time, under the stage: what the loom just did, then the moments and the loom's controls. */
   function time() {
     const caption = el("div", { class: "caption" });
     const player = el("div", { class: "player" });
     put(statusPanel(store), caption);
-    put(transportPanel(store), player);
+    put(transportPanel(store, { tools: [soundSwitch()] }), player);
     return [caption, player];
   }
 
@@ -611,6 +631,7 @@ export function createShell(store, root) {
   }
 
   build();
+  wireKeys(store);
   window.addEventListener("resize", () => {
     if (modeOf() !== mode) build();
   });

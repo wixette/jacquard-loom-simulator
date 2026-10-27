@@ -25,6 +25,10 @@ const TYPES = {
   ".jpg": "image/jpeg",
   ".jpeg": "image/jpeg",
   ".glb": "model/gltf-binary",
+  ".woff2": "font/woff2",
+  ".mp3": "audio/mpeg",
+  ".ogg": "audio/ogg",
+  ".wav": "audio/wav",
   ".md": "text/markdown; charset=utf-8",
   ".txt": "text/plain; charset=utf-8",
 };

@@ -134,9 +134,9 @@ export function benchPanel(store, o = {}) {
 /**
  * Turning the loom: reset, step back, play or pause, step, the play button the largest; the
  * speed; the six moments of a pick as a stepper (a state, not buttons), the one reached marked;
- * and where the loom is.
+ * and where the loom is; and any tools the frame adds after the speed (the sound switch).
  * @param {AppStore} store
- * @param {PanelOptions} [o]
+ * @param {PanelOptions & { tools?: HTMLElement[] }} [o]
  * @returns {Component}
  */
 export function transportPanel(store, o = {}) {
@@ -185,7 +185,7 @@ export function transportPanel(store, o = {}) {
             button("play", "play_arrow", "filled play", () => play(store, o.loom)),
             button("fwd", "skip_next", "tonal", () => step(store, o.loom)),
           ]),
-          el("label", { class: "speed" }, [speedOut, speed]),
+          el("div", { class: "after" }, [el("label", { class: "speed" }, [speedOut, speed]), ...(o.tools ?? [])]),
         ]),
       ]);
       h.appendChild(box);

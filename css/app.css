@@ -124,8 +124,9 @@ body.resizing .stage { pointer-events: none; }
 .under-stage .player .transport { padding: 8px 12px 6px; gap: 6px; }
 /* a phone's stepper is dots only: the caption above it names the moment reached */
 .under-stage .moments .name { display: none; }
-.under-stage .transport-row { grid-template-columns: auto minmax(0, 1fr); gap: 10px; }
+.under-stage .transport-row { grid-template-columns: auto minmax(0, 1fr) auto; gap: 8px; }
 .under-stage .transport .speed { display: none; }
+.under-stage .transport .after { width: auto; }
 .under-stage .controls { order: -1; gap: 8px; }
 .under-stage .controls .btn.icon-only { width: 42px; height: 42px; }
 .under-stage .controls .btn.play { width: 50px; height: 50px; }
