@@ -50,6 +50,9 @@ function shade(hex, k) {
 
 /** At most this many rows are drawn, the newest. */
 const MAX_ROWS = 400;
+/** The largest square, in CSS pixels: in the panel, and as a view on the stage. */
+const CELL = 22;
+const LARGE_CELL = 33;
 
 /** @type {number | null} */
 let scrollbar = null;
@@ -110,9 +113,9 @@ export class ClothView {
 
   /**
    * @param {Snapshot} snap
-   * @param {{ face: "front" | "back", warp: string, weft: string, bits: boolean, trace: Trace | null, floats?: Float[], fit?: boolean }} o
-   *   floats: the loose threads to mark (on the front's ends and picks); fit: the whole cloth in
-   *   the host's height as well as its width, with larger squares (the cloth as a view, large)
+   * @param {{ face: "front" | "back", warp: string, weft: string, bits: boolean, trace: Trace | null, floats?: Float[], large?: boolean }} o
+   *   floats: the loose threads to mark (on the front's ends and picks); large: the cloth as a
+   *   view on the stage, its squares up to 1.5 times the panel's
    */
   render(snap, o) {
     // The newest rows only, when the cloth gets long (a looped chain can weave for ever).
@@ -126,10 +129,9 @@ export class ClothView {
     // again at every redraw, so it blinked as it grew past its box.
     const width = Math.max(200, steadyWidth(this.host) - 4);
     const across = Math.floor((width - this.left - 6) / ends);
-    const hs = getComputedStyle(this.host);
-    const inside = this.host.clientHeight - parseFloat(hs.paddingTop) - parseFloat(hs.paddingBottom);
-    const down = o.fit ? Math.floor((inside - this.top - 22) / Math.max(cells.length, 1)) : Infinity;
-    const cell = Math.max(3, Math.min(o.fit ? 40 : 22, across, down));
+    // The squares are sized by the width only, so they keep their size as the cloth grows, and
+    // rows past the host's height scroll, in the panel and on the stage alike.
+    const cell = Math.max(3, Math.min(o.large ? LARGE_CELL : CELL, across));
     this.cell = cell;
     const rows = Math.max(cells.length, 1);
     const w = this.left + ends * cell + 6;

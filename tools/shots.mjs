@@ -52,6 +52,7 @@ const README_SHOTS = [
 
 const SHOTS = [
   ...README_SHOTS,
+  { name: "create-tall", path: "index.html#v=2&w=create", ready: APP_READY, setup: "await sleep(600); const z = document.querySelector('.pic-size'); z.value = '32'; z.dispatchEvent(new Event('change')); await sleep(300); const p = document.querySelectorAll('.pic-reading select')[0]; p.value = '3'; p.dispatchEvent(new Event('change')); await sleep(800);", size: [1366, 768] },
   { name: "app-1366", path: "index.html#v=2", ready: APP_READY, setup: APP, size: [1366, 768] },
   { name: "app-1280", path: "index.html#v=2", ready: APP_READY, setup: APP, size: [1280, 800] },
   { name: "app-1600", path: "index.html#v=2", ready: APP_READY, setup: `${APP} await sleep(1500);`, size: [1600, 1000] },

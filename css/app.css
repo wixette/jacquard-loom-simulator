@@ -320,7 +320,9 @@ dialog::backdrop { background: var(--md-scrim); }
 .weave-it-row { flex: none; padding: 10px 12px; border-bottom: 1px solid var(--md-outline-variant); }
 .weave-it-row .btn { width: 100%; justify-content: center; gap: 6px; }
 /* the cloth as a view on the stage: centred, as large as the pane holds it */
-.cloth-box.large { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; padding: 56px 12px 12px; overflow: auto; }
+/* centred by its margins, not by flex alignment, so a cloth taller than its pane scrolls to its top (its newest rows) */
+.cloth-box.large { width: 100%; height: 100%; display: flex; padding: 56px 12px 12px; overflow: auto; }
+.cloth-box.large > canvas { margin: auto; flex: none; }
 
 /* ---- Play: the games (js/app/components/games.js) ------------------------------------------- */
 .games-slot { flex: 1 1 auto; min-height: 0; overflow-y: auto; }

@@ -38,3 +38,7 @@
 4. **An image is read in the browser and never leaves it:** reduced to 256 pixels, then thresholded at the slider's level into the paper's squares.
 5. **The cloth view is a 2D view like the others** (`cloth` in the view menu), the default in Create and Play; each workspace keeps its own views (`viewsBy`).
 6. **The link format grows, it does not change** (design/links.md): Create's fields are new names, read only with `w=create`.
+
+## After the review (2026-10-28)
+
+7. **The cloth view sizes its squares as the side panel's cloth does:** by the width only, so they keep their size as rows are woven, and rows past the pane's height scroll (newest on top, where the scroll starts). Its squares are at most 33 px, 1.5 times the panel's 22, which leaves room for the red float marks; it first fitted the whole cloth in its pane, so its squares shrank as the cloth grew and started much larger than the panel's.

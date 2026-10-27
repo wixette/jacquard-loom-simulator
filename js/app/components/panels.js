@@ -16,7 +16,7 @@ import { loomOf, shown } from "./component.js";
 /** @import { AppStore, LoomId } from "../looms.js" */
 /** @import { Component } from "./component.js" */
 
-/** @typedef {{ loom?: LoomId; large?: boolean }} PanelOptions the loom it shows, if not the current one; large: a view on the stage, fitting it */
+/** @typedef {{ loom?: LoomId; large?: boolean }} PanelOptions the loom it shows, if not the current one; large: a view on the stage, its squares larger */
 
 /**
  * The woven cloth, first pick at the bottom; a click on a cell follows its thread.
@@ -50,7 +50,7 @@ export function clothPanel(store, o = {}) {
       // a picture's cloth shows its loose threads (Create, and the tutorial's picture steps)
       const id = o.loom ?? s.current;
       const marks = id === "create" || (id === "tutorial" && s.workspace === "learn" && !!STEPS[s.learn.step].picture);
-      view.render(snap, { face: ls.face, warp: ls.warp, weft: ls.weft, bits: ls.bits, trace: ls.follow ? traceOf(snap, ls.follow) : null, floats: marks ? findFloats(snap.cloth).floats : undefined, fit: o.large });
+      view.render(snap, { face: ls.face, warp: ls.warp, weft: ls.weft, bits: ls.bits, trace: ls.follow ? traceOf(snap, ls.follow) : null, floats: marks ? findFloats(snap.cloth).floats : undefined, large: o.large });
     },
     unmount() {
       box.remove();
