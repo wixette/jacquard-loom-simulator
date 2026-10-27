@@ -157,6 +157,19 @@ async function settings({ store }) {
     warp.value = "#336699";
     warp.dispatchEvent(new Event("input"));
     if (ls().warp !== "#336699") bad.push("the warp colour does not change the cloth");
+    await frames();
+    // the button shows the pair itself, warp in front; a ready-made pair sets both; swap swaps
+    const front = () => palette?.querySelector(".pair-swatch .warp")?.getAttribute("fill");
+    if (front() !== "#336699") bad.push(`the colours button shows ${front()}, not the warp`);
+    const pair = /** @type {HTMLElement | null} */ ($('.colours-pop .pair[data-pair="madder"]'));
+    pair?.click();
+    if (ls().warp !== "#9b2d30" || ls().weft !== "#e8c16a") bad.push("a ready-made pair does not set both colours");
+    await frames();
+    if (pair?.getAttribute("aria-pressed") !== "true") bad.push("the pair chosen is not marked");
+    /** @type {HTMLElement | null} */ ($(".colours-pop .swap"))?.click();
+    if (ls().warp !== "#e8c16a" || ls().weft !== "#9b2d30") bad.push("swap does not swap the colours");
+    await frames();
+    if (/** @type {HTMLInputElement | null} */ (document.getElementById("colour-warp"))?.value !== "#e8c16a") bad.push("the panel does not follow the colours");
     palette?.click();
     act.setColours(store, { warp: act.WARP, weft: act.WEFT });
   }
@@ -172,7 +185,7 @@ async function settings({ store }) {
     if (ls().loom.deck.loop !== want) bad.push("the chain's end does not lace or open the chain");
     if ($(".chain-end.lace")?.getAttribute("aria-checked") !== String(want) || loopButton()?.getAttribute("aria-pressed") !== String(want)) bad.push("the chain's end and the loop button disagree");
   }
-  return result("S-2", "The machine's settings sit with what they change: the head and tie-up over the cards, the colours over the cloth, the loop at the chain's end; the top bar holds only the app's own", bad.length === 0, bad.slice(0, 4).join("; ") || "top bar: Share, language, About; head 16 → 32 → 16 from its chip; warp from the palette; the chain laced and opened from its end");
+  return result("S-2", "The machine's settings sit with what they change: the head and tie-up over the cards, the colours over the cloth, the loop at the chain's end; the top bar holds only the app's own", bad.length === 0, bad.slice(0, 4).join("; ") || "top bar: Share, language, About; head 16 → 32 → 16 from its chip; warp, a pair and swap from the colours button, which shows them; the chain laced and opened from its end");
 }
 
 /**

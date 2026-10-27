@@ -74,6 +74,37 @@ const STAGE_MIN = 560;
 const TWO_VIEWS = 1040;
 
 /**
+ * Ready-made pairs of warp and weft colours, by the key of their names (colours.pair.*): the
+ * opening pair first, then pairs of the dyes and silks of the period.
+ * @type {Record<string, [string, string]>}
+ */
+const COLOUR_PAIRS = {
+  start: ["#5b3f8c", "#efe3c2"],
+  indigo: ["#25386b", "#f2efe6"],
+  madder: ["#9b2d30", "#e8c16a"],
+  black: ["#1f1f22", "#f4f1ea"],
+  green: ["#2f5d46", "#e9dfb8"],
+  silver: ["#7d8794", "#2a3247"],
+};
+
+const SVGNS = "http://www.w3.org/2000/svg";
+
+/**
+ * The two colours as a paint program shows them: the warp's square in front, the weft's behind.
+ * @param {string} warp
+ * @param {string} weft
+ * @returns {SVGSVGElement}
+ */
+function pairSwatch(warp, weft) {
+  const svg = document.createElementNS(SVGNS, "svg");
+  svg.setAttribute("viewBox", "0 0 24 24");
+  svg.setAttribute("class", "icon pair-swatch");
+  svg.setAttribute("aria-hidden", "true");
+  svg.innerHTML = `<rect class="weft" x="9" y="9" width="12.5" height="12.5" rx="2.5" fill="${weft}"/><rect class="warp" x="2.5" y="2.5" width="12.5" height="12.5" rx="2.5" fill="${warp}"/>`;
+  return svg;
+}
+
+/**
  * A view's name on its chip: a 2D drawing by its short name, a 3D model as "3D · its name".
  * @param {StageView} v
  */
@@ -229,16 +260,18 @@ export function createShell(store, root) {
    * @param {string} name
    * @param {HTMLElement[]} rows
    */
-  function popover(anchor, id, name, rows) {
+  function popover(anchor, id, name, rows, cls = "") {
     const old = /** @type {HTMLElement | null} */ (document.querySelector(".popover"));
     old?.remove();
     if (old?.dataset.for === id) return;
-    const pop = el("div", { class: "popover", role: "dialog", "aria-label": name }, rows);
+    const pop = el("div", { class: `popover ${cls}`.trim(), role: "dialog", "aria-label": name }, rows);
     pop.dataset.for = id;
     document.body.appendChild(pop);
     const r = anchor.getBoundingClientRect();
     const b = pop.getBoundingClientRect();
-    pop.style.top = `${r.bottom + 6}px`;
+    // below the button if it fits, else above it, else as high as the window allows (it scrolls)
+    const below = r.bottom + 6 + b.height <= window.innerHeight - 8;
+    pop.style.top = `${below ? r.bottom + 6 : Math.max(8, r.top - 6 - b.height)}px`;
     pop.style.left = `${Math.max(8, Math.min(window.innerWidth - b.width - 8, r.left))}px`;
     const shut = () => {
       pop.remove();
@@ -274,18 +307,68 @@ export function createShell(store, root) {
 
   /** The cloth's colours, from the palette over the cloth. @param {HTMLElement} anchor */
   function coloursPopover(anchor) {
-    const s = ls();
-    const warp = el("input", { type: "color", id: "colour-warp", value: s.warp });
-    warp.addEventListener("input", () => act.setColours(store, { warp: warp.value }));
-    const weft = el("input", { type: "color", id: "colour-weft", value: s.weft });
-    weft.addEventListener("input", () => act.setColours(store, { weft: weft.value }));
+    /**
+     * One thread's row: its swatch (the colour picker itself), its name and what it is, and its
+     * value as hex.
+     * @param {"warp" | "weft"} thread
+     */
+    const row = (thread) => {
+      const input = el("input", { type: "color", id: `colour-${thread}`, class: "swatch-input", "aria-label": t(`setup.${thread}`) });
+      input.addEventListener("input", () => act.setColours(store, { [thread]: input.value }));
+      const hex = el("span", { class: "hex" });
+      const swatch = el("label", { class: "swatch", for: `colour-${thread}` }, [input]);
+      const line = el("div", { class: "colour-row" }, [
+        swatch,
+        el("div", { class: "colour-text" }, [el("label", { class: "colour-name", for: `colour-${thread}`, text: t(`setup.${thread}`) }), el("span", { class: "colour-hint", text: t(`colours.${thread}Hint`) })]),
+        hex,
+      ]);
+      return { line, input, swatch, hex, thread };
+    };
+    const rows = [row("warp"), row("weft")];
+    const swap = el("button", { type: "button", class: "btn icon-only swap" }, [icon("swap_vert")]);
+    setTip(swap, t("colours.swap"));
+    swap.addEventListener("click", () => act.setColours(store, { warp: ls().weft, weft: ls().warp }));
+    const pairs = el("div", { class: "colour-pairs", role: "group", "aria-label": t("colours.pairs") });
+    for (const [key, [warp, weft]] of Object.entries(COLOUR_PAIRS)) {
+      const b = el("button", { type: "button", class: "pair", "aria-label": t(`colours.pair.${key}`) }, [pairSwatch(warp, weft)]);
+      setTip(b, t(`colours.pair.${key}`));
+      b.dataset.pair = key;
+      b.addEventListener("click", () => act.setColours(store, { warp, weft }));
+      pairs.append(b);
+    }
     const again = el("button", { type: "button", class: "btn", text: t("colours.reset") });
-    again.addEventListener("click", () => {
-      act.setColours(store, { warp: act.WARP, weft: act.WEFT });
-      warp.value = act.WARP;
-      weft.value = act.WEFT;
+    again.addEventListener("click", () => act.setColours(store, { warp: act.WARP, weft: act.WEFT }));
+    popover(
+      anchor,
+      "colours",
+      t("colours.tip"),
+      [
+        el("h3", { class: "popover-title", text: t("colours.title") }),
+        el("div", { class: "colour-threads" }, [rows[0].line, swap, rows[1].line]),
+        el("p", { class: "popover-sub", text: t("colours.pairs") }),
+        pairs,
+        el("div", { class: "popover-foot" }, [again]),
+      ],
+      "colours-pop",
+    );
+    // the panel follows the colours however they change: a swatch, the swap, a pair, Reset
+    const show = () => {
+      const s = ls();
+      for (const r of rows) {
+        r.input.value = s[r.thread];
+        r.swatch.style.background = s[r.thread];
+        r.hex.textContent = s[r.thread].toUpperCase();
+      }
+      for (const b of /** @type {HTMLElement[]} */ ([...pairs.children])) {
+        const [w, f] = COLOUR_PAIRS[/** @type {string} */ (b.dataset.pair)];
+        b.setAttribute("aria-pressed", String(w === s.warp && f === s.weft));
+      }
+    };
+    show();
+    const unwatchColours = store.watch((st) => [st.looms[st.current].warp, st.looms[st.current].weft], () => {
+      if (!document.body.contains(pairs)) return unwatchColours();
+      show();
     });
-    popover(anchor, "colours", t("colours.tip"), [el("label", { for: "colour-warp", text: t("setup.warp") }), warp, el("label", { for: "colour-weft", text: t("setup.weft") }), weft, el("span"), again]);
   }
 
   /**
@@ -403,7 +486,11 @@ export function createShell(store, root) {
       back.setAttribute("aria-pressed", String(ls().face === "back"));
       bits.setAttribute("aria-pressed", String(ls().bits));
     });
-    const colours = controls(iconButton("palette", "colours.tip", () => (colours.classList.contains("locked") ? act.say(store, msg("learn.locked"), true) : coloursPopover(colours))), "colours");
+    // the colours themselves, warp over weft, as a paint program shows its two colours
+    const colours = controls(el("button", { type: "button", class: "btn icon-only colours-btn", "aria-haspopup": "dialog" }), "colours");
+    colours.dataset.l10nTip = "colours.tip";
+    colours.addEventListener("click", () => (colours.classList.contains("locked") ? act.say(store, msg("learn.locked"), true) : coloursPopover(colours)));
+    follow((s) => [s.looms[s.current].warp, s.looms[s.current].weft], () => colours.replaceChildren(pairSwatch(ls().warp, ls().weft)));
     colours.setAttribute("aria-haspopup", "dialog");
     return [el("div", { class: "seg", role: "group" }, [front, back]), bits, colours];
   }
