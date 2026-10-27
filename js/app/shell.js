@@ -553,8 +553,10 @@ export function createShell(store, root) {
 
   /** The section's tools: how close it looks, and which cross-row it cuts. */
   function sectionTools() {
-    // how close the section looks: a zoom on the same drawing, so a tool of the view, not a view
-    const zoom = el("div", { class: "chip-row zoom", role: "group", "data-l10n-name": "section.zoom", "data-l10n-tip": "section.zoom" }, [el("span", { class: "chip zoom-mark", "aria-hidden": "true" }, [icon("zoom_in")])]);
+    // how close the section looks: a zoom on the same drawing, so a tool of the view, not a view;
+    // a plain magnifier before the chips says so (a mark, not a control: it looks like none)
+    const zoom = el("div", { class: "chip-row", role: "group", "data-l10n-name": "section.zoom" });
+    const zoomTool = el("div", { class: "zoom-tool", "data-l10n-tip": "section.zoom" }, [el("span", { class: "zoom-mark", "aria-hidden": "true" }, [icon("zoom_in")]), zoom]);
     for (const z of /** @type {const} */ (["whole", "needles", "crooks"])) {
       const b = label("button", `section.${z}`, { type: "button", class: "chip" });
       b.addEventListener("click", () => act.setSectionView(store, z));
@@ -570,7 +572,7 @@ export function createShell(store, root) {
       cross.value = String(ls().crossRow);
       crossChip.hidden = n === 1;
     });
-    return [zoom, crossChip];
+    return [zoomTool, crossChip];
   }
 
   /** The stage, split as the store says, with the arrangement and the thread followed. */

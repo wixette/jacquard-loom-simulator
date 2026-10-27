@@ -250,8 +250,9 @@ dialog::backdrop { background: var(--md-scrim); }
 .unit-card h3 { margin: 0 0 6px; font-size: 14px; font-weight: 620; color: var(--md-on-surface); }
 .unit-card p { margin: 0; font-size: 13px; line-height: 1.5; color: var(--md-on-surface-variant); user-select: text; -webkit-user-select: text; }
 
-/* the section's zoom: a magnifier marks the group as a zoom (on a phone, where room is short, the
-   chips alone) */
-.chip-row.zoom .zoom-mark { padding: 0 6px; color: var(--md-on-surface-variant); cursor: default; }
-.chip-row.zoom .zoom-mark .icon { width: 18px; height: 18px; }
-.app:not(.desktop) .chip-row.zoom .zoom-mark { display: none; }
+/* the section's zoom: a plain magnifier, no control of its own, marks the chips beside it as a
+   zoom (on a phone, where room is short, the chips alone) */
+.zoom-tool { display: inline-flex; align-items: center; gap: 4px; }
+.zoom-mark { display: inline-flex; color: var(--md-on-surface-variant); pointer-events: none; }
+.zoom-mark .icon { width: 18px; height: 18px; }
+.app:not(.desktop) .zoom-mark { display: none; }
