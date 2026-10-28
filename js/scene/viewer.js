@@ -98,6 +98,11 @@ export class Viewer {
   lastRender = 0;
   /** @type {((q: Quality) => void) | null} */
   onQualityChange = null;
+  /**
+   * Called after each frame actually drawn (the camera or the scene changed), not every tick.
+   * @type {(() => void)[]}
+   */
+  onDraw = [];
   /** @readonly */
   scene = new THREE.Scene();
   /**
@@ -425,13 +430,15 @@ export class Viewer {
     this.renderedFrames++;
     // Auto quality: watch back-to-back frames (animation, orbiting); if they are slow,
     // drop shadows and the pixel ratio once.
-    if (this.qualityMode === "auto" && this.quality === "high" && this.lastRender > 0) {
+    // a gap of more than a quarter second is a pause (another tab, shaders compiling), not a slow frame
+    if (this.qualityMode === "auto" && this.quality === "high" && this.lastRender > 0 && time - this.lastRender < 250) {
       this.slowFrames.push(time - this.lastRender);
       if (this.slowFrames.length > 60) this.slowFrames.shift();
       const avg = this.slowFrames.reduce((a, b) => a + b, 0) / this.slowFrames.length;
       if (this.slowFrames.length === 60 && avg > 1000 / LITE_BELOW_FPS) this.setQuality("lite");
     }
     this.lastRender = time;
+    for (const cb of this.onDraw) cb();
   }
 
   /**
@@ -452,6 +459,8 @@ export class Viewer {
     });
     this.scene.environment?.dispose();
     this.renderer.dispose();
+    // the GL context given back now, not when the page is collected: views swapped often add up
+    this.renderer.forceContextLoss();
     this.renderer.domElement.remove();
   }
 }

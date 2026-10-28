@@ -84,7 +84,8 @@ export class UnitsView {
       }
       down = null;
     });
-    this.viewer.addFrameCallback(() => this.placeTags());
+    // the labels move only when the picture does: placed after each frame drawn, not every tick
+    this.viewer.onDraw.push(() => this.placeTags());
   }
 
   /**

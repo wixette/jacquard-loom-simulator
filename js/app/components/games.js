@@ -9,7 +9,7 @@ import * as drawBoy from "../../game/drawBoy.js";
 import { puzzle } from "../../game/guessGame.js";
 import { decodeCloth, MAX_CHARS, MAX_LINES, planName } from "../../game/nameGame.js";
 import { cardToString } from "../../sim/deck.js";
-import { el, icon, setText } from "../../ui/components.js";
+import { el, icon, setText, tabs as tabList } from "../../ui/components.js";
 import { clothThumb } from "../../view2d/clothThumb.js";
 import * as play from "../play.js";
 import { GAMES } from "../playState.js";
@@ -67,8 +67,12 @@ export function gamesPanel(store) {
   const byteGame = () => {
     const rows = el("table", { class: "byte-rows" });
     const secret = store.state.play.byte.secret;
+    let filled = -1;
     const fill = (/** @type {AppState} */ s) => {
       const cloth = s.looms.game.loom.cloth;
+      // made anew only when a row is woven or unwoven, not every frame (a selection in it stays)
+      if (cloth.length === filled) return;
+      filled = cloth.length;
       rows.replaceChildren(
         el("tr", {}, [el("th", { text: t("byte.row") }), el("th", { text: t("byte.bits") }), el("th", { text: t("byte.code") }), el("th", { text: t("byte.char") })]),
         ...cloth.map((row, i) => el("tr", {}, [el("td", { text: String(i + 1) }), el("td", { class: "bits", text: rowBits(row) }), el("td", { text: secret ? "" : String(rowByte(row)) }), el("td", { text: secret ? "" : byteChar(rowByte(row)) })])),
@@ -179,6 +183,9 @@ export function gamesPanel(store) {
   /** Lay the panel out for the game on show. @param {AppState} s */
   const build = (s) => {
     shown = `${s.play.game}/${s.play.byte.secret}/${s.play.guess.seed}/${s.locale}`;
+    tabs.setAttribute("aria-label", t("game.choose"));
+    // one panel for the four tabs (so no aria-controls, which the shared tablist would hide), named by the tab on show
+    body.setAttribute("aria-labelledby", `game-tab-${s.play.game}`);
     for (const b of /** @type {HTMLElement[]} */ ([...tabs.children])) {
       b.setAttribute("aria-selected", String(b.dataset.game === s.play.game));
       b.tabIndex = b.dataset.game === s.play.game ? 0 : -1;
@@ -191,14 +198,15 @@ export function gamesPanel(store) {
   return {
     name: "comp.games",
     mount(h) {
-      tabs = el("div", { class: "tabs game-tabs", role: "tablist", "aria-label": t("game.choose") });
+      tabs = el("div", { class: "tabs game-tabs", role: "tablist" });
       for (const g of GAMES) {
-        const b = el("button", { type: "button", role: "tab", class: "tab" });
+        const b = el("button", { type: "button", role: "tab", class: "tab", id: `game-tab-${g}` });
         b.dataset.game = g;
-        b.addEventListener("click", () => play.chooseGame(store, g));
         tabs.append(b);
       }
-      body = el("div", { class: "game-body" });
+      // the arrow keys, Home and End choose a game, as a click does (the shared tablist)
+      tabList(tabs, (id) => play.chooseGame(store, /** @type {import("../playState.js").GameName} */ (id.slice("game-tab-".length))));
+      body = el("div", { class: "game-body", id: "game-body", role: "tabpanel" });
       box = el("div", { class: "games-box" }, [tabs, body]);
       h.appendChild(box);
     },

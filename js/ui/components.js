@@ -137,6 +137,7 @@ let tipTimer;
  * @param {string} text
  */
 export function setTip(e, text) {
+  if (e.dataset.tipBound && e.dataset.tip === text) return;
   e.dataset.tip = text;
   e.setAttribute(e.hasAttribute("data-tip-describes") ? "aria-description" : "aria-label", text);
   if (e.dataset.tipBound) return;

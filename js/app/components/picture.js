@@ -98,6 +98,8 @@ export function picturePanel(store, o) {
     return x >= 0 && y >= 0 && x < n && y < n ? { x, y } : null;
   };
 
+  /** What the note says, written again in another language. */
+  let note = () => "";
   /** @param {HTMLInputElement} input */
   const openImage = (input) => {
     const file = input.files?.[0];
@@ -129,7 +131,8 @@ export function picturePanel(store, o) {
     };
     img.onerror = () => {
       URL.revokeObjectURL(url);
-      ui.note.textContent = t("pic.imageFailed", { file: file.name });
+      note = () => t("pic.imageFailed", { file: file.name });
+      ui.note.textContent = note();
     };
     img.src = url;
   };
@@ -139,7 +142,8 @@ export function picturePanel(store, o) {
     const n = spec().rows.length;
     const level = Number(/** @type {HTMLInputElement} */ (ui.level).value);
     change({ rows: pictureFromPixels(image.data, image.width, image.height, n, n, level) });
-    ui.note.textContent = t("pic.imageOpened", { file: imageName, n });
+    note = () => t("pic.imageOpened", { file: imageName, n });
+    ui.note.textContent = note();
   };
 
   /**
@@ -210,6 +214,7 @@ export function picturePanel(store, o) {
             run: () => {
               image = null;
               ui.threshold.hidden = true;
+              note = () => "";
               ui.note.textContent = "";
               change({ rows: presetPicture(name) });
             },
@@ -264,6 +269,7 @@ export function picturePanel(store, o) {
     },
     update(s) {
       const p = s.pictures[o.loom];
+      ui.note.textContent = note();
       if (!stroke) draw(p.rows);
       const n = p.rows.length;
       /** @type {HTMLSelectElement} */ (ui.size).value = String(n);

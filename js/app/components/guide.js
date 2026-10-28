@@ -68,9 +68,9 @@ export function guidePanel(store, o) {
 
   /** The controls the step's task asks for, glowing in the page while it is not done. @param {boolean} on */
   const glow = (on) => {
-    for (const e of document.querySelectorAll(".wanted")) e.classList.remove("wanted");
-    if (!on) return;
-    for (const a of STEPS[store.state.learn.step].task?.ask ?? []) for (const e of document.querySelectorAll(ASKED[a].find)) e.classList.add("wanted");
+    const want = new Set(on ? (STEPS[store.state.learn.step].task?.ask ?? []).flatMap((a) => [...document.querySelectorAll(ASKED[a].find)]) : []);
+    for (const e of document.querySelectorAll(".wanted")) if (!want.has(e)) e.classList.remove("wanted");
+    for (const e of want) if (!e.classList.contains("wanted")) e.classList.add("wanted");
   };
 
   /** Lay the card out for the step on show. @param {AppState} s */

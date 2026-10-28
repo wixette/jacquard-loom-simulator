@@ -14,6 +14,7 @@ import { linkOf } from "./links.js";
 import { tieLabel } from "../sim/tieup.js";
 import { fitsPage, printDocument } from "../teach/printCards.js";
 import { realCard } from "../view2d/cardLayout.js";
+import { ClothView } from "../view2d/clothView.js";
 import { applyIcons, applyL10n, el, icon, setText, setTip, showMenu, showPopover, tabs } from "../ui/components.js";
 import { colourPicker } from "../ui/colourPicker.js";
 import { wireEdge } from "../ui/edge.js";
@@ -159,6 +160,8 @@ export function createShell(store, root) {
   let unwatch = [];
   /** @type {Mode | null} */
   let mode = null;
+  /** The phone sheet's tab on show, kept across a rebuild. @type {string | null} */
+  let sheetTab = null;
 
   /**
    * Put a component in a host.
@@ -262,8 +265,15 @@ export function createShell(store, root) {
   }
 
   function savePicture() {
-    const canvas = /** @type {HTMLCanvasElement | null} */ (root.querySelector("canvas.cloth-canvas"));
-    if (!canvas) return;
+    // drawn afresh, off the page, from the loom as it is: not whichever cloth the page shows
+    // (one in a closed panel is blank or old; a phone's Cards tab has none)
+    const s = ls();
+    const host = el("div", { style: "position: fixed; left: -10000px; top: 0; width: 900px" });
+    document.body.appendChild(host);
+    const view = new ClothView(host, { onCell: () => {} });
+    view.render(s.loom.snapshot(), { face: s.face, warp: s.warp, weft: s.weft, bits: false, trace: null, large: true });
+    const canvas = view.canvas;
+    host.remove();
     canvas.toBlob((blob) => {
       if (!blob) return;
       const a = el("a", { href: URL.createObjectURL(blob), download: "jacquard-cloth.png" });
@@ -430,7 +440,10 @@ export function createShell(store, root) {
       list.appendChild(tab);
     }
     tabs(list, (id) => goWorkspace(/** @type {Workspace} */ (id.slice(3))));
-    for (const tab of list.children) tab.setAttribute("aria-selected", String(tab.id === `ws-${store.state.workspace}`));
+    for (const tab of /** @type {HTMLElement[]} */ ([...list.children])) {
+      tab.setAttribute("aria-selected", String(tab.id === `ws-${store.state.workspace}`));
+      tab.tabIndex = tab.id === `ws-${store.state.workspace}` ? 0 : -1;
+    }
     const share = el("button", { type: "button", class: "btn has-icon", "aria-haspopup": "menu" }, [icon("share"), label("span", "bar.share")]);
     share.dataset.l10nTip = "bar.share.tip";
     share.setAttribute("data-tip-describes", "");
@@ -715,7 +728,7 @@ export function createShell(store, root) {
     const cross = el("select", { "data-l10n-name": "section.name" });
     cross.addEventListener("change", () => act.setCrossRow(store, Number(cross.value)));
     const crossChip = el("label", { class: "chip" }, [cross]);
-    follow((s) => [s.sectionView, s.looms[s.current].crossRow, s.looms[s.current].rev, s.locale], () => {
+    follow((s) => [s.sectionView, s.looms[s.current].crossRow, s.looms[s.current].loom.deck.hooks, s.locale], () => {
       for (const b of zoom.querySelectorAll("button")) b.setAttribute("aria-pressed", String(/** @type {HTMLElement} */ (b).dataset.l10n === `section.${store.state.sectionView}`));
       const n = ls().loom.deck.hooks / 8;
       // the options are made anew only when the head or the language changes: made every frame
@@ -742,12 +755,24 @@ export function createShell(store, root) {
     const chipFollow = el("button", { type: "button", class: "chip follow-chip" });
     chipFollow.addEventListener("click", () => act.follow(store, null));
     const panes = el("div", { class: "panes", style: "display: contents" });
-    let mine = { placed: /** @type {Placed[]} */ ([]), unwatch: /** @type {(() => void)[]} */ ([]) };
+    /** The panes on show, each with its place and view, its node, and its components and watchers. @type {{ key: string; node: HTMLElement; mine: { placed: Placed[]; unwatch: (() => void)[] } }[]} */
+    let shownPanes = [];
     follow((s) => [s.views], () => {
       st.dataset.n = String(store.state.views.length);
-      const made = remake(mine, () => store.state.views.map((v, i) => pane(i, v)));
-      panes.replaceChildren(...made.nodes);
-      mine = made.mine;
+      const keys = store.state.views.map((v, i) => `${i}:${v}`);
+      for (const p of shownPanes) if (!keys.includes(p.key)) remake(p.mine, () => []);
+      shownPanes = keys.map((key, i) => {
+        const kept = shownPanes.find((p) => p.key === key);
+        if (kept) return kept;
+        const made = remake({ placed: [], unwatch: [] }, () => [pane(i, store.state.views[i])]);
+        return { key, node: made.nodes[0], mine: made.mine };
+      });
+      // focus on a view's chip (its menu, keys 1 to 4) goes back to the same pane's chip
+      const focused = /** @type {HTMLElement | null} */ (document.activeElement)?.closest(".pane");
+      const at = focused ? [...panes.children].indexOf(focused) : -1;
+      panes.replaceChildren(...shownPanes.map((p) => p.node));
+      if (at >= 0 && !panes.contains(document.activeElement)) /** @type {HTMLElement | undefined} */ (panes.children[at]?.querySelector(".view-chip"))?.focus();
+      greyLocked();
       for (const b of arrangement.children) b.setAttribute("aria-pressed", String(/** @type {HTMLElement} */ (b).dataset.n === String(store.state.views.length)));
       relabel();
     });
@@ -846,9 +871,15 @@ export function createShell(store, root) {
       if (y0 === null) return;
       const dy = e.clientY - y0;
       y0 = null;
+      dragged = Math.abs(dy) > 24;
       if (dy < -24) to(now() + (dy < -200 ? 2 : 1));
       else if (dy > 24) to(now() - (dy > 200 ? 2 : 1));
-      else to(now() === 2 ? 1 : 2);
+    });
+    // a tap, Enter or Space (a click without a drag) opens the sheet fully, or brings it back
+    let dragged = false;
+    b.addEventListener("click", () => {
+      if (!dragged) to(now() === 2 ? 1 : 2);
+      dragged = false;
     });
     b.addEventListener("keydown", (e) => {
       if (e.key === "ArrowUp") to(now() + 1);
@@ -866,15 +897,21 @@ export function createShell(store, root) {
     const list = el("div", { class: "tabs", role: "tablist" });
     const body = el("div", { class: "sheet-body" });
     for (const id of ids) list.appendChild(label("button", `sheet.${id}`, { type: "button", role: "tab", class: "tab", id: `sheet-${id}` }));
-    /** @type {Placed[]} */
-    let mine = [];
+    list.dataset.l10nName = "sheet.name";
+    /** @type {{ placed: Placed[]; unwatch: (() => void)[] }} */
+    let mine = { placed: [], unwatch: [] };
     const show = (/** @type {string} */ id) => {
-      for (const p of mine) {
-        p.unmount();
-        placed = placed.filter((x) => x !== p);
-      }
-      const before = placed.length;
-      body.replaceChildren();
+      sheetTab = id;
+      mine = remake(mine, () => {
+        body.replaceChildren();
+        fill(id);
+        return [];
+      }).mine;
+      relabel();
+      greyLocked();
+    };
+    /** The tab's own parts, in the sheet's body. @param {string} id */
+    const fill = (id) => {
       if (id === "guide") {
         body.appendChild(guide());
         // a step on a picture brings the picture tool under it
@@ -912,18 +949,17 @@ export function createShell(store, root) {
         put(clothPanel(store), cloth);
         put(tracePanel(store), trace);
       }
-      mine = placed.slice(before);
-      relabel();
-      greyLocked();
     };
     const select = tabs(list, (tab) => show(tab.slice("sheet-".length)));
-    select(`sheet-${ids[0]}`);
+    // the tab on show stays when the frame is built again (the phone turned, the workspace changed)
+    select(`sheet-${sheetTab && ids.includes(sheetTab) ? sheetTab : ids[0]}`);
     return el("section", { class: "sheet" }, [grab(), list, body]);
   }
 
   // ---- building the frame ------------------------------------------------------------------------
 
   function build() {
+    const tabFocused = !!document.activeElement?.closest(".workspaces");
     for (const p of placed) p.unmount();
     for (const u of unwatch) u();
     placed = [];
@@ -955,7 +991,9 @@ export function createShell(store, root) {
     }
     applyIcons(root);
     relabel();
-    follow((s) => [s.current, s.learn.step, s.looms[s.current].rev], greyLocked);
+    follow((s) => [s.current, s.learn.step, s.looms[s.current].loom.deck, s.looms[s.current].loom.pick, s.looms[s.current].selected, s.looms[s.current].follow], greyLocked);
+    // a workspace chosen by the keyboard: focus stays on its tab, which the frame made anew
+    if (tabFocused) document.getElementById(`ws-${store.state.workspace}`)?.focus();
   }
 
   build();
