@@ -13,7 +13,7 @@ pnpm serve
 `pnpm serve` (`tools/serve.mjs`) is a small static server that turns caching off, so a changed file is always fetched again while you work; any static server works too (`python3 -m http.server 8000`), but a browser may then keep an old stylesheet until a hard reload.
 
 - <http://localhost:8000/> is the main app (`index.html`).
-- <http://localhost:8000/dev/> lists the developer pages, one per milestone, the prototype learner page among them (`dev/03-learner/`). The main app does not link to them.
+- <http://localhost:8000/dev/> lists the developer pages, one for each of M0 to M5 (`dev/01-section/` to `dev/07-foundations/`, with the name game's prototype), the prototype learner page among them (`dev/03-learner/`). Later milestones are checked on `index.html`. The main app does not link to them.
 
 Pages cannot be opened from `file://`, because browsers do not load modules from there.
 
@@ -26,7 +26,7 @@ Pages cannot be opened from `file://`, because browsers do not load modules from
 | `?lang=fr` | `index.html` | Open the app in that language (one of the ten), whatever the browser prefers |
 | `?lesson=L3` | `dev/03-learner/` | Open a lesson (L1 to L10) |
 | `?view=3d` | `dev/03-learner/` | Open the mechanism pane on the parts in 3D |
-| `#v=2&…` (a copied link) | `dev/03-learner/`, `dev/02-loom/` | Open the loom with those cards, at that moment, in the format the main app will use ([design/links.md](../design/links.md), a contract from 0.1.0) |
+| `#v=2&…` (a copied link) | `dev/03-learner/`, `dev/02-loom/` | Open the loom with those cards, at that moment, in the format the main app uses ([design/links.md](../design/links.md), a contract from 0.1.0) |
 | `?text=…&mode=damask` or `direct` | `dev/06-name-game/` | Open the name game with that text |
 | `?selftest` | every page | Run the page's acceptance checks and show the results |
 
@@ -34,6 +34,8 @@ Pages cannot be opened from `file://`, because browsers do not load modules from
 
 - **Git LFS**, for the 3D models: run `git lfs install` once, then clone as usual (or `git lfs pull` in an existing clone). Without it the `.glb` files are small pointer files, and the 3D views and tests fail.
 - **Node 22 or later** and **pnpm** (the version is in `package.json`'s `packageManager`), for the checks: `pnpm install` brings three.js for Node and TypeScript's checker. The pages themselves need neither.
+- **Google Chrome**, for `pnpm selftest` and `pnpm shots`, which drive it headless (`tools/headless.mjs`). It is looked for at its default path on macOS and Windows; elsewhere, Linux included, set `CHROME` to its path.
+- **The REUSE tool**, for `reuse lint`: `pipx install reuse`. `pnpm install` does not bring it.
 - **Blender 5.2**, only to rebuild the models (`pnpm build:model`). Set `BLENDER` to its path if it is not at `/Applications/Blender.app`.
 
 ## Commands
@@ -47,9 +49,9 @@ Pages cannot be opened from `file://`, because browsers do not load modules from
 | `pnpm build:model` | Rebuilds the five units and the ghosted machine into `assets/` with Blender, headless |
 | `pnpm vendor` | Copies three.js and the font from `node_modules` into `vendor/`, and writes the icons the pages use into one module |
 | `pnpm selftest` | Every page's `?selftest`, run in headless Chrome: the browser half of the checks |
-| `pnpm shots` | Screenshots of every view, from headless Chrome, into `shots/` (`--out`, `--only`): for reviewing a change of the theme or the layout side by side |
+| `pnpm shots` | Screenshots of every view, from headless Chrome, into `shots/` (`--out`, `--only`): for reviewing a change of the theme or the layout side by side. `pnpm shots --only readme- --out screenshots` takes the README's screenshots again |
 | `pnpm stamp` | Writes the version into every file name the pages load |
-| `reuse lint` | Every file's licence is declared (REUSE; CI runs it) |
+| `reuse lint` | Every file's licence is declared (the REUSE tool, installed apart; CI runs it) |
 
 Before a commit: `pnpm check:refs`, `pnpm typecheck`, `pnpm test`, and `pnpm selftest` (or the `?selftest` of the pages a change touches). After a change to `params/` or `blender/scripts/`: `pnpm build:model`, and commit the new `.glb` files with it.
 

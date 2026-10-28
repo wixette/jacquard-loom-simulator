@@ -4,7 +4,7 @@
 
 import { chooseLanguage, initialLanguage } from "./app/language.js";
 import { openLearn, openingWorkspace, watchWorkspace } from "./app/learn.js";
-import { openCreate } from "./app/create.js";
+import { openCreate, watchPicture } from "./app/create.js";
 import { openLink } from "./app/links.js";
 import { appState, setViews } from "./app/looms.js";
 import { openPlay, rememberedGame, watchGame } from "./app/play.js";
@@ -16,6 +16,8 @@ await chooseLanguage(store, initialLanguage());
 setViews(store, openingViews());
 // Without a link, the app opens where it was left on this device; a newcomer, on Learn. A link
 // that cannot be read opens Weave, whose status line says why.
+// Design's picture is kept from the start, so a link's picture is the one Design keeps
+watchPicture(store);
 const linked = await openLink(store, location.hash);
 if (!linked && location.hash.length <= 1) {
   const w = openingWorkspace();

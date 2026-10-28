@@ -1,7 +1,7 @@
 // Guess the cloth (design/public-app.md §2): shown a small deck and three cloths, the player
 // picks the one it weaves. The wrong two are what a learner reading the cards carelessly would
-// expect: the chain read in the other order, each card read from the other end, holes and
-// blanks swapped. Every puzzle comes from a number (its seed), so a link can give a friend the
+// expect: two of the four misreadings (the chain read in the other order, each card read from
+// the other end, holes and blanks swapped, or each card read one hook along). Every puzzle comes from a number (its seed), so a link can give a friend the
 // same one, and the three cloths are always different. Pure: no DOM.
 
 import { makeDeck } from "../sim/deck.js";

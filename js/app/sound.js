@@ -100,7 +100,7 @@ export class Sound {
       if (this.ctx && this.ctx.state !== "running") this.ctx.resume().catch(() => {});
     };
     for (const type of ["pointerdown", "pointerup", "keydown"]) window.addEventListener(type, unlock, true);
-    /** @type {{ ls: LoomState; at: number } | null} */
+    /** @type {{ id: string; ls: LoomState; at: number } | null} */
     let was = null;
     store.watch(
       (s) => [s.current, s.looms[s.current]],
@@ -108,8 +108,9 @@ export class Sound {
         const ls = store.state.looms[store.state.current];
         const at = ls.loom.pick + ls.loom.phi;
         const before = was;
-        was = { ls, at };
-        if (!before) return;
+        was = { id: store.state.current, ls, at };
+        // another workspace's loom: a jump, silent, whatever its status line last said
+        if (!before || before.id !== store.state.current) return;
         if (ls.status !== before.ls.status && ls.status.warn) this.play("refuse");
         // the same loom, moved on by at most one pick: sound the stops passed
         if (ls.loom !== before.ls.loom || at <= before.at || at - before.at > 1 + 1e-9) return;

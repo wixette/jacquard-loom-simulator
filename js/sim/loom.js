@@ -171,9 +171,15 @@ export class Loom {
     const beat = P.beat[1];
     const rows = t + EPS >= beat ? Math.floor(t - beat + EPS) + 1 : 0;
     while (this.cloth.length > rows) this.cloth.pop();
+    // a row is never changed once woven, so the picks of one card share its row: a link's long
+    // loop (p up to 1,000,000) costs a reference a pick, not a row
+    /** @type {Map<boolean[] | null, boolean[]>} */
+    const woven = new Map();
     while (this.cloth.length < rows) {
-      const r = this.cloth.length;
-      this.cloth.push(rowOfCard(this.tie, cardForPick(this.deck, r), this.deck.hooks));
+      const card = cardForPick(this.deck, this.cloth.length);
+      let row = woven.get(card);
+      if (!row) woven.set(card, (row = rowOfCard(this.tie, card, this.deck.hooks)));
+      this.cloth.push(row);
     }
   }
 

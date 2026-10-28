@@ -8,6 +8,7 @@ import { messageDeck } from "../game/byteGame.js";
 import { puzzle } from "../game/guessGame.js";
 import { planName } from "../game/nameGame.js";
 import { msg } from "../l10n/l10n.js";
+import { MAX_SEED } from "../sim/link.js";
 import { Loom } from "../sim/loom.js";
 import { makeDeck } from "../sim/deck.js";
 import * as act from "./looms.js";
@@ -53,8 +54,8 @@ function make(store, p) {
     return cards(store, r.plan.deck, msg(p.name.mode === "damask" ? "name.planDamask" : "name.planDirect", words), also);
   }
   if (p.game === "byte") {
-    // a friend's secret is the cards themselves, kept on the loom; a message typed makes them
-    if (p.byte.secret) return store.set(also);
+    // a friend's secret is the cards themselves, kept with the game; a message typed makes them
+    if (p.byte.secret && p.byte.deck) return cards(store, p.byte.deck, msg("byte.secret", {}, p.byte.deck.cards.length), also);
     const r = messageDeck(p.byte.text);
     if (!r.ok) return nothing(store, r.reason, also);
     return cards(store, r.deck, msg("byte.made", {}, r.deck.cards.length), also);
@@ -65,7 +66,7 @@ function make(store, p) {
   }
   if (p.drawboy.phase === "hand") {
     const rows = p.drawboy.hand.woven;
-    return cards(store, { hooks: 8, cards: rows.map((r) => [...r]), loop: false }, msg("drawboy.hand", { row: rows.length + 1, of: drawBoy.ROWS.length }), also, rows.length);
+    return cards(store, { hooks: 8, cards: rows.map((r) => [...r]), loop: false }, msg("drawboy.hand", { row: Math.min(rows.length + 1, drawBoy.ROWS.length), of: drawBoy.ROWS.length }), also, rows.length);
   }
   return cards(store, makeDeck(8, drawBoy.ROWS.map((r) => r.map((x) => (x ? "O" : ".")).join("")), false), msg("drawboy.cards", { cards: drawBoy.ROWS.length }), also);
 }
@@ -117,7 +118,7 @@ export function openPlay(store, game) {
 /** Choose a game. @param {AppStore} store @param {GameName} game */
 export const chooseGame = (store, game) => setPlay(store, (p) => ({ ...p, game }));
 
-/** Weave all the game loom's cards at once (the name game's "Weave it all"). @param {AppStore} store */
+/** Weave all the game loom's cards at once (the games' "Weave to the end"). @param {AppStore} store */
 export function weaveAll(store) {
   const { loom } = store.state.looms.game;
   act.moveTo(store, loom.deck.cards.length, 0, "game");
@@ -141,7 +142,7 @@ export const setMessage = (store, text) => setPlay(store, (p) => ({ ...p, byte: 
 export function openSecret(store, deck) {
   act.setWorkspace(store, "play");
   const p = store.state.play;
-  cards(store, deck, msg("byte.secret", {}, deck.cards.length), { play: { ...p, game: "byte", byte: { text: "", secret: true, guess: "" } } });
+  cards(store, deck, msg("byte.secret", {}, deck.cards.length), { play: { ...p, game: "byte", byte: { text: "", secret: true, guess: "", deck } } });
 }
 
 /** The friend's reading of the secret. @param {AppStore} store @param {string} guess */
@@ -159,7 +160,7 @@ export function pickCloth(store, i) {
 }
 
 /** The next puzzle. @param {AppStore} store */
-export const nextPuzzle = (store) => setPlay(store, (p) => ({ ...p, guess: { ...p.guess, seed: p.guess.seed + 1, picked: null } }));
+export const nextPuzzle = (store) => setPlay(store, (p) => ({ ...p, guess: { ...p.guess, seed: p.guess.seed >= MAX_SEED ? 1 : p.guess.seed + 1, picked: null } }));
 
 // ---- draw boy against Jacquard -----------------------------------------------------------------
 

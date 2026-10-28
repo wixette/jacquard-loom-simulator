@@ -10,8 +10,8 @@ If a change needs to break a principle, change the principle here first, with it
 |---|---|---|
 | P1 | One primary surface | The machine is always on screen; nothing covers it or pushes it out of view |
 | P2 | A control has one home | If it is wanted elsewhere, move it; never a second copy (a tutorial's task line works the real control, and is not a copy) |
-| P3 | Each role has one home; workspaces arrange them | The program on the left, the machine in the middle, the output on the right, time along the bottom; Learn, Weave, Create and Play arrange the same components for their task (ui-layout.md §1–§3) |
-| P4 | Occasional actions in menus and dialogs | Always-visible space is for things that change while you watch: setup, Share, the language and About live in the top bar |
+| P3 | Each role has one home; workspaces arrange them | The program on the left, the machine in the middle, the output on the right, time along the bottom; Learn, Weave, Design (`w=create`) and Games (`w=play`) arrange the same components for their task (ui-layout.md §1–§3) |
+| P4 | Occasional actions in menus and dialogs | Always-visible space is for things that change while you watch: the setup waits in popovers beside what it changes (the head and tie-up in a chip over the cards, the colours in the cloth's header); the top bar holds the workspaces, Share, the language and About |
 | P5 | Each surface keeps its voice | The machine's own markings stay as on the machine; everything around it is ours, and translated, the parts named in each language's own weaving terms |
 | P6 | Unavailable is greyed and explained, never hidden | A greyed control still answers, in the status line, with the reason |
 | P7 | One status line, always visible | It says what just happened, and why something is greyed |
@@ -49,7 +49,7 @@ The sibling's dark Material 3 scheme (its U5), with the same tokens: the views r
 - **The real machine first, our views second.** The cards, the head and the cloth are the primary surface; the trace, the 0/1 overlay, the ghosted 3D machine and the tutorial are instruments around it, and say so.
 - **Simplifications are named where they are met,** with their reason: the estimated timing within a pick, stepping back unweaving exactly, the drawn shapes of the hooks and the cylinder's swing.
 - **Historical material is real** and cited, and the research's list of myths is respected (no "patented 1801", no "24,000 cards" for the woven portrait).
-- **The top bar:** what you do to the machine on the left, what you do with the app (share, language, about) on the right.
+- **The top bar:** the workspaces on the left, what you do with the app (share, language, about) on the right.
 - **About** is the app's one dialog: the version, what the simulator is, the credits, the licences and the source.
 - **The machine sounds; the interface does not** (the sibling's U29), with a mute switch at the end of the transport.
 - **Accessibility:** every icon button has a tooltip and a screen-reader name, both translated; every control is reachable with Tab and has a visible focus ring; tabs and the panels' edges follow the WAI-ARIA patterns; motion honours `prefers-reduced-motion`.

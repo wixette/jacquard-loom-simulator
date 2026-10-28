@@ -42,7 +42,7 @@ export async function runM9Checks(page) {
 }
 
 /**
- * P-1: Play opens on the game loom, the cloth on the stage, the games in four tabs; a tab
+ * P-1: Games opens on the game loom, the cloth on the stage, the games in four tabs; a tab
  * chooses its game.
  * @param {AppPage} page
  * @returns {Promise<CheckResult>}
@@ -59,7 +59,7 @@ async function opens({ store }) {
     await frames();
     if (store.state.play.game !== b.dataset.game || $(".game-title")?.textContent !== t(`game.${b.dataset.game}.title`)) bad.push(`the ${b.dataset.game} tab did not open its game`);
   }
-  return result("P-1", "Play opens on its loom with the cloth, and a tab for each of the four games opens it", bad.length === 0, bad.slice(0, 4).join("; ") || GAMES.join(", "));
+  return result("P-1", "Games opens on its loom with the cloth, and a tab for each of the four games opens it", bad.length === 0, bad.slice(0, 4).join("; ") || GAMES.join(", "));
 }
 
 /**

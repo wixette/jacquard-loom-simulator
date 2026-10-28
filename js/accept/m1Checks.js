@@ -280,6 +280,8 @@ async function links() {
       follow: rand() < 0.5 ? null : { hook: Math.floor(rand() * 8), end: null, pick: null },
       face: rand() < 0.5 ? "front" : "back",
     };
+    // an open chain goes no further than its end, where it rests after its last pick
+    if (l.deck && !l.deck.loop && l.pick >= l.deck.cards.length) Object.assign(l, { pick: l.deck.cards.length, stop: 0 });
     const back = await decodeLink(await encodeLink(l));
     n++;
     if (!back.ok) bad.push(`round trip ${i + 1}: ${say(back.reason, "en")}`);

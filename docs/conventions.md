@@ -51,9 +51,9 @@ Every value in `params/machine.json` is `{v, unit, conf, src, note}`: `conf` say
 - **Export:** glTF 2.0 binary, modifiers applied, no cameras or lights, the rest pose only: runtime code drives every part from the simulation. No baked animation.
 - **Budgets:** each unit under 10 k triangles, the ghosted machine under 10 k, all `.glb` files together under 3 MB (checked by J3-9 and J4-4).
 
-## Developer pages (one per milestone)
+## Developer pages (M0 to M5)
 
-- Every milestone ships a **permanent** developer page in `dev/NN-name/`, listed in `dev/index.html`. It is how the milestone is verified by hand. The developer pages are prototypes: the site's main page, `index.html`, is the main app ([design/public-app.md](../design/public-app.md)), and the prototype learner page moves into `dev/03-learner/` (in M5). A milestone that builds part of the main app checks it on `index.html` and its `?selftest`; its developer page may simply link there.
+- M0 to M5 each shipped a **permanent** developer page in `dev/NN-name/` (`dev/01-section/` to `dev/07-foundations/`, with the name game's prototype, `dev/06-name-game/`), listed in `dev/index.html`. It is how the milestone was verified by hand. The developer pages are prototypes: the site's main page, `index.html`, is the main app ([design/public-app.md](../design/public-app.md)), and the prototype learner page moved into `dev/03-learner/` (in M5). The later milestones (M6 on) build the main app and are checked on `index.html` and its `?selftest`, with no developer page of their own.
 - Pages are never deleted when the next milestone arrives. They stay working and act as **live regression tests** in the browser for shared code.
 - Every page has a visible **Reset machine** control.
 - **Step ▸ and ◂ Step** turn the loom to the next (or previous) of the six moments of a pick, each the moment a visible change has just completed: hooks taken, shed open, shuttle across, beaten up, shed closed, next card pressed. After each step the status line says what just happened. Stepping back unweaves exactly.
@@ -64,10 +64,10 @@ Every value in `params/machine.json` is `{v, unit, conf, src, note}`: `conf` say
 
 | Layer | Question | Where it is tested | Runs in |
 |---|---|---|---|
-| 1. Logic | Do the chain, the tie-up, the cycle, the cloth, the links, the store and the languages behave? | `tests/sim/*.test.js`, `tests/app/*.test.js`, `tests/l10n.test.js` | `pnpm test` |
+| 1. Logic | Do the chain, the tie-up, the cycle, the cloth, the links, the store, the games, the tutorial, the components' logic, the part names and the languages behave? | `tests/sim/`, `tests/app/`, `tests/game/`, `tests/teach/`, `tests/ui/`, `tests/scene/`, `tests/accept/game.accept.test.js`, `tests/l10n.test.js` | `pnpm test` |
 | 2. The 2D drawings | Does each drawing show what the simulation says, and do its parts touch and clear where they should? | `tests/accept/m0`–`m2` (checks in `js/accept/`, measured on the layouts the views draw) | `pnpm test` |
 | 3. The 3D models | Do the real 3D parts, posed as the browser poses them, match the 2D section and each other? | `tests/accept/m3`, `m4` (acceptance tests on the `.glb`) | `pnpm test` |
-| 4. What is seen | Labels readable and clear of the drawing, the cloth steady, the components in their slots, every language, the pages' own behaviour | The pages' `?selftest` (V-1 to V-3, J2-7 to J2-9, J4-6 to J4-9, G-5, F-3, F-6), and by hand | the browser, or headless: `pnpm selftest` |
+| 4. What is seen | Labels readable and clear of the drawing, the cloth steady, the components in their slots, every language, the pages' own behaviour | The developer pages' `?selftest` (V-1 to V-3, J2-7 to J2-9, J4-6 to J4-9, G-5, F-3, F-6), the main app's (`index.html?selftest`: M6's S-, M7's L-, M8's C- and M9's P- checks), and by hand | the browser, or headless: `pnpm selftest` |
 
 ### Rules
 
@@ -83,7 +83,7 @@ Every value in `params/machine.json` is `{v, unit, conf, src, note}`: `conf` say
 
 - **Plain JavaScript ES modules with JSDoc types,** checked strictly by `pnpm typecheck` (`checkJs`, `strict`), run by the browser as written: **no build step**. three.js is vendored in `vendor/` by `tools/vendor.mjs` and reached through each page's import map; Node and the type check use the same version from `node_modules`, and a test fails while the two differ. Tests use Node's own runner (`node --test`).
 - `js/sim/` and `js/view2d/` never import three.js; `js/scene/` does.
-- **Where code goes:** `js/sim/` the machine, the picture reader, the trace and the links (no DOM, no three.js); `js/view2d/` the 2D drawings; `js/scene/` three.js; `js/teach/` the tutorial and the part names as data (no DOM); `js/game/` the games' logic; `js/app/` the main app (the store, the layout, the workspaces, the tutorial player); `js/ui/` its components ([ui-design.md](ui-design.md), P10); `js/l10n/` the texts, one file per language.
+- **Where code goes:** `js/sim/` the machine, the picture reader, the trace and the links (no DOM, no three.js); `js/view2d/` the 2D drawings; `js/scene/` three.js; `js/teach/` the tutorial as data, the prototype's lessons and the cards to print (no DOM); `js/scene/partNames.js` the 3D parts' names, whose texts are in `js/l10n/`; `js/game/` the games' logic; `js/app/` the main app (the store, the layout, the workspaces, the tutorial player); `js/ui/` its components ([ui-design.md](ui-design.md), P10); `js/l10n/` the texts, one file per language.
 - **Every text a reader sees is a message key** in `js/l10n/en.js`, translated in each locale's file (the ten languages of the sibling project); a test fails while a locale lacks a key or changes a `{placeholder}`.
 - **No colour literal in a view:** the 2D drawings, the cloth and the 3D materials take their colours from the theme's tokens ([ui-design.md](ui-design.md), *Theme*).
 - **The font and the icons are vendored** like three.js (`pnpm vendor`): Roboto Flex in `vendor/roboto-flex/`, the Material Symbols the page uses written into one module of SVG paths.

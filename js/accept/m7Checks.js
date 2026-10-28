@@ -86,8 +86,10 @@ async function walk({ store }) {
     }
     if (s.task) {
       if ($(".taskline")?.hidden) bad.push(`${s.id}: no task line once answered`);
-      s.task.solve(store.state.looms.tutorial.loom);
-      act.touch(store, "tutorial");
+      // a picture's step is solved as the learner would: by the picture's reading, which weaves it again
+      const changed = s.task.solve(store.state.looms.tutorial.loom);
+      if (changed) act.setPicture(store, changed, "tutorial");
+      else act.touch(store, "tutorial");
       await frames();
       if (!$(".taskline.done")) bad.push(`${s.id}: the task line does not say done`);
       if (s.done && $(".step-done")?.hidden) bad.push(`${s.id}: no done text`);

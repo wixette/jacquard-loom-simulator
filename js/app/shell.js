@@ -12,7 +12,8 @@ import { HOOK_COUNTS, PRESETS } from "../sim/deck.js";
 import { encodeLink, LONG_LINK, STAGE_VIEWS } from "../sim/link.js";
 import { linkOf } from "./links.js";
 import { tieLabel } from "../sim/tieup.js";
-import { printDocument } from "../teach/printCards.js";
+import { fitsPage, printDocument } from "../teach/printCards.js";
+import { realCard } from "../view2d/cardLayout.js";
 import { applyIcons, applyL10n, el, icon, setText, setTip, showMenu, showPopover, tabs } from "../ui/components.js";
 import { colourPicker } from "../ui/colourPicker.js";
 import { wireEdge } from "../ui/edge.js";
@@ -24,7 +25,7 @@ import { benchPanel, chainPanel, clothPanel, statusPanel, tracePanel, transportP
 import { frontView, sectionView, sideView, UNIT_VIEWS, unitsView } from "./components/views.js";
 import { chooseLanguage } from "./language.js";
 import { leaveLearn, openLearn, watchDone } from "./learn.js";
-import { openCreate, watchPicture } from "./create.js";
+import { openCreate } from "./create.js";
 import { picturePanel } from "./components/picture.js";
 import { gamesPanel } from "./components/games.js";
 import { openPlay } from "./play.js";
@@ -274,7 +275,12 @@ export function createShell(store, root) {
 
   function printCards() {
     const deck = ls().loom.deck;
-    const url = URL.createObjectURL(new Blob([printDocument(deck, t("app.title"))], { type: "text/html" }));
+    const rc = realCard(deck.hooks);
+    const size = { hooks: deck.hooks, w: rc.width.toFixed(1), h: rc.height.toFixed(1) };
+    // a 400 head's card is wider than the paper: it cannot be printed at its true size
+    if (!fitsPage(deck.hooks)) return act.say(store, { key: "share.tooWide", params: size }, true);
+    const note = tn("print.note", deck.cards.length, size);
+    const url = URL.createObjectURL(new Blob([printDocument(deck, t("app.title"), { note, lang: store.state.locale })], { type: "text/html" }));
     const w = window.open(url, "_blank");
     act.say(store, w ? { key: "share.printed", n: deck.cards.length } : { key: "share.blocked" }, !w);
   }
@@ -574,7 +580,7 @@ export function createShell(store, root) {
 
   /**
    * Design's left panel: the picture and how it is read (js/app/components/picture.js), and
-   * under it the cards it makes, with Weave it, as Learn stacks its guide over the cards.
+   * under it the cards it makes, with Open in Weave, as Learn stacks its guide over the cards.
    */
   function picturesPanel() {
     const slot = el("div", { class: "picture-slot" });
@@ -591,7 +597,7 @@ export function createShell(store, root) {
     return panel;
   }
 
-  /** "Weave it": the picture's cards on the learner's own loom, in Weave. */
+  /** Open in Weave: the picture's cards on the learner's own loom, in Weave. */
   function weaveIt() {
     const b = el("button", { type: "button", class: "btn filled weave-it" }, [icon("open_in_new"), label("span", "pic.weaveIt")]);
     b.dataset.l10nTip = "pic.weaveIt.tip";
@@ -955,7 +961,6 @@ export function createShell(store, root) {
   build();
   wireKeys(store);
   watchDone(store);
-  watchPicture(store);
   window.addEventListener("resize", () => {
     if (modeOf() !== mode) build();
   });

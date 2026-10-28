@@ -176,7 +176,7 @@ export function guidePanel(store, o) {
       live.feedback.textContent = answered === undefined ? "" : t(key(answered === step.predict.answer ? "right" : "wrong"), params(step));
       live.feedback.className = `feedback${answered === undefined ? "" : answered === step.predict.answer ? " right" : " wrong"}`;
     }
-    const taskDone = !!step.task && step.task.check(s.looms.tutorial.loom);
+    const taskDone = !!step.task && step.task.check(s.looms.tutorial.loom, step.picture ? s.pictures.tutorial : null);
     // predict, then weave: the task comes once the question has an answer
     const waiting = !!step.predict && answered === undefined;
     // what appears (the task, once answered; the done text) is scrolled into view

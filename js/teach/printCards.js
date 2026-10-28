@@ -47,23 +47,30 @@ export function pageSvg(deck, first, count) {
   return out.join("");
 }
 
+/** Whether a card for this head fits across an A4 page at its true size (a 400 head's does not). */
+export const fitsPage = (/** @type {number} */ hooks) => realCard(hooks).width <= PAGE.w - 2 * PAGE.margin - LABEL;
+
 /** How many cards fit on one page. */
 export const cardsPerPage = (/** @type {number} */ hooks) => Math.floor((PAGE.h - 2 * PAGE.margin + GAP) / (realCard(hooks).height + GAP));
 
 /**
- * A printable HTML document of the whole deck.
+ * A printable HTML document of the whole deck, its note (how to print and cut them) in the
+ * page's language.
  * @param {Deck} deck
  * @param {string} title
+ * @param {{ note?: string; lang?: string }} [o] the note, and its language (English by default)
  * @returns {string}
  */
-export function printDocument(deck, title) {
+export function printDocument(deck, title, o = {}) {
   const per = cardsPerPage(deck.hooks);
   const pages = [];
   for (let first = 0; first < deck.cards.length; first += per) pages.push(pageSvg(deck, first, Math.min(per, deck.cards.length - first)));
   const rc = realCard(deck.hooks);
-  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>${title}</title>
+  const note = o.note ?? `${deck.cards.length} cards for a ${deck.hooks}-hook head, ${rc.width.toFixed(1)} × ${rc.height.toFixed(1)} mm each. Print at 100 % (not "fit to page"); check one card with a ruler. Cut out the black holes, then lace the cards in order through the small holes at their ends.`;
+  const esc = (/** @type {string} */ s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;");
+  return `<!doctype html><html lang="${o.lang ?? "en"}"><head><meta charset="utf-8"><title>${esc(title)}</title>
 <style>@page { size: A4; margin: 0; } body { margin: 0; font-family: sans-serif; } .page { width: 210mm; height: 297mm; page-break-after: always; } .note { position: fixed; top: 4mm; left: 12mm; font-size: 3.2mm; } @media print { .note { display: none; } }</style></head><body>
-<p class="note">${deck.cards.length} cards for a ${deck.hooks}-hook head, ${rc.width.toFixed(1)} × ${rc.height.toFixed(1)} mm each. Print at 100 % (not "fit to page"); check one card with a ruler. Cut out the black holes, then lace the cards in order through the small holes at their ends.</p>
+<p class="note">${esc(note)}</p>
 ${pages.map((p) => `<div class="page">${p}</div>`).join("\n")}
 </body></html>`;
 }

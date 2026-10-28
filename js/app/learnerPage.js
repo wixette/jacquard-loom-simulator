@@ -1,4 +1,4 @@
-// The learner page (index.html): the whole loom in 2D (loomPage.js), always on screen, and
+// The prototype learner page (dev/03-learner/; the main app replaced it at index.html): the whole loom in 2D (loomPage.js), always on screen, and
 // one dock beside it with the lessons, the picture helper and "about this machine", one at a
 // time. The mechanism pane shows the head in section or, at the learner's choice, the parts
 // in 3D (parts3d.js). ?lesson=L3 opens a lesson, so a worksheet can link straight to it;

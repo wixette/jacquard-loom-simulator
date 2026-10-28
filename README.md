@@ -13,7 +13,9 @@ weaving a picture by hand, and on to the punched cards that came after. Draw a p
 simulator cuts its cards; or play four games on the loom.
 
 **[▶ Try it online](https://wixette.github.io/jacquard-loom-simulator/)**, with nothing to
-install, on a computer or a phone, in ten languages.
+install, on a computer or a phone, in ten languages. It needs a current Chrome, Edge, Firefox or
+Safari: JavaScript modules with import maps, WebGL for the 3D views, and CompressionStream for
+the long links.
 
 ![The simulator: the cards on the left, the head cut through and the whole loom in 3D in the middle, the cloth on the right, and the controls along the bottom](./screenshots/readme-app.png)
 
@@ -210,7 +212,8 @@ browser.
 
 Start with [docs/development.md](docs/development.md): the commands, the page options, versions
 and releases. The rules the code follows are in [docs/conventions.md](docs/conventions.md), and
-the design principles in [docs/ui-design.md](docs/ui-design.md).
+the design principles in [docs/ui-design.md](docs/ui-design.md). What changed in each release
+is in [CHANGELOG.md](CHANGELOG.md).
 
 ### The link format
 

@@ -1,6 +1,6 @@
-// Create, the picture tool, as a workspace (design/m8-notes.md): its own loom, woven from the
+// Design (first called Create), the picture tool, as a workspace (design/m8-notes.md): its own loom, woven from the
 // learner's picture, which is kept on this device, so a picture drawn is there the next time.
-// "Weave it" puts the picture's cards on the learner's own loom (js/app/looms.js).
+// Open in Weave puts the picture's cards on the learner's own loom (js/app/looms.js).
 
 import { pictureFromStrings } from "../sim/design.js";
 import { DAMASK_BLOCKS, PICKS_PER_ROW, PICTURE_SIZES } from "../sim/picture.js";
@@ -46,7 +46,7 @@ export function openCreate(store) {
 }
 
 /**
- * Keep Create's picture on this device each time it changes.
+ * Keep Design's picture on this device each time it changes.
  * @param {AppStore} store
  * @returns {() => void}
  */

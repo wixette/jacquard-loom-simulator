@@ -1,9 +1,9 @@
 // The name game (design/public-app.md §2): a name, set in an 8 × 16 pixel font, becomes a chain
 // of cards, and the loom weaves it. The text wraps at 8 characters a line, up to 16 lines, with
 // two blank pixel rows between lines. Two ways to read it, as the picture helper has them:
-// - "damask", real cloth: each pixel 4 × 4 threads of 8-end satin, on the reference head of the
+// - "damask" (As damask): each pixel 4 × 4 threads of 8-end satin, on the reference head of the
 //   whole-loom view (400 hooks): eight characters need 256 hooks and 64 cards a line (and 8 for the gap);
-// - "direct", quick: one pixel per thread, eight characters on a 64-hook head, 16 cards a line (and 2),
+// - "direct" (Square by square): one pixel per thread, eight characters on a 64-hook head, 16 cards a line (and 2),
 //   but letters on a blank ground leave long loose threads.
 // The cloth reads back as the text (decodeCloth), which is how the checks know the program
 // woven is the name typed.

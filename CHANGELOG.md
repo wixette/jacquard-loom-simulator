@@ -2,6 +2,8 @@
 
 What changed in each release. Versions follow `package.json` and are tagged `vX.Y.Z` ([docs/development.md](docs/development.md), *Versions and releases*). Each stage's details are in its notes in [design/](design/).
 
+## Unreleased (1.0.0)
+
 ## 0.2.0
 
 Make and play (2026-10-28): the picture tool, four games and the whole tutorial, in ten languages.
