@@ -162,10 +162,11 @@ body.resizing .stage { pointer-events: none; }
 .popover { position: fixed; z-index: 25; max-height: calc(100dvh - 16px); overflow-y: auto; display: grid; grid-template-columns: auto 1fr; gap: 10px 14px; align-items: center; padding: 14px 16px; border-radius: var(--radius-m); background: var(--md-surface-highest); box-shadow: 0 8px 28px rgba(0, 0, 0, 0.5); }
 .popover label { font-size: 12px; color: var(--md-on-surface-variant); }
 .popover .btn { justify-self: start; height: 32px; padding: 0 12px; }
-.setup-row { padding: 8px 10px 0; }
-.chip.setup-chip { max-width: 100%; gap: 6px; padding: 0 8px; color: var(--md-on-surface); }
-.chip.setup-chip span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.chip.setup-chip .icon { width: 18px; height: 18px; color: var(--md-on-surface-variant); }
+/* the two things to choose before punching, alike and side by side: the ready-made decks and the head (on two lines where they do not fit one) */
+.setup-row { display: flex; flex-wrap: wrap; gap: 8px; padding: 8px 10px 0; }
+.chip.setup-chip, .chip.decks-chip { max-width: 100%; gap: 6px; padding: 0 8px; color: var(--md-on-surface); }
+.chip.setup-chip span, .chip.decks-chip span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.chip.setup-chip .icon, .chip.decks-chip .icon { width: 18px; height: 18px; color: var(--md-on-surface-variant); }
 .popover input[type="color"] { width: 44px; height: 28px; padding: 0; border: 1px solid var(--md-outline-variant); border-radius: 6px; background: none; }
 
 /* ---- the guide (Learn): the tutorial's step card above the panel it needs ---------------------- */

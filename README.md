@@ -93,10 +93,10 @@ Everything is on one screen: the cards on the left, the drawings in the middle, 
 the right, and the controls along the bottom.
 
 - **The cards.** Click a hole, on the card on the bench or in the chain, to punch it or fill it
-  in. The tools over the chain add, duplicate, delete, move and invert cards, load a ready-made
-  deck (plain weave, twill, satin, the arrow), and lace the chain into a loop. The chip above
-  the cards sets the head, from 8 to 64 hooks, and the tie-up, which repeats the pattern across
-  the warp.
+  in. The tools in the panel's head add, duplicate, delete, move and invert cards, and lace the
+  chain into a loop. The two chips above the cards load a ready-made deck (plain weave, twill,
+  satin, the arrow) and set the head, from 8 to 64 hooks, and the tie-up, which repeats the
+  pattern across the warp.
 - **The drawings.** The menu on each view chooses it: four 2D drawings (the head in section,
   the loom from the side and from the front, and the cloth alone) or six 3D models (the whole loom, and its five
   units alone, each with a note on the idea it shows). Show one, two side by side, or four.

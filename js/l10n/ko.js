@@ -200,6 +200,7 @@ export default {
   "bar.language": "언어",
   "bar.about": "정보",
   "setup.chip": "{head} · {tie}",
+  "setup.head": "후크 {hooks}개",
   "setup.tip": "자카드 기계와 통사법입니다. 후크가 몇 개인지, 후크를 날실에 어떻게 묶는지를 정합니다",
   "colours.tip": "날실과 씨실의 색을 정합니다",
   "colours.reset": "초기화",

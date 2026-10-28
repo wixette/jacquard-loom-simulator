@@ -200,6 +200,7 @@ export default {
   "bar.language": "語言",
   "bar.about": "關於",
   "setup.chip": "{head} · {tie}",
+  "setup.head": "{hooks} 個豎鉤",
   "setup.tip": "龍頭和它的穿法：有多少個豎鉤，以及它們怎樣連到經紗上",
   "colours.tip": "經紗和緯紗的顏色",
   "colours.reset": "恢復預設",

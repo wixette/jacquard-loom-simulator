@@ -200,6 +200,7 @@ export default {
   "bar.language": "语言",
   "bar.about": "关于",
   "setup.chip": "{head} · {tie}",
+  "setup.head": "{hooks} 个竖钩",
   "setup.tip": "龙头和它的穿法：有多少个竖钩，以及它们怎样连到经纱上",
   "colours.tip": "经纱和纬纱的颜色",
   "colours.reset": "恢复默认",

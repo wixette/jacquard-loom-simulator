@@ -200,6 +200,7 @@ export default {
   "bar.language": "Lingua",
   "bar.about": "Informazioni",
   "setup.chip": "{head} · {tie}",
+  "setup.head": "{hooks} uncini",
   "setup.tip": "La macchina e la sua legatura: quanti uncini, e come sono legati ai fili d'ordito",
   "colours.tip": "I colori dell'ordito e della trama",
   "colours.reset": "Ripristina",

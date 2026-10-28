@@ -200,6 +200,7 @@ export default {
   "bar.language": "Idioma",
   "bar.about": "Sobre",
   "setup.chip": "{head} · {tie}",
+  "setup.head": "{hooks} ganchos",
   "setup.tip": "A máquina e sua amarração: quantos ganchos, e como eles se amarram aos fios de urdume",
   "colours.tip": "As cores do urdume e da trama",
   "colours.reset": "Redefinir",

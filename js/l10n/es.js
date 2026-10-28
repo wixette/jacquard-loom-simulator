@@ -201,6 +201,7 @@ export default {
   "bar.language": "Idioma",
   "bar.about": "Acerca de",
   "setup.chip": "{head} · {tie}",
+  "setup.head": "{hooks} ganchos",
   "setup.tip": "La máquina y su atado: cuántos ganchos, y cómo se atan a los hilos de urdimbre",
   "colours.tip": "Los colores de la urdimbre y de la trama",
   "colours.reset": "Restablecer",

@@ -200,6 +200,7 @@ export default {
   "bar.language": "Langue",
   "bar.about": "À propos",
   "setup.chip": "{head} · {tie}",
+  "setup.head": "{hooks} crochets",
   "setup.tip": "La mécanique et son empoutage : combien de crochets, et comment ils sont attachés aux fils de chaîne",
   "colours.tip": "Les couleurs de la chaîne et de la trame",
   "colours.reset": "Rétablir",

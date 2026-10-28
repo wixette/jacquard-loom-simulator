@@ -200,6 +200,7 @@ export default {
   "bar.language": "言語",
   "bar.about": "このアプリについて",
   "setup.chip": "{head} · {tie}",
+  "setup.head": "竪針 {hooks} 本",
   "setup.tip": "ジャカード機と通し方です：竪針の本数と、竪針を経糸にどう結ぶかを決めます",
   "colours.tip": "経糸と緯糸の色を決めます",
   "colours.reset": "リセット",

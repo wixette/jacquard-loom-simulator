@@ -487,16 +487,9 @@ export function createShell(store, root) {
 
   /** The card tools, over the chain. */
   function cardTools() {
-    const decks = controls(iconButton("menu_book", "cards.decks", () =>
-      showMenu(
-        decks,
-        Object.entries(PRESETS).map(([key, p]) => ({ label: tn("preset.option", p.rows.length, { name: t(p.name) }), run: () => act.loadPreset(store, key) })),
-      ),
-    ), "cards");
     const loop = controls(iconButton("repeat", "cards.loop", () => act.lace(store, !ls().loom.deck.loop)), "loop");
     follow((s) => [s.looms[s.current].rev], () => loop.setAttribute("aria-pressed", String(ls().loom.deck.loop)));
     return [
-      decks,
       ...[
         iconButton("add", "cards.add", () => act.add(store)),
         iconButton("content_copy", "cards.duplicate", () => act.duplicate(store)),
@@ -554,6 +547,17 @@ export function createShell(store, root) {
 
   /** The head and its tie-up, shown as they are, over the cards; pressed, they can be changed. */
   function setupRow() {
+    // The ready-made decks, a chip with its name beside the head's: the two things to choose
+    // before punching, alike and side by side (as an icon among the card tools it was missed).
+    const decks = controls(el("button", { type: "button", class: "chip decks-chip", "aria-haspopup": "menu" }, [icon("menu_book"), label("span", "cards.decks"), icon("keyboard_arrow_down")]), "cards");
+    decks.addEventListener("click", () =>
+      decks.classList.contains("locked")
+        ? act.say(store, msg("learn.locked"), true)
+        : showMenu(
+            decks,
+            Object.entries(PRESETS).map(([key, p]) => ({ label: tn("preset.option", p.rows.length, { name: t(p.name) }), run: () => act.loadPreset(store, key) })),
+          ),
+    );
     const text = el("span");
     const chip = controls(el("button", { type: "button", class: "chip setup-chip", "aria-haspopup": "dialog" }, [icon("tune"), text, icon("keyboard_arrow_down")]), "setup");
     chip.dataset.l10nTip = "setup.tip";
@@ -562,9 +566,9 @@ export function createShell(store, root) {
     chip.addEventListener("click", () => (chip.classList.contains("locked") ? act.say(store, msg("learn.locked"), true) : setupPopover(chip)));
     follow((s) => [s.looms[s.current].rev, s.locale], () => {
       const { deck, tie } = ls().loom;
-      setText(text, t("setup.chip", { head: tn("hooks.option", deck.hooks / 8, { hooks: deck.hooks }), tie: words(tieLabel(tie)) }));
+      setText(text, t("setup.chip", { head: t("setup.head", { hooks: deck.hooks }), tie: words(tieLabel(tie)) }));
     });
-    return el("div", { class: "setup-row" }, [chip]);
+    return el("div", { class: "setup-row" }, [decks, chip]);
   }
 
   /**

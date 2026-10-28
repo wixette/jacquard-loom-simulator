@@ -200,6 +200,7 @@ export default {
   "bar.language": "Sprache",
   "bar.about": "Über",
   "setup.chip": "{head} · {tie}",
+  "setup.head": "{hooks} Platinen",
   "setup.tip": "Die Maschine und ihre Schnürung: wie viele Platinen, und wie sie an die Kettfäden geschnürt sind",
   "colours.tip": "Die Farben von Kette und Schuss",
   "colours.reset": "Zurücksetzen",

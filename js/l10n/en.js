@@ -223,6 +223,7 @@ export default {
   "bar.language": "Language",
   "bar.about": "About",
   "setup.chip": "{head} · {tie}",
+  "setup.head": "{hooks} hooks",
   "setup.tip": "The head and its tie-up: how many hooks, and how they are tied to the warp ends",
   "colours.tip": "The colours of the warp and the weft",
   "colours.reset": "Reset",
