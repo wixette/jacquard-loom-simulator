@@ -31,6 +31,10 @@ const shell = createShell(store, /** @type {HTMLElement} */ (document.getElement
 window.addEventListener("hashchange", () => openLink(store, location.hash));
 
 // With ?selftest, M6's to M9's checks run on the app (design/m6-notes.md to design/m9-notes.md).
+// With ?debug, the app's store and frame for the tools that drive the page (tools/shots.mjs,
+// tools/video.mjs: the sound to log, the looms to set up).
+if (new URLSearchParams(location.search).has("debug")) /** @type {any} */ (window).app = { store, shell };
+
 if (new URLSearchParams(location.search).has("selftest")) {
   const [{ runM6Checks }, { runM7Checks }, { runM8Checks }, { runM9Checks }, { showSelftest }] = await Promise.all([import("./accept/m6Checks.js"), import("./accept/m7Checks.js"), import("./accept/m8Checks.js"), import("./accept/m9Checks.js"), import("./accept/selftestPanel.js")]);
   // what this device keeps (the picture, the tutorial's place, the tab…) is given back after the

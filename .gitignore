@@ -16,3 +16,4 @@ __pycache__/
 # Local renders and scratch output
 blender/out/
 shots/
+videos/

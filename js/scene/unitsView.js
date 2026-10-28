@@ -71,6 +71,8 @@ export class UnitsView {
     if (getComputedStyle(host).position === "static") host.style.position = "relative";
     this.raycaster = new THREE.Raycaster();
     const canvas = this.viewer.renderer.domElement;
+    // the view, from its canvas: for the tools that steer its camera (tools/shots.mjs, tools/video.mjs)
+    /** @type {any} */ (canvas).unitsView = this;
     // named, and worked by the keyboard too: the arrows move the model, Shift and the arrows turn it
     canvas.setAttribute("role", "img");
     canvas.tabIndex = 0;
