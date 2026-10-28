@@ -2,7 +2,18 @@
 
 What changed in each release. Versions follow `package.json` and are tagged `vX.Y.Z` ([docs/development.md](docs/development.md), *Versions and releases*). Each stage's details are in its notes in [design/](design/).
 
-## Unreleased (1.0.0)
+## 1.0.0
+
+The first full release (2026-10-28): the same loom, tutorial, picture tool and games as 0.2.0,
+reviewed: its links, its state, the keyboard and screen readers, phones, speed, the texts in ten
+languages and the docs.
+
+- **For everyone:** every control is reached by the keyboard, the chain of cards and Design's
+  paper included; screen readers hear what changes, not every moment of a pick; reduced motion
+  is honoured; the frame fits a 320 px phone; a first visit loads a third less.
+- **Links:** every link the app writes opens as it was written, and a link to a puzzle gives the
+  same puzzle in every browser ([design/links.md](design/links.md)).
+- **Games:** chosen from a list of the games by their titles.
 
 **The release review (M11, [design/m11-notes.md](design/m11-notes.md))**
 - Links: an open chain woven to its end, and a loom paused between two moments, reopen as they were; a pick past an open chain's end is refused; Games links open their views, and the name game's reading without a text; a Weave link without a cross-row opens on the first.
