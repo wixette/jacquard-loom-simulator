@@ -4,6 +4,7 @@ What changed in each release. Versions follow `package.json` and are tagged `vX.
 
 ## Unreleased (1.1.0)
 
+- Draw boy against Jacquard: room above and below its eight cords (a pulled cord rises into it).
 - The 3D views frame their object centred and the same size, the whole loom and each of the five units alone: about 80 % of the view's width or height, framed again when the view changes shape (the selector took a fifth of the view, the harness was small, the card cylinder large beside the griffe, and the shed and batten went past the view's top).
 
 - For developers: `pnpm shots --only post- --lang en,zh` takes a set of pictures for posts, and `pnpm video` short clips with the machine's sound, in any language ([docs/development.md](docs/development.md)).

@@ -376,7 +376,10 @@ dialog::backdrop { background: var(--md-scrim); }
 .guess-choice.wrong { border-color: var(--attention); }
 .guess-choice[aria-disabled="true"] { cursor: default; }
 .drawboy-figure { margin: 0; display: flex; align-items: center; gap: 10px; font-size: 12px; color: var(--md-on-surface-variant); }
-.cords { display: grid; grid-template-columns: repeat(8, 1fr); gap: 4px; }
+/* the cords between the words that ask for them and the shuttle, spaced as the panel's own rows; a pulled cord rises 6 px into the room above */
+.drawboy-hand { display: flex; flex-direction: column; gap: 10px; }
+.drawboy-hand > p { margin: 0; }
+.cords { display: grid; grid-template-columns: repeat(8, 1fr); gap: 4px; margin: 6px 0 2px; }
 .cord { height: 52px; border: 1px solid var(--md-outline-variant); border-radius: 6px; background: var(--md-surface-high); color: var(--md-on-surface); font-weight: 650; cursor: pointer; }
 .cord[aria-pressed="true"] { background: var(--lift); color: var(--md-surface); border-color: transparent; transform: translateY(-6px); }
 .machine-slot { flex: 1 1 auto; min-height: 0; display: flex; }
