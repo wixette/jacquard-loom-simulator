@@ -327,7 +327,7 @@ async function opening() {
     for (let k = 0; k < 50 && !doc.querySelector(".app .player"); k++) await sleep(100);
     const app = /** @type {HTMLElement | null} */ (doc.querySelector(".app"));
     const views = [...doc.querySelectorAll(".stage .view-chip .view-name")].map((e) => e.textContent).join(",");
-    const game = /** @type {HTMLElement | null} */ (doc.querySelector('.game-tabs [aria-selected="true"]'))?.dataset.game ?? "";
+    const game = /** @type {HTMLSelectElement | null} */ (doc.querySelector(".game-chooser"))?.value ?? "";
     f.remove();
     return { ws: app?.dataset.ws ?? "no app", views, game };
   };

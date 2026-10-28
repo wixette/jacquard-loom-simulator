@@ -102,7 +102,7 @@ The game the Games workspace opens on (design/m9-notes.md; the workspace was fir
 | `game` | `name`, `byte`, `guess`, `drawboy` | `name` | The game. A name this release does not know opens the name game |
 | `text` | up to 144 characters | the game's own | With `game=name`: the text to weave, its lines joined by a line break |
 | `mode` | `damask`, `direct` | `damask` | With `game=name`: how the name is read, as damask or square by square (`direct`), as Design reads a picture; read with or without `text` |
-| `seed` | 1 … 1,000,000,000 | `1` | With `game=guess`: the puzzle |
+| `seed` | 1 … 1,000,000,000 | `1` | With `game=guess`: the puzzle, the same in every browser. (Before 1.0.0 a seed's puzzle was shuffled as each browser chose, so Chrome and Safari showed different ones; 1.0.0 fixed the shuffle, and with it every seed's puzzle, the one change of reading the format has made. Since then a seed's puzzle is pinned by a test.) |
 
 **One byte per card's secret** carries the message as cards only, in `h=8` and `c` (as in Weave), so the friend it is sent to reads it from the holes or the cloth: the link never holds the text.
 

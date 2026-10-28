@@ -75,6 +75,16 @@ describe("guess the cloth (Q-1)", () => {
       assert.ok(p.cloths.every((c) => c.length === ROWS));
     }
   });
+  it("a seed's puzzle is pinned, the same in every browser (Chrome's V8 and Safari's JavaScriptCore gave these; 1.0.0)", () => {
+    const seen = (/** @type {number} */ seed) => {
+      const p = puzzle(seed);
+      return { cards: p.deck.cards.map(cardToString), answer: p.answer, how: p.how };
+    };
+    const bits = (/** @type {string[]} */ cs) => cs.map((c) => [...c].map((x) => (x === "1" ? "O" : ".")).join(""));
+    assert.deepEqual(seen(1), { cards: bits(["10001001", "00011110", "11011110", "01100010", "00010111"]), answer: 1, how: ["mirrored", null, "inverted"] });
+    assert.deepEqual(seen(7), { cards: bits(["10001010", "01100111"]), answer: 2, how: ["mirrored", "shifted", null] });
+    assert.deepEqual(seen(1_000_000_000), { cards: bits(["00010011", "10000111", "10011010", "10000100", "10011100", "10100100"]), answer: 2, how: ["mirrored", "reversed", null] });
+  });
   it("the same seed gives the same puzzle; others differ", () => {
     assert.deepEqual(puzzle(42), puzzle(42));
     assert.notDeepEqual(puzzle(42).deck, puzzle(43).deck);

@@ -10,7 +10,7 @@ import { puzzle } from "../../game/guessGame.js";
 import { decodeCloth, MAX_CHARS, MAX_LINES, planName } from "../../game/nameGame.js";
 import { cardToString } from "../../sim/deck.js";
 import { MAX_TEXT } from "../../sim/link.js";
-import { el, icon, setText, tabs as tabList } from "../../ui/components.js";
+import { el, icon, setText } from "../../ui/components.js";
 import { clothThumb } from "../../view2d/clothThumb.js";
 import * as play from "../play.js";
 import { GAMES } from "../playState.js";
@@ -29,8 +29,8 @@ export function gamesPanel(store) {
   let box;
   /** @type {HTMLElement} */
   let body;
-  /** @type {HTMLElement} */
-  let tabs;
+  /** The game chooser: a list of the games by their titles, as many as there come to be. @type {HTMLSelectElement} */
+  let chooser;
   /** The game laid out, and the language, to know when to lay it out again. */
   let shown = "";
   /** What follows the state, set by the game laid out. @type {(s: AppState) => void} */
@@ -186,31 +186,23 @@ export function gamesPanel(store) {
   /** Lay the panel out for the game on show. @param {AppState} s */
   const build = (s) => {
     shown = `${s.play.game}/${s.play.byte.secret}/${s.play.guess.seed}/${s.locale}`;
-    tabs.setAttribute("aria-label", t("game.choose"));
-    // one panel for the four tabs (so no aria-controls, which the shared tablist would hide), named by the tab on show
-    body.setAttribute("aria-labelledby", `game-tab-${s.play.game}`);
-    for (const b of /** @type {HTMLElement[]} */ ([...tabs.children])) {
-      b.setAttribute("aria-selected", String(b.dataset.game === s.play.game));
-      b.tabIndex = b.dataset.game === s.play.game ? 0 : -1;
-      setText(b, t(`game.${b.dataset.game}`));
-    }
+    chooser.setAttribute("aria-label", t("game.choose"));
+    for (const o of chooser.options) o.text = t(`game.${o.value}.title`);
+    chooser.value = s.play.game;
     const game = { name: nameGame, byte: byteGame, guess: guessGame, drawboy: drawBoyGame }[s.play.game];
-    body.replaceChildren(el("h3", { class: "game-title", text: t(`game.${s.play.game}.title`) }), ...game());
+    // the title is the chooser's, on show; kept as the heading a screen reader goes by
+    body.replaceChildren(el("h3", { class: "game-title visually-hidden", text: t(`game.${s.play.game}.title`) }), ...game());
   };
 
   return {
     name: "comp.games",
     mount(h) {
-      tabs = el("div", { class: "tabs game-tabs", role: "tablist" });
-      for (const g of GAMES) {
-        const b = el("button", { type: "button", role: "tab", class: "tab", id: `game-tab-${g}` });
-        b.dataset.game = g;
-        tabs.append(b);
-      }
-      // the arrow keys, Home and End choose a game, as a click does (the shared tablist)
-      tabList(tabs, (id) => play.chooseGame(store, /** @type {import("../playState.js").GameName} */ (id.slice("game-tab-".length))));
-      body = el("div", { class: "game-body", id: "game-body", role: "tabpanel" });
-      box = el("div", { class: "games-box" }, [tabs, body]);
+      // a list, not tabs: a game is chosen, not a page of the panel shown, and more games fit it
+      chooser = /** @type {HTMLSelectElement} */ (el("select", { class: "game-chooser" }));
+      for (const g of GAMES) chooser.add(new Option("", g));
+      chooser.addEventListener("change", () => play.chooseGame(store, /** @type {import("../playState.js").GameName} */ (chooser.value)));
+      body = el("div", { class: "game-body" });
+      box = el("div", { class: "games-box" }, [el("div", { class: "game-choose" }, [chooser]), body]);
       h.appendChild(box);
     },
     watch(s) {

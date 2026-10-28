@@ -9,7 +9,7 @@
 |---|---|---|
 | The games' logic | `js/game/nameGame.js`, `js/game/byteGame.js`, `js/game/guessGame.js`, `js/game/drawBoy.js` | Pure: no DOM |
 | Games | `js/app/playState.js`, `js/app/play.js` | The game on show and each game's state; the game loom set up for it; the actions the panel calls |
-| The panel | `js/app/components/games.js`, `css/app.css` | A tab per game; the game's controls; on the right, the machine (the section) as it weaves |
+| The panel | `js/app/components/games.js`, `css/app.css` | A list of the games by their titles (tabs until 1.0.0); the game's controls; on the right, the machine (the section) as it weaves |
 | Links | `js/sim/link.js`, `js/app/links.js` | `w=play` with `game`, `text`, `mode`, `seed`; one byte per card's message as its cards only (design/links.md, Games) |
 
 ## The games
@@ -32,6 +32,7 @@
 
 5. **The name game takes a message, not only a name:** the text wraps at the spaces into lines of 8 characters (a word longer than a line is cut; a line break typed is kept), up to 16 lines, about 100 characters, with two blank pixel rows between lines so that a descender never meets the line below. Sixteen lines as damask are 1,144 cards on 256 hooks; a link's `text` takes up to 144 characters. The cloth, read back, shows the text as typed.
 6. **The cloth view draws a long cloth cheaply:** it lays two tiles (warp over, weft over) as patterns, a rectangle for each run of squares alike, instead of a gradient for every square (about 110 ms instead of 420 for 1,000 rows on 256 ends); and while the loom plays, it draws again only when a row is woven or the row in the shed appears or goes, not at every frame. It shows up to 1,200 rows, the newest.
+7. **The games are chosen from a list, not tabs** (1.0.0, the author's call): a list holds as many games as there come to be, where four tabs were already tight on a phone; and a game is chosen, not a page of the panel shown. Each game is listed by its title, which the list shows as the panel's heading.
 
 ## Acceptance spec
 
@@ -39,7 +40,7 @@ The games' logic is checked in `pnpm test` (above); these are the app's own, on 
 
 | ID | Statement | Kind |
 |---|---|---|
-| P-1 | Games opens on its loom with the cloth, and a tab for each of the four games opens it. | page |
+| P-1 | Games opens on its loom with the cloth, and the list of the four games, by their titles, opens each. | page |
 | P-2 | The name game: the text typed, woven to the end, reads back as typed, as damask and square by square. | page |
 | P-3 | One byte per card: a card a character, the cloth reads back as the message; its link gives only the cards, to be read. | page |
 | P-4 | Guess the cloth: three cloths; a wrong pick is told why, the right one counted; Next brings another. | page |

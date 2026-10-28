@@ -1,26 +1,21 @@
 // Copies the browser files of the page's libraries from node_modules into vendor/, where the
-// pages load them (three.js through their import maps, the font through css/fonts.css). The
-// icons the page uses are written into one module of SVG paths, vendor/material-symbols/icons.js.
+// pages load them (three.js through their import maps, the font through css/fonts.css). three.js
+// is minified on the way (esbuild): its two build files bundled into one, the addons each on its
+// own, their licence comments kept; the package ships no minified build. The icons the page uses
+// are written into one module of SVG paths, vendor/material-symbols/icons.js.
 // Run `pnpm vendor` after changing a version in package.json or the list of icons below;
 // tests/vendor.test.js fails while vendor/ is out of date.
 
+import { buildSync, transformSync } from "esbuild";
 import { copyFileSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = fileURLToPath(new URL("..", import.meta.url));
 
-/** Files the pages need, by package. Addons import each other by relative path. */
+/** Files the pages need, copied as they are, by package. */
 export const VENDORED = {
-  three: [
-    "LICENSE",
-    "build/three.module.js",
-    "build/three.core.js",
-    "examples/jsm/controls/OrbitControls.js",
-    "examples/jsm/loaders/GLTFLoader.js",
-    "examples/jsm/utils/BufferGeometryUtils.js",
-    "examples/jsm/utils/SkeletonUtils.js", // GLTFLoader imports it
-  ],
+  three: ["LICENSE"],
   // Roboto Flex, weight axis only, every subset but CJK (docs/ui-design.md, Theme).
   "@fontsource-variable/roboto-flex": [
     "LICENSE",
@@ -28,6 +23,31 @@ export const VENDORED = {
   ],
   "@material-symbols/svg-400": ["LICENSE"],
 };
+
+/**
+ * three.js, minified: the file in vendor/three/ and the one in node_modules/three it is made
+ * from. The build is one module (three.module.js with three.core.js bundled in), what the import
+ * maps' "three" names; an addon keeps its imports ("three", and each other by relative path).
+ */
+export const MINIFIED = {
+  "build/three.module.min.js": "build/three.module.js",
+  "examples/jsm/controls/OrbitControls.js": "examples/jsm/controls/OrbitControls.js",
+  "examples/jsm/loaders/GLTFLoader.js": "examples/jsm/loaders/GLTFLoader.js",
+  "examples/jsm/utils/BufferGeometryUtils.js": "examples/jsm/utils/BufferGeometryUtils.js",
+  "examples/jsm/utils/SkeletonUtils.js": "examples/jsm/utils/SkeletonUtils.js", // GLTFLoader imports it
+};
+
+/**
+ * A three.js file minified, as vendor/ holds it.
+ * @param {string} from its path in node_modules/three
+ * @returns {string}
+ */
+export function minified(from) {
+  const file = sourcePath("three", from);
+  const options = /** @type {const} */ ({ minify: true, format: "esm", target: "es2022", legalComments: "inline", charset: "utf8" });
+  if (from === "build/three.module.js") return buildSync({ ...options, entryPoints: [file], bundle: true, write: false }).outputFiles[0].text;
+  return transformSync(readFileSync(file, "utf8"), { ...options, loader: "js" }).code;
+}
 
 /** Where each package goes under vendor/ (a short name for the scoped ones). */
 const DIR = /** @type {Record<string, string>} */ ({
@@ -145,6 +165,11 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
     }
     process.stdout.write(`vendor/${DIR[pkg] ?? pkg}: ${files.length} files\n`);
   }
+  for (const [to, from] of Object.entries(MINIFIED)) {
+    mkdirSync(dirname(vendorPath("three", to)), { recursive: true });
+    writeFileSync(vendorPath("three", to), minified(from));
+  }
+  process.stdout.write(`vendor/three: ${Object.keys(MINIFIED).length} files minified\n`);
   writeFileSync(ICONS_MODULE, iconsModule());
   process.stdout.write(`vendor/material-symbols/icons.js: ${ICONS.length} icons\n`);
 }

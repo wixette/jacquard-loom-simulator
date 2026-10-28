@@ -42,8 +42,8 @@ export async function runM9Checks(page) {
 }
 
 /**
- * P-1: Games opens on the game loom, the cloth on the stage, the games in four tabs; a tab
- * chooses its game.
+ * P-1: Games opens on the game loom, the cloth on the stage, the games in a list by their
+ * titles; choosing one opens it (1.0.0: a list, not tabs, so more games fit).
  * @param {AppPage} page
  * @returns {Promise<CheckResult>}
  */
@@ -52,14 +52,18 @@ async function opens({ store }) {
   const bad = [];
   if (store.state.workspace !== "play" || store.state.current !== "game") bad.push(`${store.state.workspace}, ${store.state.current}`);
   if (store.state.views.join() !== "cloth") bad.push(`views ${store.state.views.join()}`);
-  const tabs = $$(".game-tabs [role=tab]");
-  if (tabs.map((b) => b.dataset.game).join() !== GAMES.join()) bad.push(`tabs ${tabs.map((b) => b.dataset.game).join()}`);
-  for (const b of tabs) {
-    b.click();
+  const chooser = /** @type {HTMLSelectElement | null} */ ($(".game-chooser"));
+  const listed = chooser ? [...chooser.options].map((o) => o.value) : [];
+  if (listed.join() !== GAMES.join()) bad.push(`the list of games is ${listed.join()}`);
+  if (chooser && [...chooser.options].some((o) => o.text !== t(`game.${o.value}.title`))) bad.push("a game not listed by its title");
+  for (const g of listed) {
+    if (!chooser) break;
+    chooser.value = g;
+    chooser.dispatchEvent(new Event("change"));
     await frames();
-    if (store.state.play.game !== b.dataset.game || $(".game-title")?.textContent !== t(`game.${b.dataset.game}.title`)) bad.push(`the ${b.dataset.game} tab did not open its game`);
+    if (store.state.play.game !== g || $(".game-title")?.textContent !== t(`game.${g}.title`)) bad.push(`choosing ${g} did not open it`);
   }
-  return result("P-1", "Games opens on its loom with the cloth, and a tab for each of the four games opens it", bad.length === 0, bad.slice(0, 4).join("; ") || GAMES.join(", "));
+  return result("P-1", "Games opens on its loom with the cloth, and the list of the four games, by their titles, opens each", bad.length === 0, bad.slice(0, 4).join("; ") || GAMES.join(", "));
 }
 
 /**

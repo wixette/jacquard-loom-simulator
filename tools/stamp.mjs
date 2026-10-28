@@ -98,7 +98,7 @@ export function stamp(html, page, version, modules) {
   /** @type {Record<string, string>} */
   const imports = {};
   // three.js arrives with the 3D units (M3); until then nothing is vendored.
-  if (modules.includes("vendor/three/build/three.module.js")) imports.three = url("vendor/three/build/three.module.js") + v;
+  if (modules.includes("vendor/three/build/three.module.min.js")) imports.three = url("vendor/three/build/three.module.min.js") + v;
   for (const f of modules.filter((f) => f.startsWith("vendor/three/examples/jsm/"))) {
     imports[`three/addons/${f.slice("vendor/three/examples/jsm/".length)}`] = url(f) + v;
   }

@@ -12,7 +12,12 @@ What changed in each release. Versions follow `package.json` and are tagged `vX.
 - Speed: a change of views no longer loads a 3D view again; less is done every frame while the loom plays; a long looped link no longer fills the memory.
 - Save a picture draws the cloth afresh; the printed cards' note is in the page's language, and a card wider than A4 is refused.
 - Translations: Open in Weave's tooltip in all nine languages, and the errors the review found.
-- The docs made to match the app, and tests for each fix (475 unit tests; `pnpm selftest` fails a page that runs no checks).
+- The docs made to match the app, and tests for each fix (476 unit tests; `pnpm selftest` fails a page that runs no checks).
+
+**After the review**
+- Games: the game is chosen from a list of the games by their titles, in place of four tabs, so more games fit.
+- Guess the cloth: a seed gives the same puzzle in every browser (it was shuffled as each browser chose). Every seed's puzzle changed with it, so a 0.2.0 link to a puzzle shows another one.
+- three.js minified: a first visit loads about 1.4 MB less, in one request fewer.
 
 ## 0.2.0
 

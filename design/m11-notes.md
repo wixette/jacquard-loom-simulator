@@ -1,6 +1,6 @@
 # M11 notes: the release review
 
-- **Status:** under way since 2026-10-28, on the branch `release/v1.0.0`, the milestone of release 1.0.0 ([public-app.md](public-app.md) §4). The first pass, a review of the code, the docs, the tests and the translations, is done; the open questions below wait for the author.
+- **Status:** done 2026-10-28, on the branch `release/v1.0.0`, the milestone of release 1.0.0 ([public-app.md](public-app.md) §4): a review of the code, the docs, the tests and the translations, its fixes, and the author's decisions on the questions it left.
 
 ## How the review was done
 
@@ -22,22 +22,12 @@ Every finding was checked in the code before it was fixed, and each fix has a te
 - **Docs:** 30 mismatches (links.md's rules, the layouts, the plan, the notes' specs, licensing, development); all fixed.
 - **Translations:** one tooltip never translated after its English changed; a handful of errors; the rest for the native speakers (below).
 
-## Open questions, for the author
+## Open questions, decided by the author (2026-10-28)
 
-From the plan (ui-layout.md §7) and the review:
-
-1. A chain-as-timeline strip with a playhead, for long decks.
-2. The four-view arrangement below 1440 px wide.
-3. A glow on parts in 3D, as the section has.
-4. The harness in 3D for draw boy against Jacquard.
-5. Pictures of Babbage's and Hollerith's machines for part 6.
-6. A logo and favicon drawn as a pair.
-7. **Guess the cloth's puzzles differ between browsers.** The deck is shuffled by `sort` with a random comparator, whose result each engine decides: seed 1 gives another puzzle in Safari than in Chrome. A Fisher–Yates shuffle fixes it, but changes every seed's puzzle, so the links of 0.2.0 would show other puzzles. To decide before 1.0.0.
-8. **three.js unminified:** the minified build would halve the scripts a first visit loads.
-9. **The phone's section and caption:** at 320 px the section is small in its pane and the caption is cut at two lines; and Design's cloth shows its top rows only.
-10. **The tablet's own layout** (ui-layout.md §5) is not built: an upright tablet has the phone's.
-11. **Following a thread by the keyboard** is by the hook numbers over the chain; the cloth and the drawings are still followed by the pointer only.
+- **Not in 1.0.0, as they are:** a chain-as-timeline strip (the cards panel already shows the card on the needles); the views' arrangements below 1440 px; 3D steps pointing by a unit alone, without a glow; draw boy against Jacquard in 2D; part 6 in words, without pictures; the logo as it is, also the favicon; the phone's section and caption at 320 px; the tablet with the phone's layout; following a thread by the keyboard from the hook numbers only.
+- **Done for 1.0.0:** guess the cloth's shuffle made the same in every browser (Fisher–Yates; every seed's puzzle changed once, links.md says so; three seeds pinned by a test, checked in V8 and JavaScriptCore); three.js minified in `pnpm vendor` (esbuild), from 2.3 MB to 0.8 MB; the games chosen from a list by their titles, not tabs (m9-notes, decision 7).
+- **The translations and the tutorial's text:** checked by the author in a few rounds, not every string; good enough for 1.0.0.
 
 ## For the native speakers
 
-Beyond design/m7-notes.md's list: es and pt-BR "rompecabezas"/"quebra-cabeça" for a puzzle (a jigsaw?), and es "cartones" where computing says "tarjetas perforadas"; fr "une espace" (byte.hint); fr and it the draw boy's tab, long on a phone; it "Quadretto per quadretto"; ja 段のうち段 (drawboy.row); fr spaces before : ; ? ! not yet narrow and unbreakable.
+Beyond design/m7-notes.md's list: es and pt-BR "rompecabezas"/"quebra-cabeça" for a puzzle (a jigsaw?), and es "cartones" where computing says "tarjetas perforadas"; fr "une espace" (byte.hint); it "Quadretto per quadretto"; ja 段のうち段 (drawboy.row); fr spaces before : ; ? ! not yet narrow and unbreakable.

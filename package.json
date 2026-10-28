@@ -31,6 +31,7 @@
     "@material-symbols/svg-400": "0.48.0",
     "@types/node": "24.19.2",
     "@types/three": "0.186.0",
+    "esbuild": "0.25.0",
     "three": "0.186.1",
     "typescript": "7.0.2"
   }
