@@ -4,6 +4,8 @@ What changed in each release. Versions follow `package.json` and are tagged `vX.
 
 ## Unreleased (1.1.0)
 
+- The head's section shows the shuttle crossing through the shed, between the warp-up and warp-down lines, laying its weft, as the front view does (it showed nothing at the moment "Shuttle across").
+
 - A unit opened by a click in the whole loom in 3D is the view on show: the view's chip and menu name it, a link keeps it, and Whole loom brings the machine back (the menu still said the whole loom, and choosing it did nothing). Going between the 3D views flies the same view's camera, without loading the models again.
 
 - On a phone, Share, the language and About are on the right of the top bar, each a button of its own, as on the desktop and in the sibling simulators (the language and About were folded into a menu, and the three sat on the left).

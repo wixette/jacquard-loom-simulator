@@ -14,6 +14,8 @@
 
 /* ---- the head in section ------------------------------------------------------------------- */
 svg.section .wood { fill: var(--wood); stroke: var(--wood-edge); stroke-width: 0.6; }
+svg.section .shuttle { fill: var(--wood-light); stroke: var(--wood-edge); stroke-width: 0.6; }
+svg.section .weft { stroke: var(--weft-thread); stroke-width: 2; }
 svg.section .board-face { fill-opacity: 0.85; }
 svg.section .griffe-frame { fill: var(--ghost-fill); stroke: var(--ghost-line); stroke-width: 0.6; stroke-dasharray: 3 2; }
 svg.section .knife { fill: var(--iron); }
