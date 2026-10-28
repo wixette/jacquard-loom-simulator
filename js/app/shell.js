@@ -59,6 +59,17 @@ const MENU_VIEWS = /** @type {const} */ (["section", "side", "front", "3d", "u1"
 /** The workspaces of this release, in the order the bar shows them. */
 const WORKSPACES = /** @type {const} */ (["learn", "weave", "create", "play"]);
 
+/** The 3D view that shows a unit alone, or the whole machine. @param {"machine" | UnitId} unit @returns {StageView} */
+const viewOfUnit = (unit) => /** @type {StageView} */ (Object.entries(UNIT_VIEWS).find(([, u]) => u.unit === unit)?.[0] ?? "3d");
+
+/**
+ * What a pane keeps across a change of views: the 3D views are one pane, which shows the whole
+ * machine or a unit alone by flying its camera (a click on a unit opens it in the same view), so
+ * going between them neither loads the models again nor loses the camera.
+ * @param {StageView} v
+ */
+const paneKind = (v) => (is3d(v) ? "3d" : v);
+
 /**
  * A view's component.
  * @param {AppStore} store
@@ -160,6 +171,8 @@ export function createShell(store, root) {
   let unwatch = [];
   /** @type {Mode | null} */
   let mode = null;
+  /** How a 3D pane is told to show another 3D view, by its node. @type {WeakMap<HTMLElement, (v: StageView) => void>} */
+  const retarget = new WeakMap();
   /** The phone sheet's tab on show, kept across a rebuild. @type {string | null} */
   let sheetTab = null;
 
@@ -657,7 +670,9 @@ export function createShell(store, root) {
   function pane(i, v) {
     const host = el("div", { class: "pane-host" });
     const chip = el("button", { type: "button", class: "chip view-chip", "aria-haspopup": "menu" }, [el("span", { class: "view-name" }), icon("keyboard_arrow_down")]);
-    follow((s) => [s.locale], () => (/** @type {HTMLElement} */ (chip.firstChild).textContent = viewName(v)));
+    /** The view this pane shows now: a 3D pane, whichever 3D view the store says (a unit opened by a click included). */
+    const now = () => (paneKind(store.state.views[i] ?? v) === paneKind(v) ? store.state.views[i] : v);
+    follow((s) => [s.locale, s.views[i]], () => (/** @type {HTMLElement} */ (chip.firstChild).textContent = viewName(now())));
     // One flat list: the 2D drawings, the 3D models, then the cloth; a view on show in another
     // pane says where, and choosing it swaps the two (js/app/arrange.js).
     chip.addEventListener("click", () => {
@@ -669,7 +684,7 @@ export function createShell(store, root) {
           const name = viewName(x, true);
           return {
             label: at >= 0 && at !== i ? `${name} · ${t(placeKey(at, views.length))}` : name,
-            checked: x === v,
+            checked: x === now(),
             divider: x === "section" ? t("view.group.2d") : x === "cloth" ? true : x === "3d" ? t("view.group.3d") : undefined,
             run: () => act.setViews(store, choose(store.state.views, i, x)),
           };
@@ -689,10 +704,18 @@ export function createShell(store, root) {
       onMode = (unit) => {
         note.show(unit);
         counts.shownFor(unit);
+        // a unit opened by a click in the whole machine is the view on show: the menu, the
+        // chip, a link and the way back to the whole machine all know it
+        const want = viewOfUnit(unit);
+        if (paneKind(store.state.views[i] ?? "") === "3d" && store.state.views[i] !== want) act.setViews(store, choose(store.state.views, i, want));
       };
     }
-    put(viewComponent(store, v, onMode), host);
-    return el("div", { class: "pane" }, [host, tools]);
+    const component = viewComponent(store, v, onMode);
+    put(component, host);
+    const node = el("div", { class: "pane" }, [host, tools]);
+    // the same 3D pane told to show another 3D view: its camera flies there
+    if ("showUnit" in component) retarget.set(node, (/** @type {StageView} */ nv) => /** @type {any} */ (component).showUnit(UNIT_VIEWS[/** @type {keyof typeof UNIT_VIEWS} */ (nv)].unit));
+    return node;
   }
 
   /**
@@ -791,11 +814,15 @@ export function createShell(store, root) {
     let shownPanes = [];
     follow((s) => [s.views], () => {
       st.dataset.n = String(store.state.views.length);
-      const keys = store.state.views.map((v, i) => `${i}:${v}`);
+      const keys = store.state.views.map((v, i) => `${i}:${paneKind(v)}`);
       for (const p of shownPanes) if (!keys.includes(p.key)) remake(p.mine, () => []);
       shownPanes = keys.map((key, i) => {
         const kept = shownPanes.find((p) => p.key === key);
-        if (kept) return kept;
+        // a 3D pane kept, to show another 3D view: its camera flies there
+        if (kept) {
+          retarget.get(kept.node)?.(store.state.views[i]);
+          return kept;
+        }
         const made = remake({ placed: [], unwatch: [] }, () => [pane(i, store.state.views[i])]);
         return { key, node: made.nodes[0], mine: made.mine };
       });
@@ -849,11 +876,18 @@ export function createShell(store, root) {
     });
     const one = el("div", { class: "panes", style: "display: contents" });
     let mine = { placed: /** @type {Placed[]} */ ([]), unwatch: /** @type {(() => void)[]} */ ([]) };
+    /** The pane's kind on show (the 3D views are one pane, its camera flying between them). */
+    let kind = "";
     follow((s) => [s.views[0]], () => {
       const v = store.state.views[0];
-      const made = remake(mine, () => [pane(0, v)]);
-      one.replaceChildren(...made.nodes);
-      mine = made.mine;
+      const node = /** @type {HTMLElement | undefined} */ (one.firstElementChild ?? undefined);
+      if (node && paneKind(v) === kind) retarget.get(node)?.(v);
+      else {
+        const made = remake(mine, () => [pane(0, v)]);
+        one.replaceChildren(...made.nodes);
+        mine = made.mine;
+        kind = paneKind(v);
+      }
       for (const b of /** @type {HTMLElement[]} */ ([...chips.children])) b.setAttribute("aria-pressed", String(chipView(b) === v));
       // the view on show is in sight in the strip (Design and Games open on the cloth, its end)
       const on = /** @type {HTMLElement | undefined} */ ([...chips.children].find((b) => chipView(/** @type {HTMLElement} */ (b)) === v));

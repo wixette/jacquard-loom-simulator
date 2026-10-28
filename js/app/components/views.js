@@ -230,9 +230,19 @@ export function unitsView(store, o = {}) {
   const say = () => (note.textContent = failed !== null ? t("units.failed", { error: failed }) : t("units.loading", { percent: Math.round(progress * 100) }));
   /** The counts turned on or off: drawn again (they are placed as each frame is drawn). */
   const relabelled = () => view?.viewer.invalidate();
-  /** @type {Component} */
+  /**
+   * The component, and how to show another unit (or the whole machine) in the same view, as a
+   * flight of its camera, without loading the models again.
+   * @type {Component & { showUnit: (unit: "machine" | UnitId) => void }}
+   */
   const component = {
     name: "comp.units",
+    showUnit(unit) {
+      o.unit = unit;
+      if (!view?.loaded || view.mode === unit) return;
+      if (unit === "machine") view.showMachine();
+      else view.show(unit);
+    },
     mount(h) {
       host = h;
       restore = asView(h);

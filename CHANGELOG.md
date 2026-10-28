@@ -4,6 +4,8 @@ What changed in each release. Versions follow `package.json` and are tagged `vX.
 
 ## Unreleased (1.1.0)
 
+- A unit opened by a click in the whole loom in 3D is the view on show: the view's chip and menu name it, a link keeps it, and Whole loom brings the machine back (the menu still said the whole loom, and choosing it did nothing). Going between the 3D views flies the same view's camera, without loading the models again.
+
 - On a phone, Share, the language and About are on the right of the top bar, each a button of its own, as on the desktop and in the sibling simulators (the language and About were folded into a menu, and the three sat on the left).
 - On a phone, the 3D chip opens a menu of the whole loom and its five units (they were reached only by tapping one in the whole loom).
 - The counts over the whole loom in 3D (416 hooks, 1,600 warp ends…) show by themselves only where the view is large enough not to be covered by them, so not on a phone; a switch by the view's ⓘ turns them on or off, kept on the device.
