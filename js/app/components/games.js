@@ -50,7 +50,7 @@ export function gamesPanel(store) {
     }
     const all = el("button", { type: "button", class: "btn filled" }, [icon("skip_next"), el("span", { text: t("game.weaveAll") })]);
     all.addEventListener("click", () => play.weaveAll(store));
-    const read = el("p", { class: "game-result", "aria-live": "polite" });
+    const read = el("p", { class: "game-result" });
     follow = (s) => {
       for (const b of /** @type {HTMLElement[]} */ ([...modes.children])) b.setAttribute("aria-pressed", String(b.dataset.mode === s.play.name.mode));
       const r = planName(s.play.name.text, s.play.name.mode);
@@ -58,6 +58,8 @@ export function gamesPanel(store) {
       // the cloth read back line by line; when it is the text's lines, the text as typed (its line breaks as " / ")
       const back = r.ok && cloth.length >= r.plan.deck.cards.length ? decodeCloth(cloth, r.plan) : [];
       const typed = s.play.name.text.split("\n").map((l) => l.trim().replace(/ +/g, " ")).filter((l, i, all) => l !== "" || all.slice(i).some((x) => x.trim() !== "")).join(" / ");
+      // said aloud once the cloth reads back, not at every row woven
+      read.setAttribute("aria-live", back.length ? "polite" : "off");
       setText(read, !r.ok ? "" : back.length === 0 ? t("name.weaving", { rows: cloth.length, of: r.plan.deck.cards.length }) : t("name.reads", { text: back.join("\n") === r.plan.lines.join("\n") ? typed : back.join(" / ") }));
     };
     return [p("name.about", { per: MAX_CHARS, lines: MAX_LINES }), text, el("div", { class: "game-row" }, [el("span", { class: "game-label", text: t("pic.reading.label") }), modes]), p("name.modes"), el("div", { class: "game-row" }, [all]), read];

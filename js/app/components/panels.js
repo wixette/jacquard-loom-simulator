@@ -37,7 +37,8 @@ export function clothPanel(store, o = {}) {
     name: "comp.cloth",
     mount(h) {
       host = h;
-      box = el("div", { class: o.large ? "cloth-box large" : "cloth-box" });
+      // a box that scrolls is reached by the keyboard, to scroll it
+      box = el("div", { class: o.large ? "cloth-box large" : "cloth-box", tabindex: "0", role: "group", "data-l10n-name": "cloth.title" });
       h.appendChild(box);
       view = new ClothView(box, { onCell: (pick, end) => followCloth(store, pick, end, o.loom) });
     },
@@ -259,10 +260,14 @@ export function statusPanel(_store, o = {}) {
       h.appendChild(line);
     },
     watch(s) {
-      return [loomOf(s, o.loom).status, s.locale];
+      const ls = loomOf(s, o.loom);
+      return [ls.status, ls.playing, s.locale];
     },
     update(s) {
-      const { status } = loomOf(s, o.loom);
+      const { status, playing } = loomOf(s, o.loom);
+      // while the loom plays it says each moment, several a second: a screen reader hears only
+      // a refusal then, and the line as it stands once the loom stops
+      line.setAttribute("aria-live", playing && !status.warn ? "off" : "polite");
       line.textContent = say(status.msg);
       line.title = line.textContent;
       line.classList.toggle("warn", status.warn);

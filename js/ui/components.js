@@ -146,7 +146,14 @@ export function setTip(e, text) {
     clearTimeout(tipTimer);
     tipTimer = setTimeout(() => {
       if (!e.isConnected || !e.dataset.tip) return;
-      tipBox ??= document.body.appendChild(el("div", { class: "tooltip", role: "presentation" }));
+      if (!tipBox) {
+        tipBox = el("div", { class: "tooltip", role: "presentation" });
+        // Esc puts a tooltip away without moving the pointer or the focus (WCAG 1.4.13)
+        document.addEventListener("keydown", (k) => k.key === "Escape" && tipBox && (tipBox.hidden = true), true);
+      }
+      // in a modal dialog's top layer when one is open, else it would show under the dialog
+      const layer = document.querySelector("dialog[open]") ?? document.body;
+      if (tipBox.parentElement !== layer) layer.appendChild(tipBox);
       tipBox.textContent = e.dataset.tip;
       tipBox.hidden = false;
       const r = e.getBoundingClientRect();
@@ -217,12 +224,13 @@ export function showPopover(anchor, id, name, rows, cls = "", onShut = () => {})
     cancelAnimationFrame(frame);
     pop.remove();
     document.removeEventListener("pointerdown", away);
+    document.removeEventListener("focusin", away);
     document.removeEventListener("keydown", esc);
     window.removeEventListener("resize", follow);
     window.removeEventListener("scroll", follow, true);
     onShut();
   };
-  const away = (/** @type {PointerEvent} */ e) => {
+  const away = (/** @type {Event} */ e) => {
     if (!pop.contains(/** @type {Node} */ (e.target)) && !anchor.contains(/** @type {Node} */ (e.target))) shut();
   };
   const esc = (/** @type {KeyboardEvent} */ e) => {
@@ -233,6 +241,8 @@ export function showPopover(anchor, id, name, rows, cls = "", onShut = () => {})
   pop.addEventListener("shut", shut, { once: true });
   // listening first, so that a popover whose anchor has already gone shuts all it set up
   document.addEventListener("pointerdown", away);
+  // the keyboard leaving it (Tab past its last control, Shift+Tab before its first) shuts it too
+  document.addEventListener("focusin", away);
   document.addEventListener("keydown", esc);
   window.addEventListener("resize", follow);
   window.addEventListener("scroll", follow, true);

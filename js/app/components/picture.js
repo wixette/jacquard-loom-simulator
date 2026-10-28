@@ -87,7 +87,17 @@ export function picturePanel(store, o) {
     }
     g.stroke();
     g.globalAlpha = 1;
+    // the keyboard's square, while the paper has the keyboard
+    if (document.activeElement === grid && grid.matches(":focus-visible")) {
+      const k = Math.min(cursor.x, n - 1);
+      const m = Math.min(cursor.y, n - 1);
+      g.strokeStyle = token("--md-primary", "#9ccaff");
+      g.lineWidth = 2;
+      g.strokeRect(k * c + 1, m * c + 1, c - 2, c - 2);
+    }
   };
+  /** The square the arrow keys are on. */
+  let cursor = { x: 0, y: 0 };
 
   /** The square under a pointer, or null. @param {PointerEvent} e */
   const squareAt = (e) => {
@@ -98,6 +108,8 @@ export function picturePanel(store, o) {
     return x >= 0 && y >= 0 && x < n && y < n ? { x, y } : null;
   };
 
+  /** Where the keyboard is on the paper, said to a screen reader. @type {HTMLElement} */
+  let gridSaid;
   /** What the note says, written again in another language. */
   let note = () => "";
   /** @param {HTMLInputElement} input */
@@ -170,7 +182,29 @@ export function picturePanel(store, o) {
   return {
     name: "comp.picture",
     mount(h) {
-      grid = el("canvas", { class: "pic-grid", role: "img" });
+      // painted by the pointer, or by the keyboard: the arrows move a square, Space or Enter paints it
+      grid = el("canvas", { class: "pic-grid", role: "application", tabindex: "0" });
+      const said = el("span", { class: "visually-hidden", "aria-live": "polite" });
+      const sayAt = () => {
+        const rows = spec().rows;
+        said.textContent = t(rows[cursor.y]?.[cursor.x] ? "pic.square.dark" : "pic.square.light", { row: cursor.y + 1, col: cursor.x + 1 });
+      };
+      grid.addEventListener("focus", () => (draw(spec().rows), sayAt()));
+      grid.addEventListener("blur", () => draw(spec().rows));
+      grid.addEventListener("keydown", (e) => {
+        const n = spec().rows.length;
+        const step = /** @type {Record<string, [number, number]>} */ ({ ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] })[e.key];
+        if (step) cursor = { x: Math.max(0, Math.min(n - 1, cursor.x + step[0])), y: Math.max(0, Math.min(n - 1, cursor.y + step[1])) };
+        else if (e.key === " " || e.key === "Enter") {
+          const rows = spec().rows.map((r) => [...r]);
+          rows[cursor.y][cursor.x] = !rows[cursor.y][cursor.x];
+          change({ rows });
+        } else return;
+        e.preventDefault();
+        draw(spec().rows);
+        sayAt();
+      });
+      gridSaid = said;
       // Painting: the first square pressed decides whether the stroke paints dark or light.
       /** @type {boolean | null} */
       let paint = null;
@@ -261,6 +295,7 @@ export function picturePanel(store, o) {
         ui.note,
         threshold,
         grid,
+        gridSaid,
       ]);
       h.appendChild(box);
     },

@@ -4,6 +4,7 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+import { reducedMotion } from "../ui/motion.js";
 import { token } from "../ui/theme.js";
 
 /**
@@ -187,7 +188,8 @@ export class Viewer {
     this.scene.add(new THREE.HemisphereLight(0xc8d8ec, 0x2a2018, HEMI)); // not a theme colour: the sky's and the floor's light
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
     this.controls.target.set(0, 0.09, 0.2);
-    this.controls.enableDamping = true;
+    // the orbit coasts to a stop, unless the reader asked for less motion
+    this.controls.enableDamping = !reducedMotion();
 
     this.controls.addEventListener("change", () => this.invalidate(false));
     this.resized = new ResizeObserver(() => this.resize());
@@ -299,6 +301,8 @@ export class Viewer {
     const t0 = this.controls.target.clone();
     const p1 = new THREE.Vector3().copy(position);
     const t1 = new THREE.Vector3().copy(target);
+    // with reduced motion, the camera is there at once
+    if (reducedMotion()) seconds = 1e-6;
     let t = 0;
     /** @param {number} dt */
     const step = (dt) => {

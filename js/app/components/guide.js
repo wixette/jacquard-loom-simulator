@@ -9,6 +9,7 @@ import { endsPart, opensPart, placeInPart, STEPS, targetCloth } from "../../teac
 import { el, icon, setTip, showMenu } from "../../ui/components.js";
 import { clothThumb } from "../../view2d/clothThumb.js";
 import { answer, goTo, stepDone } from "../learn.js";
+import { reducedMotion } from "../../ui/motion.js";
 /** @import { AppStore, AppState } from "../looms.js" */
 /** @import { Component } from "./component.js" */
 /** @import { Asked } from "../../teach/tutorial.js" */
@@ -148,7 +149,8 @@ export function guidePanel(store, o) {
     const back = el("button", { type: "button", class: "btn" }, [icon("chevron_left"), el("span", { text: t("learn.back") })]);
     back.disabled = i === 0;
     back.addEventListener("click", () => goTo(store, i - 1));
-    const next = el("button", { type: "button", class: "btn filled" }, [el("span", { text: t("learn.next") }), icon("chevron_right")]);
+    // its visible word stays its name ("click Next" works by voice); the tooltip describes it
+    const next = el("button", { type: "button", class: "btn filled", "data-tip-describes": "" }, [el("span", { text: t("learn.next") }), icon("chevron_right")]);
     next.hidden = i === STEPS.length - 1;
     // Next waits, greyed but with its tooltip saying for what (a disabled button shows none)
     next.addEventListener("click", () => {
@@ -192,7 +194,7 @@ export function guidePanel(store, o) {
     if (live.done) live.done.hidden = !(step.task ? taskDone : answered !== undefined);
     if (!live.fresh)
       [live.task, live.done].forEach((e, k) => {
-        if (e && !e.hidden && !shownBefore[k]) e.scrollIntoView({ block: "nearest", behavior: "smooth" });
+        if (e && !e.hidden && !shownBefore[k]) e.scrollIntoView({ block: "nearest", behavior: reducedMotion() ? "auto" : "smooth" });
       });
     live.fresh = false;
     if (live.recap) live.recap.hidden = !ready;

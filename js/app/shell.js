@@ -233,7 +233,8 @@ export function createShell(store, root) {
   // ---- the parts of the frame ------------------------------------------------------------------
 
   function brand() {
-    return el("a", { class: "brand", href: "./" }, [el("img", { src: "images/logo.svg", alt: "", draggable: "false" }), label("span", "app.name")]);
+    // named even where its words are hidden (a phone shows the logo alone)
+    return el("a", { class: "brand", href: "./", "data-l10n-name": "app.name" }, [el("img", { src: "images/logo.svg", alt: "", draggable: "false" }), label("span", "app.name")]);
   }
 
   /** @param {HTMLElement} anchor */
@@ -560,7 +561,7 @@ export function createShell(store, root) {
     if (store.state.workspace === "create") return picturesPanel();
     if (store.state.workspace === "play") {
       const slot = el("div", { class: "games-slot" });
-      const panel = el("aside", { class: "panel left" }, [rail("left"), el("div", { class: "panel-head" }, [label("h2", "game.title")]), slot]);
+      const panel = el("aside", { class: "panel left", "data-l10n-name": "game.title" }, [rail("left"), el("div", { class: "panel-head" }, [label("h2", "game.title")]), slot]);
       put(gamesPanel(store), slot);
       return panel;
     }
@@ -571,7 +572,7 @@ export function createShell(store, root) {
     const setup = setupRow();
     // in Learn, a step on a picture has the picture tool under the guide, in place of the cards
     const picture = el("div", { class: "picture-slot", hidden: true });
-    const panel = el("aside", { class: "panel left" }, [rail("left"), ...(learn ? [guide(), picture] : []), head, setup, bench, chain]);
+    const panel = el("aside", { class: "panel left", "data-l10n-name": learn ? "sheet.guide" : "cards.title" }, [rail("left"), ...(learn ? [guide(), picture] : []), head, setup, bench, chain]);
     put(benchPanel(store), bench);
     put(chainPanel(store), chain);
     if (learn) put(picturePanel(store, { loom: "tutorial" }), picture);
@@ -598,7 +599,7 @@ export function createShell(store, root) {
   function picturesPanel() {
     const slot = el("div", { class: "picture-slot" });
     const chain = el("div", { class: "chain-slot" });
-    const panel = el("aside", { class: "panel left on-design" }, [
+    const panel = el("aside", { class: "panel left on-design", "data-l10n-name": "pic.title" }, [
       rail("left"),
       el("div", { class: "panel-head" }, [label("h2", "pic.title")]),
       slot,
@@ -627,14 +628,14 @@ export function createShell(store, root) {
     if (store.state.workspace === "play" || store.state.workspace === "create") {
       const machine = el("div", { class: "machine-slot" });
       const trace = el("div", { class: "trace-slot" });
-      const panel = el("aside", { class: "panel right" }, [rail("right"), el("div", { class: "panel-head" }, [label("h2", "game.machine")]), machine, trace]);
+      const panel = el("aside", { class: "panel right", "data-l10n-name": "game.machine" }, [rail("right"), el("div", { class: "panel-head" }, [label("h2", "game.machine")]), machine, trace]);
       put(sectionView(store), machine);
       put(tracePanel(store), trace);
       return panel;
     }
     const cloth = el("div", { class: "cloth-slot" });
     const trace = el("div", { class: "trace-slot" });
-    const panel = el("aside", { class: "panel right" }, [rail("right"), el("div", { class: "panel-head" }, [label("h2", "cloth.title"), ...clothTools()]), cloth, trace]);
+    const panel = el("aside", { class: "panel right", "data-l10n-name": "cloth.title" }, [rail("right"), el("div", { class: "panel-head" }, [label("h2", "cloth.title"), ...clothTools()]), cloth, trace]);
     put(clothPanel(store), cloth);
     put(tracePanel(store), trace);
     return panel;
@@ -719,9 +720,10 @@ export function createShell(store, root) {
     // how close the section looks: a zoom on the same drawing, so a tool of the view, not a view;
     // a plain magnifier before the chips says so (a mark, not a control: it looks like none)
     const zoom = el("div", { class: "chip-row", role: "group", "data-l10n-name": "section.zoom" });
-    const zoomTool = el("div", { class: "zoom-tool", "data-l10n-tip": "section.zoom" }, [el("span", { class: "zoom-mark", "aria-hidden": "true" }, [icon("zoom_in")]), zoom]);
+    const zoomTool = el("div", { class: "zoom-tool" }, [el("span", { class: "zoom-mark", "aria-hidden": "true" }, [icon("zoom_in")]), zoom]);
     for (const z of /** @type {const} */ (["whole", "needles", "crooks"])) {
-      const b = label("button", `section.${z}`, { type: "button", class: "chip" });
+      const b = label("button", `section.${z}`, { type: "button", class: "chip", "data-tip-describes": "" });
+      b.dataset.l10nTip = "section.zoom";
       b.addEventListener("click", () => act.setSectionView(store, z));
       zoom.appendChild(b);
     }
