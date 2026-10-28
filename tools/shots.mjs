@@ -101,7 +101,7 @@ const POSTS = [
   post("05-section", "view=section", `${ARROW}`, { stage: true }),
   post("06-section-and-front", "view=section,front", `${ARROW}`, { stage: true }),
   ...["u1", "u2", "u3", "u4", "u5"].map((u, i) =>
-    post(`${String(7 + i).padStart(2, "0")}-unit-${["selector", "cylinder", "griffe", "harness", "shed"][i]}`, `h=8&c=x.cc-66-33-99&p=5&s=2&f=1&view=${u}`, `await loaded(); await orbit(0, 0, ${[0.5, 0.9, 1, 1, 0.85][i]}); document.querySelector('.unit-note summary').click(); await sleep(500);`, { stage: true }),
+    post(`${String(7 + i).padStart(2, "0")}-unit-${["selector", "cylinder", "griffe", "harness", "shed"][i]}`, `h=8&c=x.cc-66-33-99&p=5&s=2&f=1&view=${u}`, "await loaded(); document.querySelector('.unit-note summary').click(); await sleep(500);", { stage: true }),
   ),
   post("12-cloth-satin", "view=cloth", `act.loadPreset(store, "satin"); act.setColours(store, { warp: "#9b2d30", weft: "#e8c16a" }); act.moveTo(store, 24, 0); await sleep(500);`, { stage: true }),
   post("13-design-loose", "w=create", "await sleep(800);"),
