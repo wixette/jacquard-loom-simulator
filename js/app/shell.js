@@ -461,14 +461,15 @@ export function createShell(store, root) {
     for (const w of WORKSPACES) ws.appendChild(label("option", `ws.${w}`, { value: w }));
     ws.value = store.state.workspace;
     ws.addEventListener("change", () => goWorkspace(/** @type {Workspace} */ (ws.value)));
-    const menu = iconButton("menu", "bar.menu", () =>
-      showMenu(menu, [
-        { label: t("bar.language"), run: () => languageMenu(menu) },
-        { label: t("bar.about"), run: showAbout },
-      ]),
-    );
+    // on the right, each a button of its own, as on the desktop and in the sibling simulators:
+    // Share, the language (by its 文A alone) and About
     const share = iconButton("share", "bar.share.tip", () => shareMenu(share));
-    return el("header", { class: "appbar" }, [brand(), ws, el("span", { class: "spacer" }), share, menu]);
+    share.setAttribute("aria-haspopup", "menu");
+    const lang = iconButton("translate", "bar.language", () => languageMenu(lang));
+    lang.setAttribute("aria-haspopup", "menu");
+    const about = iconButton("info", "bar.about", showAbout);
+    about.setAttribute("aria-haspopup", "dialog");
+    return el("header", { class: "appbar" }, [brand(), ws, el("span", { class: "spacer" }), share, lang, about]);
   }
 
   /** The card tools, over the chain. */

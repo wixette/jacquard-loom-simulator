@@ -200,7 +200,6 @@ export default {
   "bar.share.tip": "Copiar un enlace, guardar una imagen del tejido o imprimir los cartones",
   "bar.language": "Idioma",
   "bar.about": "Acerca de",
-  "bar.menu": "Menú",
   "setup.chip": "{head} · {tie}",
   "setup.tip": "La máquina y su atado: cuántos ganchos, y cómo se atan a los hilos de urdimbre",
   "colours.tip": "Los colores de la urdimbre y de la trama",

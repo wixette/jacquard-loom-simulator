@@ -94,7 +94,6 @@ export const ICONS = [
   "left_panel_open",
   "lightbulb",
   "link",
-  "menu",
   "menu_book",
   "open_in_new",
   "palette",

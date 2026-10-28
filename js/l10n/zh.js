@@ -199,7 +199,6 @@ export default {
   "bar.share.tip": "复制链接、把织物存为图片，或打印纹板",
   "bar.language": "语言",
   "bar.about": "关于",
-  "bar.menu": "菜单",
   "setup.chip": "{head} · {tie}",
   "setup.tip": "龙头和它的穿法：有多少个竖钩，以及它们怎样连到经纱上",
   "colours.tip": "经纱和纬纱的颜色",

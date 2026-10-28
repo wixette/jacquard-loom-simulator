@@ -199,7 +199,6 @@ export default {
   "bar.share.tip": "リンクをコピーしたり、織物の画像を保存したり、紋紙を印刷したりできます",
   "bar.language": "言語",
   "bar.about": "このアプリについて",
-  "bar.menu": "メニュー",
   "setup.chip": "{head} · {tie}",
   "setup.tip": "ジャカード機と通し方です：竪針の本数と、竪針を経糸にどう結ぶかを決めます",
   "colours.tip": "経糸と緯糸の色を決めます",

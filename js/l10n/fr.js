@@ -199,7 +199,6 @@ export default {
   "bar.share.tip": "Copier un lien, enregistrer une image de l'étoffe ou imprimer les cartons",
   "bar.language": "Langue",
   "bar.about": "À propos",
-  "bar.menu": "Menu",
   "setup.chip": "{head} · {tie}",
   "setup.tip": "La mécanique et son empoutage : combien de crochets, et comment ils sont attachés aux fils de chaîne",
   "colours.tip": "Les couleurs de la chaîne et de la trame",

@@ -199,7 +199,6 @@ export default {
   "bar.share.tip": "複製連結、把織物存成圖片，或列印紋板",
   "bar.language": "語言",
   "bar.about": "關於",
-  "bar.menu": "選單",
   "setup.chip": "{head} · {tie}",
   "setup.tip": "龍頭和它的穿法：有多少個豎鉤，以及它們怎樣連到經紗上",
   "colours.tip": "經紗和緯紗的顏色",

@@ -199,7 +199,6 @@ export default {
   "bar.share.tip": "Copia un link, salva un'immagine del tessuto o stampa i cartoni",
   "bar.language": "Lingua",
   "bar.about": "Informazioni",
-  "bar.menu": "Menu",
   "setup.chip": "{head} · {tie}",
   "setup.tip": "La macchina e la sua legatura: quanti uncini, e come sono legati ai fili d'ordito",
   "colours.tip": "I colori dell'ordito e della trama",

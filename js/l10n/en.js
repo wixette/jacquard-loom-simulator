@@ -222,7 +222,6 @@ export default {
   "bar.share.tip": "Copy a link, save a picture of the cloth, or print the cards",
   "bar.language": "Language",
   "bar.about": "About",
-  "bar.menu": "Menu",
   "setup.chip": "{head} · {tie}",
   "setup.tip": "The head and its tie-up: how many hooks, and how they are tied to the warp ends",
   "colours.tip": "The colours of the warp and the weft",

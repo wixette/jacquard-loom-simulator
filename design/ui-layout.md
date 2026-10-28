@@ -104,7 +104,7 @@ The bar is lower, as agreed: everything must be operable, not everything at once
 
 ```
 ┌───────────────────────────┐
-│ ◎  Weave ▾      ⤴   ☰    │  app bar: logo, workspace, share, menu
+│ ◎  Weave ▾     ⤴  文A  ⓘ  │  app bar: logo, workspace; share, language, about
 ├───────────────────────────┤
 │ [Section][Side][Front][3D…│  view chips, then Cloth (scroll sideways)
 │                           │
@@ -123,7 +123,7 @@ The bar is lower, as agreed: everything must be operable, not everything at once
 └───────────────────────────┘
 ```
 
-- **The app bar** has the logo at its left, then the workspace (a menu of the four), Share, and ☰, which holds the language and About. The tutorial's place is on the step's card, as on the desktop. The head and tie-up chip sits over the cards in the Cards tab, the colours in the Cloth tab's header, as on the desktop.
+- **The app bar** has the logo at its left, then the workspace (a menu of the four); on its right Share, the language (by its 文A alone) and About, each a button of its own, as on the desktop and in the sibling simulators (1.1.0; before, the language and About were folded into a ☰ menu). The tutorial's place is on the step's card, as on the desktop. The head and tie-up chip sits over the cards in the Cards tab, the colours in the Cloth tab's header, as on the desktop.
 - **The stage on top, one view at a time,** switched by chips: Section, Side, Front, 3D and Cloth. The 3D chip opens a menu of the whole loom and its five units alone, as the desktop's view menu does, and names the one on show (1.1.0; before, the units were reached only by tapping one in the whole loom). The counts over the whole loom (416 hooks…) show by themselves only in a 3D view at least 560 × 420 px, so not on a phone, where they covered the machine; a switch by the view's ⓘ turns them on or off, in every 3D view, kept on the device. The section is the default (in Design and Games, the cloth; in Learn, the step's view). The 3D view drops to a lighter quality on a device too slow for the full one.
 - **Time is sticky,** directly under the stage (caption, moments, controls, the play button 50 px and the others 42 px): the learner's thumb drives the machine while watching it.
 - **The bottom sheet** holds the rest, by tab, as each workspace needs: Learn **Guide**, **Cards** (the chain, with the bench card) and **Cloth**; Weave **Cards** and **Cloth**; Design **Picture** and **Cards** (the picture's, with Open in Weave); Games **Game**. It rests half open; dragging it up gives the panel the screen, dragging it down gives the stage the screen.

@@ -199,7 +199,6 @@ export default {
   "bar.share.tip": "Einen Link kopieren, ein Bild des Gewebes speichern oder die Karten drucken",
   "bar.language": "Sprache",
   "bar.about": "Über",
-  "bar.menu": "Menü",
   "setup.chip": "{head} · {tie}",
   "setup.tip": "Die Maschine und ihre Schnürung: wie viele Platinen, und wie sie an die Kettfäden geschnürt sind",
   "colours.tip": "Die Farben von Kette und Schuss",

@@ -199,7 +199,6 @@ export default {
   "bar.share.tip": "Copiar um link, salvar uma imagem do tecido ou imprimir os cartões",
   "bar.language": "Idioma",
   "bar.about": "Sobre",
-  "bar.menu": "Menu",
   "setup.chip": "{head} · {tie}",
   "setup.tip": "A máquina e sua amarração: quantos ganchos, e como eles se amarram aos fios de urdume",
   "colours.tip": "As cores do urdume e da trama",

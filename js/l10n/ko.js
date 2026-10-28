@@ -199,7 +199,6 @@ export default {
   "bar.share.tip": "링크를 복사하거나, 직물 그림을 저장하거나, 문지를 인쇄합니다",
   "bar.language": "언어",
   "bar.about": "정보",
-  "bar.menu": "메뉴",
   "setup.chip": "{head} · {tie}",
   "setup.tip": "자카드 기계와 통사법입니다. 후크가 몇 개인지, 후크를 날실에 어떻게 묶는지를 정합니다",
   "colours.tip": "날실과 씨실의 색을 정합니다",
