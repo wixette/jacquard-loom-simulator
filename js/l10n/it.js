@@ -262,6 +262,7 @@ export default {
   "view.front": "Fronte",
   "view.3d": "Telaio intero",
   "view3d.how": "trascina per ruotare il modello; da tastiera, le frecce lo spostano e Maiusc con le frecce lo ruota",
+  "view3d.labels": "I numeri delle parti della macchina reale, sul telaio: mostra o nascondi",
   "view.u1": "Selettore",
   "view.u2": "Cilindro",
   "view.u3": "Griffa e sollevamento",

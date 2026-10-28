@@ -263,6 +263,7 @@ export default {
   "view.front": "Frontal",
   "view.3d": "Telar entero",
   "view3d.how": "arrastra para girar el modelo; con el teclado, las flechas lo mueven y Mayús con las flechas lo gira",
+  "view3d.labels": "Las cifras de las piezas de la máquina real, sobre el telar: mostrar u ocultar",
   "view.u1": "Selector",
   "view.u2": "Cilindro",
   "view.u3": "Grifa y elevación",

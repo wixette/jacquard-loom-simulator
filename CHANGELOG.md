@@ -4,6 +4,8 @@ What changed in each release. Versions follow `package.json` and are tagged `vX.
 
 ## Unreleased (1.1.0)
 
+- On a phone, the 3D chip opens a menu of the whole loom and its five units (they were reached only by tapping one in the whole loom).
+- The counts over the whole loom in 3D (416 hooks, 1,600 warp ends…) show by themselves only where the view is large enough not to be covered by them, so not on a phone; a switch by the view's ⓘ turns them on or off, kept on the device.
 - Draw boy against Jacquard: room above and below its eight cords (a pulled cord rises into it).
 - The 3D views frame their object centred and the same size, the whole loom and each of the five units alone: about 80 % of the view's width or height, framed again when the view changes shape (the selector took a fifth of the view, the harness was small, the card cylinder large beside the griffe, and the shed and batten went past the view's top).
 

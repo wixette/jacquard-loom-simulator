@@ -262,6 +262,7 @@ export default {
   "view.front": "Face",
   "view.3d": "Métier entier",
   "view3d.how": "faites glisser pour tourner le modèle ; au clavier, les flèches le déplacent, et Maj avec les flèches le fait tourner",
+  "view3d.labels": "Les nombres de pièces de la vraie mécanique, sur le métier : afficher ou masquer",
   "view.u1": "Sélecteur",
   "view.u2": "Cylindre",
   "view.u3": "Griffe et levée",

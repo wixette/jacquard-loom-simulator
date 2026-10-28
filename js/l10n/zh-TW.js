@@ -262,6 +262,7 @@ export default {
   "view.front": "正視",
   "view.3d": "整台織機",
   "view3d.how": "拖曳可旋轉模型；用鍵盤時，方向鍵移動它，按住 Shift 再按方向鍵旋轉它",
+  "view3d.labels": "織機上標出的真實提花機零件數量：顯示或隱藏",
   "view.u1": "選針器",
   "view.u2": "花筒",
   "view.u3": "刀箱與提升",

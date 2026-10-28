@@ -57,6 +57,8 @@ export class UnitsView {
     this.disposed = false;
     /** Not yet posed by the loom since it loaded. */
     this.unposed = true;
+    /** Whether the bands' labels (the counts) show over the whole machine: the page decides (by the reader's choice, or the view's size). */
+    this.showTags = () => true;
     this.tip = document.createElement("div");
     this.tip.className = "part-tip";
     this.tip.hidden = true;
@@ -220,7 +222,7 @@ export class UnitsView {
    * @returns {void}
    */
   placeTags() {
-    const show = this.mode === "machine" && this.host.clientWidth > 0;
+    const show = this.mode === "machine" && this.host.clientWidth > 0 && this.showTags();
     const w = this.host.clientWidth;
     const h = this.host.clientHeight;
     /** @type {{ b: Band, x: number, y: number }[]} */

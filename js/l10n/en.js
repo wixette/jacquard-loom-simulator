@@ -285,6 +285,7 @@ export default {
   "view.front": "Front",
   "view.3d": "Whole loom",
   "view3d.how": "drag to turn the model; with the keyboard, the arrow keys move it, and Shift with the arrows turns it",
+  "view3d.labels": "The counts of the real head's parts, over the loom: on or off",
   "view.u1": "Selector",
   "view.u2": "Card cylinder",
   "view.u3": "Griffe and lift",

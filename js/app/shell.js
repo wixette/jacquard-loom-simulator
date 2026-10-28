@@ -23,7 +23,7 @@ import { wireKeys } from "./keys.js";
 import { Sound } from "./sound.js";
 import { place } from "./components/component.js";
 import { benchPanel, chainPanel, clothPanel, statusPanel, tracePanel, transportPanel } from "./components/panels.js";
-import { frontView, sectionView, sideView, UNIT_VIEWS, unitsView } from "./components/views.js";
+import { frontView, labelsShown, sectionView, setLabels, sideView, UNIT_VIEWS, unitsView } from "./components/views.js";
 import { chooseLanguage } from "./language.js";
 import { leaveLearn, openLearn, watchDone } from "./learn.js";
 import { openCreate } from "./create.js";
@@ -682,8 +682,13 @@ export function createShell(store, root) {
     let onMode;
     if (v in UNIT_VIEWS) {
       const note = unitNote(/** @type {keyof typeof UNIT_VIEWS} */ (v));
-      tools.append(note.element);
-      onMode = note.show;
+      const counts = labelsSwitch(host);
+      tools.append(note.element, counts.element);
+      counts.shownFor(UNIT_VIEWS[/** @type {keyof typeof UNIT_VIEWS} */ (v)].unit);
+      onMode = (unit) => {
+        note.show(unit);
+        counts.shownFor(unit);
+      };
     }
     put(viewComponent(store, v, onMode), host);
     return el("div", { class: "pane" }, [host, tools]);
@@ -713,6 +718,30 @@ export function createShell(store, root) {
       write();
     };
     return { element, show };
+  }
+
+  /**
+   * The counts over the whole machine in 3D (416 hooks, 1,600 warp ends…), on or off: by
+   * themselves they show where the view is large enough not to be covered by them (not on a
+   * phone); pressed, as the reader chooses, in every 3D view and kept on this device.
+   * @param {HTMLElement} host the view's host, whose size decides by itself
+   */
+  function labelsSwitch(host) {
+    const b = el("button", { type: "button", class: "chip labels-switch", "data-l10n-tip": "view3d.labels" });
+    const draw = () => {
+      const on = labelsShown(host.clientWidth, host.clientHeight);
+      if (b.getAttribute("aria-pressed") === String(on)) return;
+      b.replaceChildren(icon(on ? "label" : "label_off"));
+      b.setAttribute("aria-pressed", String(on));
+    };
+    b.addEventListener("click", () => {
+      setLabels(labelsShown(host.clientWidth, host.clientHeight) ? "off" : "on");
+      draw();
+    });
+    // by itself, the switch follows the view's size
+    new ResizeObserver(draw).observe(host);
+    draw();
+    return { element: b, shownFor: (/** @type {"machine" | UnitId} */ unit) => (b.hidden = unit !== "machine") };
   }
 
   /** The section's tools: how close it looks, and which cross-row it cuts. */
@@ -791,14 +820,31 @@ export function createShell(store, root) {
   function smallStage() {
     const st = el("main", { class: "stage" });
     const chips = el("div", { class: "view-chips", role: "group", "data-l10n-name": "stage.views" });
+    // One chip for 3D: it opens the whole loom and its five units, as the desktop's view menu does,
+    // and names the one on show.
+    const THREE_D = /** @type {StageView[]} */ (["3d", "u1", "u2", "u3", "u4", "u5"]);
     for (const v of STAGE_VIEWS.filter((x) => !x.startsWith("u"))) {
       const b = el("button", { type: "button", class: "chip" });
       b.dataset.view = v;
-      b.addEventListener("click", () => act.setViews(store, [v]));
+      if (v === "3d") {
+        b.setAttribute("aria-haspopup", "menu");
+        b.addEventListener("click", () =>
+          showMenu(
+            b,
+            THREE_D.map((x) => ({ label: viewName(x, true), checked: x === store.state.views[0], run: () => act.setViews(store, [x]) })),
+          ),
+        );
+      } else b.addEventListener("click", () => act.setViews(store, [v]));
       chips.appendChild(b);
     }
-    follow((s) => [s.locale], () => {
-      for (const b of /** @type {HTMLElement[]} */ ([...chips.children])) b.textContent = viewName(/** @type {StageView} */ (b.dataset.view));
+    /** The view a chip stands for now: the 3D chip, the 3D view on show (or the whole loom). @param {HTMLElement} b */
+    const chipView = (b) => /** @type {StageView} */ (b.dataset.view === "3d" && THREE_D.includes(store.state.views[0]) ? store.state.views[0] : b.dataset.view);
+    follow((s) => [s.locale, s.views[0]], () => {
+      for (const b of /** @type {HTMLElement[]} */ ([...chips.children])) {
+        const name = viewName(chipView(b));
+        if (b.dataset.view === "3d") b.replaceChildren(el("span", { text: name }), icon("keyboard_arrow_down"));
+        else b.textContent = name;
+      }
     });
     const one = el("div", { class: "panes", style: "display: contents" });
     let mine = { placed: /** @type {Placed[]} */ ([]), unwatch: /** @type {(() => void)[]} */ ([]) };
@@ -807,9 +853,9 @@ export function createShell(store, root) {
       const made = remake(mine, () => [pane(0, v)]);
       one.replaceChildren(...made.nodes);
       mine = made.mine;
-      for (const b of chips.children) b.setAttribute("aria-pressed", String(/** @type {HTMLElement} */ (b).dataset.view === v));
+      for (const b of /** @type {HTMLElement[]} */ ([...chips.children])) b.setAttribute("aria-pressed", String(chipView(b) === v));
       // the view on show is in sight in the strip (Design and Games open on the cloth, its end)
-      const on = /** @type {HTMLElement | undefined} */ ([...chips.children].find((b) => /** @type {HTMLElement} */ (b).dataset.view === v));
+      const on = /** @type {HTMLElement | undefined} */ ([...chips.children].find((b) => chipView(/** @type {HTMLElement} */ (b)) === v));
       if (on) requestAnimationFrame(() => (chips.scrollLeft = Math.max(0, on.offsetLeft - (chips.clientWidth - on.offsetWidth) / 2)));
       relabel();
     });

@@ -262,6 +262,7 @@ export default {
   "view.front": "Vorn",
   "view.3d": "Ganzer Webstuhl",
   "view3d.how": "ziehen, um das Modell zu drehen; mit der Tastatur verschieben es die Pfeiltasten, Umschalt mit den Pfeiltasten dreht es",
+  "view3d.labels": "Die Anzahlen der Teile der echten Maschine, über dem Webstuhl: ein- oder ausblenden",
   "view.u1": "Auswahl",
   "view.u2": "Prisma",
   "view.u3": "Messerkasten und Hub",

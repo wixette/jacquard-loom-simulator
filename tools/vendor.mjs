@@ -88,6 +88,8 @@ export const ICONS = [
   "invert_colors",
   "keyboard",
   "keyboard_arrow_down",
+  "label",
+  "label_off",
   "left_panel_close",
   "left_panel_open",
   "lightbulb",

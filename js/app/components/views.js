@@ -164,6 +164,47 @@ export const UNIT_VIEWS = /** @type {const} */ ({
   u5: { unit: "shed" },
 });
 
+// ---- the counts over the whole machine in 3D (the bands' labels) ------------------------------
+
+/** Where the reader's choice is kept on this device. */
+const LABELS_KEY = "jacquard.labels3d";
+/** A view at least this large shows the counts by itself: a smaller one (a phone's) would be covered by them. */
+export const LABELS_MIN = { width: 560, height: 420 };
+/** @typedef {"auto" | "on" | "off"} LabelsSetting */
+/** @type {LabelsSetting} */
+let labels = (() => {
+  try {
+    const v = localStorage.getItem(LABELS_KEY);
+    return v === "on" || v === "off" ? v : "auto";
+  } catch {
+    return "auto";
+  }
+})();
+/** The 3D views to tell when the setting changes. @type {Set<() => void>} */
+const labelsWatchers = new Set();
+
+/**
+ * Whether a 3D view of this size shows the counts: the reader's choice, or by its size.
+ * @param {number} width
+ * @param {number} height
+ */
+export const labelsShown = (width, height) => labels === "on" || (labels === "auto" && width >= LABELS_MIN.width && height >= LABELS_MIN.height);
+
+/**
+ * The reader's choice: the counts on or off in every 3D view (kept on this device), or by size.
+ * @param {LabelsSetting} setting
+ */
+export function setLabels(setting) {
+  labels = setting;
+  try {
+    if (setting === "auto") localStorage.removeItem(LABELS_KEY);
+    else localStorage.setItem(LABELS_KEY, setting);
+  } catch {
+    // kept for this page only
+  }
+  for (const f of labelsWatchers) f();
+}
+
 /**
  * The loom in 3D: the ghosted whole machine with its five core units, or one unit alone. The
  * 3D code and the models load only when this is first mounted.
@@ -187,12 +228,15 @@ export function unitsView(store, o = {}) {
   /** @type {() => void} */
   let restore;
   const say = () => (note.textContent = failed !== null ? t("units.failed", { error: failed }) : t("units.loading", { percent: Math.round(progress * 100) }));
+  /** The counts turned on or off: drawn again (they are placed as each frame is drawn). */
+  const relabelled = () => view?.viewer.invalidate();
   /** @type {Component} */
   const component = {
     name: "comp.units",
     mount(h) {
       host = h;
       restore = asView(h);
+      labelsWatchers.add(relabelled);
       if (getComputedStyle(h).position === "static") h.style.position = "relative";
       note = document.createElement("p");
       note.className = "view-note";
@@ -203,6 +247,8 @@ export function unitsView(store, o = {}) {
         .then(({ UnitsView }) => {
           if (gone) return;
           view = new UnitsView(h, { onChange: o.onMode });
+          // the counts as the reader chose, or by the view's size
+          view.showTags = () => labelsShown(h.clientWidth, h.clientHeight);
           if (o.unit && o.unit !== "machine") view.show(o.unit, false);
           else view.showMachine(false);
           return view.load((f) => {
@@ -239,6 +285,7 @@ export function unitsView(store, o = {}) {
     },
     unmount() {
       gone = true;
+      labelsWatchers.delete(relabelled);
       view?.dispose();
       note.remove();
       host.style.position = "";
