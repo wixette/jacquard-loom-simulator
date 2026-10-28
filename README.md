@@ -112,7 +112,11 @@ the right, and the controls along the bottom.
 ![One unit in 3D, the selector, with its note on the idea it shows: a light needle decides, a heavy knife does the lifting](./screenshots/readme-units.png)
 
 **The keyboard:** Space plays or pauses, ← and → step, 1 to 4 show the section, the side, the
-front or the loom in 3D, F follows what is under the pointer, and Esc stops following.
+front or the loom in 3D, F follows what is under the pointer, and Esc stops following. Every
+control is reached with Tab. In the chain of cards the arrow keys go from hole to hole and card
+to card, and Enter or Space punches; on Design's paper the arrows move a square and Space
+paints it; in a 3D view the arrows move the model and Shift with the arrows turns it. The app
+honours the system's setting for reduced motion.
 
 **On a phone** the drawing sits on top with the controls under it, and the cards, the cloth
 and the tutorial share a sheet below it, dragged up or down.

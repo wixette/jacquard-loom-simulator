@@ -91,7 +91,9 @@ async function everyMessage() {
   }
   out.push(...[new Loom({ hooks: 8, cards: [], loop: true }).stepForward(), new Loom(presetDeck("plain", 8)).stepBack()].map((r) => (r.ok ? r.message : r.reason)));
   for (const k of STOP_KEYS) out.push({ key: k });
-  for (const bad of ["", "#v=1", "#v=9", "#v=2&h=12&c=x.", "#v=2&h=8&c=x.zz", "#v=2&h=8&c=q.", "#v=2&h=8", "#v=2&wc=red", "#v=2&sv=x", "#v=2&h=8&c=x.ff&p=-1", "#v=2&h=8&c=x.ff&fe=2", "#v=2&step=A"]) {
+  for (const bad of ["", "#v=1", "#v=9", "#v=2&h=12&c=x.", "#v=2&h=8&c=x.zz", "#v=2&h=8&c=q.", "#v=2&h=8", "#v=2&wc=red", "#v=2&sv=x", "#v=2&h=8&c=x.ff&p=-1", "#v=2&h=8&c=x.ff&fe=2", "#v=2&step=A",
+    // 0.2.0's: Design's picture, the games, the longest chain
+    "#v=2&w=create&pw=9&pic=x.ff", "#v=2&w=create&pw=8&pic=x.ff", "#v=2&w=create&pw=8", `#v=2&w=play&game=name&text=${"x".repeat(145)}`, `#v=2&h=8&c=x.${Array(1025).fill("ff").join("-")}`]) {
     const r = await decodeLink(bad);
     if (!r.ok) out.push(r.reason);
   }

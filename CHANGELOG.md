@@ -4,6 +4,16 @@ What changed in each release. Versions follow `package.json` and are tagged `vX.
 
 ## Unreleased (1.0.0)
 
+**The release review (M11, [design/m11-notes.md](design/m11-notes.md))**
+- Links: an open chain woven to its end, and a loom paused between two moments, reopen as they were; a pick past an open chain's end is refused; Games links open their views, and the name game's reading without a text; a Weave link without a cross-row opens on the first.
+- State: Design's picture is kept from a link; a friend's secret stays across games; the next puzzle wraps within a link's range; a chain holds at most a link's 1,024 cards; a followed end is let go when another tie gives it another hook; the damask task asks for damask.
+- The keyboard and screen readers: the chain of cards is one Tab stop, worked by the arrow keys; Design's paper is painted by the keyboard; the 3D view is named and moved by the keyboard; the games' and the workspaces' tabs work by the arrow keys; popovers, tooltips, focus rings and names as the WAI-ARIA patterns ask; the status line no longer floods a screen reader while the loom plays; reduced motion honoured.
+- Phones: on a 320 px phone the frame was wider than the screen, its right side cut off; the view on show stays in sight in the strip.
+- Speed: a change of views no longer loads a 3D view again; less is done every frame while the loom plays; a long looped link no longer fills the memory.
+- Save a picture draws the cloth afresh; the printed cards' note is in the page's language, and a card wider than A4 is refused.
+- Translations: Open in Weave's tooltip in all nine languages, and the errors the review found.
+- The docs made to match the app, and tests for each fix (475 unit tests; `pnpm selftest` fails a page that runs no checks).
+
 ## 0.2.0
 
 Make and play (2026-10-28): the picture tool, four games and the whole tutorial, in ten languages.

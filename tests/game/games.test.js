@@ -117,3 +117,32 @@ describe("draw boy against Jacquard (D-1)", () => {
     assert.equal(drawBoy.throwShuttle(done), done);
   });
 });
+
+describe("the name game at its limits (1.0.0 review)", () => {
+  const full = [...Array(MAX_LINES)].map((_, i) => "ABCDEFGH".slice(0, 7) + String.fromCharCode(97 + i)).join(" ");
+  it(`${MAX_LINES} full lines (${full.length} characters, a link's most) are taken, and read back both ways`, async () => {
+    const { MAX_TEXT } = await import("../../js/sim/link.js");
+    // the field takes as much as a link carries: 16 lines of 8 and their 15 breaks, and one more
+    assert.equal(MAX_TEXT, MAX_LINES * (MAX_CHARS + 1));
+    assert.ok(full.length <= MAX_TEXT);
+    assert.equal(wrapText(full).length, MAX_LINES);
+    for (const mode of /** @type {const} */ (["damask", "direct"])) {
+      const r = planName(full, mode);
+      assert.ok(r.ok, mode);
+      if (!r.ok) continue;
+      const loom = new Loom(r.plan.deck);
+      loom.moveTo(r.plan.deck.cards.length, 0);
+      assert.deepEqual(decodeCloth(loom.cloth, r.plan), r.plan.lines.map((l) => l.trim()), mode);
+      if (mode === "damask") assert.equal(r.plan.deck.hooks, 256, "on 256 of the 400 head's hooks");
+    }
+  });
+  it(`${MAX_LINES + 1} lines are refused, with how many it makes`, () => {
+    const r = checkText(`${full} Z`);
+    assert.ok(!r.ok);
+    assert.equal(/** @type {any} */ (r).why?.params?.lines, MAX_LINES + 1);
+  });
+  it("Windows line breaks are line breaks; spaces run together are one", () => {
+    assert.deepEqual(wrapText("Ada\r\nLovelace"), wrapText("Ada\nLovelace"));
+    assert.deepEqual(wrapText("Ada   Byron"), wrapText("Ada Byron"));
+  });
+});

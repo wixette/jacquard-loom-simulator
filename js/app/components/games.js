@@ -9,6 +9,7 @@ import * as drawBoy from "../../game/drawBoy.js";
 import { puzzle } from "../../game/guessGame.js";
 import { decodeCloth, MAX_CHARS, MAX_LINES, planName } from "../../game/nameGame.js";
 import { cardToString } from "../../sim/deck.js";
+import { MAX_TEXT } from "../../sim/link.js";
 import { el, icon, setText, tabs as tabList } from "../../ui/components.js";
 import { clothThumb } from "../../view2d/clothThumb.js";
 import * as play from "../play.js";
@@ -38,7 +39,7 @@ export function gamesPanel(store) {
   /** The name game: a name, how it is read (as Design reads a picture), Weave to the end, and the cloth read back. */
   const nameGame = () => {
     // up to MAX_LINES lines of MAX_CHARS, with room for the spaces and line breaks between them
-    const text = el("textarea", { class: "game-input", rows: "3", maxlength: String(MAX_LINES * (MAX_CHARS + 1)), spellcheck: "false", "aria-label": t("name.label") });
+    const text = el("textarea", { class: "game-input", rows: "3", maxlength: String(MAX_TEXT), spellcheck: "false", "aria-label": t("name.label") });
     text.value = store.state.play.name.text;
     text.addEventListener("input", () => play.setName(store, { text: text.value }));
     const modes = el("div", { class: "seg", role: "group" });

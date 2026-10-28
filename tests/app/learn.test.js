@@ -153,3 +153,37 @@ describe("what the device keeps", () => {
     assert.equal(s.state.learn.step, stepIndex("how-loop"));
   });
 });
+
+describe("each challenge can be solved with only the controls its step leaves free (1.0.0 review)", () => {
+  /** The learner's fix for each broken loom, by the app's own actions, which refuse a locked control. @type {Record<string, (s: Store<import("../../js/app/looms.js").AppState>) => void>} */
+  const fixes = {
+    // the second and third cards were laced the wrong way round: the third moved up one
+    "debug-swapped": (s) => {
+      act.select(s, 1);
+      act.move(s, 1);
+    },
+    // card 5 lost its hole: punched again where the satin has it
+    "debug-hole": (s) => {
+      const want = /** @type {string[]} */ (STEPS[stepIndex("debug-hole")].target?.cards);
+      [...want[4]].forEach((c, h) => c !== "." && act.punch(s, 4, h));
+    },
+    "debug-tie-up": (s) => act.setTie(s, { kind: "straight", repeats: 2 }),
+    // one card too many: the fifth taken out
+    "debug-loop": (s) => {
+      act.select(s, 4);
+      act.remove(s);
+    },
+  };
+  for (const [id, fix] of Object.entries(fixes)) {
+    it(id, () => {
+      const s = store();
+      openLearn(s, id);
+      fix(s);
+      const rows = STEPS[stepIndex(id)].target?.rows ?? 0;
+      act.moveTo(s, rows, 0);
+      const ls = s.state.looms.tutorial;
+      assert.ok(!ls.status.warn, `a control the step locks was needed: ${JSON.stringify(ls.status.msg)}`);
+      assert.ok(stepDone(s.state), `${id} is not done by the fix`);
+    });
+  }
+});

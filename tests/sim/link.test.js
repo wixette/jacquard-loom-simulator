@@ -341,7 +341,7 @@ describe("Weave: a loom, field by field (design/links.md, Weave)", () => {
     assert.equal((await read("#v=2&bits=0")).bits, false);
     for (const f of ["#v=2&sv=Whole", "#v=2&face=Back", "#v=2&bits=true", "#v=2&bits=2"]) await refused(f);
   });
-  it("view: one, two or four of the nine views, in order; anything else falls back", async () => {
+  it("view: one, two or four of the ten views, in order; anything else falls back", async () => {
     for (const v of STAGE_VIEWS) assert.deepEqual((await read(`#v=2&view=${v}`)).views, [v]);
     assert.deepEqual((await read("#v=2&view=u3,section")).views, ["u3", "section"]);
     assert.deepEqual((await read("#v=2&view=3d,side,front,section")).views, ["3d", "side", "front", "section"]);

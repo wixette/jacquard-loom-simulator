@@ -4,7 +4,6 @@
 
 import { say, t, tn } from "../../l10n/l10n.js";
 import { STOP_KEYS, STOPS } from "../../sim/loom.js";
-import { endCount } from "../../sim/tieup.js";
 import { findFloats } from "../../sim/design.js";
 import { traceOf } from "../../sim/trace.js";
 import { STEPS } from "../../teach/tutorial.js";
@@ -12,6 +11,7 @@ import { el, icon, setText, setTip } from "../../ui/components.js";
 import { BenchCard, ChainList } from "../../view2d/chainEditor.js";
 import { ClothView } from "../../view2d/clothView.js";
 import { follow, followCloth, followHook, lace, pause, play, punch, reset, select, setSpeed, step, stepBack } from "../looms.js";
+import { whereText } from "../where.js";
 import { loomOf, shown } from "./component.js";
 /** @import { AppStore, LoomId } from "../looms.js" */
 /** @import { Component } from "./component.js" */
@@ -234,9 +234,7 @@ export function transportPanel(store, o = {}) {
         if (i === here) li.setAttribute("aria-current", "step");
         else li.removeAttribute("aria-current");
       }
-      // an open chain woven to its end: no pick past it to name
-      const card = snap.cardIndex === null ? t("where.noCard") : t("where.card", { card: snap.cardIndex + 1 });
-      setText(where, snap.cardIndex === null && snap.cloth.length > 0 && snap.phi === 0 ? tn("where.end", snap.cloth.length, { ends: endCount(snap.tie, snap.deck.hooks) }) : tn("where", snap.cloth.length, { pick: snap.pick + 1, card, percent: Math.round(snap.phi * 100), ends: endCount(snap.tie, snap.deck.hooks) }));
+      setText(where, whereText(snap));
     },
     unmount() {
       box.remove();

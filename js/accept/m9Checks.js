@@ -116,7 +116,8 @@ async function bytes({ store }) {
     guess.dispatchEvent(new Event("input", { bubbles: true }));
     button("byte.check")?.click();
     await frames();
-    if (!$(".game-body .game-result")?.textContent) bad.push("Check says nothing");
+    const said = $(".game-body .game-result");
+    if (said?.textContent !== t("byte.solved", { text: "Loom" }) || !said.classList.contains("right")) bad.push(`Check says "${said?.textContent ?? ""}" to the right reading`);
   }
   return result("P-3", "One byte per card: a card a character, the cloth reads back as the message; its link gives only the cards, to be read", bad.length === 0, bad.slice(0, 4).join("; ") || `Loom in 4 cards; a ${fragment.length}-character link`);
 }

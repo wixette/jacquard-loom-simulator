@@ -64,7 +64,9 @@ describe("the tutorial's tasks (T-2)", () => {
   it("each task: not done at its step's start, a mistake refused, its solution taken", () => {
     assert.deepEqual(runTutorial(), []);
   });
-  it("a step's loom is the same however the step is reached", () => {
+  // (it proves loomAt shares nothing between calls: a step's loom is made from data each time,
+  // so going to it by Next, by Back or by a link gives the same; js/app/learn.js goTo uses it)
+  it("a step's loom is made afresh, the same each time", () => {
     for (let i = 0; i < STEPS.length; i++) {
       const [a, b] = [loomAt(i), loomAt(i)];
       assert.deepEqual(
