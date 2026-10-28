@@ -808,6 +808,9 @@ export function createShell(store, root) {
       one.replaceChildren(...made.nodes);
       mine = made.mine;
       for (const b of chips.children) b.setAttribute("aria-pressed", String(/** @type {HTMLElement} */ (b).dataset.view === v));
+      // the view on show is in sight in the strip (Design and Games open on the cloth, its end)
+      const on = /** @type {HTMLElement | undefined} */ ([...chips.children].find((b) => /** @type {HTMLElement} */ (b).dataset.view === v));
+      if (on) requestAnimationFrame(() => (chips.scrollLeft = Math.max(0, on.offsetLeft - (chips.clientWidth - on.offsetWidth) / 2)));
       relabel();
     });
     st.append(chips, one);

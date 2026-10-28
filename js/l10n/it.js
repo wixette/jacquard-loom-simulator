@@ -534,7 +534,7 @@ export default {
   "pic.title": "Immagine",
   "pic.cards": "I suoi cartoni",
   "pic.weaveIt": "Apri in Tessi",
-  "pic.weaveIt.tip": "Metti questi cartoni sul tuo telaio, e vai a Tessi per tesserli",
+  "pic.weaveIt.tip": "Metti questi cartoni sul tuo telaio, in Tessi, per tesserli o cambiarli a mano",
   "pic.woven": "I {cards} cartoni dell'immagine sono sul tuo telaio, una macchina da {hooks} uncini, a partire dal primo: premi Avvia per tesserla.",
   "pic.locked": "Questi cartoni sono letti dall'immagine: cambia l'immagine, oppure tessili in Tessi per cambiarli a mano.",
   "pic.size": "Dimensione",

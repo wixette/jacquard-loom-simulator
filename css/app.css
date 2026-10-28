@@ -22,7 +22,7 @@ select { padding: 4px 8px; border-radius: var(--radius-s); border: 1px solid var
 [hidden] { display: none !important; }
 
 /* ---- the frame: desktop ------------------------------------------------------------------- */
-.app { display: grid; grid-template-rows: 56px minmax(0, 1fr); height: 100dvh; }
+.app { display: grid; grid-template-rows: 56px minmax(0, 1fr); grid-template-columns: minmax(0, 1fr); height: 100dvh; }
 .app.desktop { grid-template-rows: 56px minmax(0, 1fr) auto; }
 .work {
   display: grid;
@@ -136,6 +136,8 @@ body.resizing .stage { pointer-events: none; }
 .under-stage .controls .btn.icon-only { width: 42px; height: 42px; }
 .under-stage .controls .btn.play { width: 50px; height: 50px; }
 .under-stage .where { text-align: right; font-size: 11.5px; display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+/* on the narrowest phones there is no room beside the controls for the pick in words: it was cut to "Pick 1 (car…"; the caption above says the moment */
+@media (max-width: 359px) { .app.phone .under-stage .where { display: none; } }
 .sheet { display: flex; flex-direction: column; min-height: 0; background: var(--md-surface-low); }
 .sheet .grab { align-self: center; display: flex; align-items: center; justify-content: center; width: 64px; height: 22px; padding: 0; border: 0; background: transparent; cursor: grab; touch-action: none; }
 .sheet .grab span { width: 36px; height: 4px; border-radius: 2px; background: var(--md-outline); }
