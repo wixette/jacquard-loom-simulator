@@ -2,6 +2,10 @@
 
 What changed in each release. Versions follow `package.json` and are tagged `vX.Y.Z` ([docs/development.md](docs/development.md), *Versions and releases*). Each stage's details are in its notes in [design/](design/).
 
+## Unreleased (1.1.0)
+
+- For developers: `pnpm shots --only post- --lang en,zh` takes a set of pictures for posts, and `pnpm video` short clips with the machine's sound, in any language ([docs/development.md](docs/development.md)).
+
 ## 1.0.0
 
 The first full release (2026-10-28): the same loom, tutorial, picture tool and games as 0.2.0,
