@@ -126,7 +126,7 @@ export function answer(store, choice) {
 export function stepDone(s) {
   const step = STEPS[s.learn.step];
   const loom = s.looms.tutorial.loom;
-  return (!step.predict || step.id in s.learn.answers) && (!step.task || step.task.check(loom));
+  return (!step.predict || step.id in s.learn.answers) && (!step.task || step.task.check(loom, step.picture ? s.pictures.tutorial : null));
 }
 
 /**

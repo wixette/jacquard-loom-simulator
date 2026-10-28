@@ -232,6 +232,8 @@ export function unitsView(store, o = {}) {
         labelled = s.locale;
         view.relabel();
       }
+      // hidden (a phone's sheet over it), it is posed when it is shown again: its size changes
+      if (!shown(host)) return;
       const ls = loomOf(s, o.loom);
       view.pose(ls.loom.snapshot(), ls.follow ? ls.follow.hook : 0);
     },

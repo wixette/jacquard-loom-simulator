@@ -71,6 +71,10 @@ export class UnitsView {
     if (getComputedStyle(host).position === "static") host.style.position = "relative";
     this.raycaster = new THREE.Raycaster();
     const canvas = this.viewer.renderer.domElement;
+    // named, and worked by the keyboard too: the arrows move the model, Shift and the arrows turn it
+    canvas.setAttribute("role", "img");
+    canvas.tabIndex = 0;
+    this.viewer.controls.listenToKeyEvents(canvas);
     canvas.addEventListener("pointermove", (e) => this.hover(e));
     canvas.addEventListener("pointerleave", () => (this.tip.hidden = true));
     // A click (not a drag) on a unit or its band, in the whole machine, opens that unit.
@@ -84,7 +88,8 @@ export class UnitsView {
       }
       down = null;
     });
-    this.viewer.addFrameCallback(() => this.placeTags());
+    // the labels move only when the picture does: placed after each frame drawn, not every tick
+    this.viewer.onDraw.push(() => this.placeTags());
   }
 
   /**
@@ -93,6 +98,7 @@ export class UnitsView {
    * @returns {void}
    */
   relabel() {
+    this.viewer.renderer.domElement.setAttribute("aria-label", `${t(this.mode === "machine" ? "view.3d" : `unit.${this.mode}`)}: ${t("view3d.how")}`);
     const rows = PARAMS.reference_head.cross_rows.v;
     const hooks = PARAMS.reference_head.hooks.v;
     const repeats = PARAMS.reference_head.repeats.v;
@@ -170,6 +176,7 @@ export class UnitsView {
    */
   showMachine(fly = true) {
     this.mode = "machine";
+    if (this.loaded) this.relabel();
     if (this.context) this.context.visible = true;
     for (const u of Object.values(this.units)) u.root.visible = true;
     if (this.context) this.viewer.fit(this.context, VIEW_FROM.machine, fly);
@@ -185,6 +192,7 @@ export class UnitsView {
    */
   show(id, fly = true) {
     this.mode = id;
+    if (this.loaded) this.relabel();
     if (this.context) this.context.visible = false;
     for (const [key, u] of Object.entries(this.units)) u.root.visible = key === id;
     const u = this.units[id];

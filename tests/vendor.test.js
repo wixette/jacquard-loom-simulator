@@ -4,7 +4,7 @@
 import assert from "node:assert/strict";
 import { existsSync, readFileSync } from "node:fs";
 import { describe, it } from "node:test";
-import { ICONS_MODULE, iconsModule, sourcePath, VENDORED, vendorPath } from "../tools/vendor.mjs";
+import { ICONS_MODULE, iconsModule, MINIFIED, minified, sourcePath, VENDORED, vendorPath } from "../tools/vendor.mjs";
 
 describe("vendor/ matches the versions in package.json", () => {
   for (const [pkg, files] of Object.entries(VENDORED)) {
@@ -15,6 +15,16 @@ describe("vendor/ matches the versions in package.json", () => {
       });
     }
   }
+
+  for (const [to, from] of Object.entries(MINIFIED)) {
+    it(`three/${to}, minified from ${from}`, () => {
+      assert.ok(existsSync(vendorPath("three", to)), `${vendorPath("three", to)} is missing: run pnpm vendor`);
+      assert.equal(readFileSync(vendorPath("three", to), "utf8"), minified(from), "run pnpm vendor");
+    });
+  }
+  it("three.js keeps its licence notice, minified", () => {
+    assert.match(readFileSync(vendorPath("three", "build/three.module.min.js"), "utf8"), /@license[\s\S]{0,200}MIT/);
+  });
 
   it("vendor/material-symbols/icons.js holds the icons listed in tools/vendor.mjs", () => {
     assert.equal(readFileSync(ICONS_MODULE, "utf8"), iconsModule(), "run pnpm vendor");

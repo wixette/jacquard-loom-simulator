@@ -28,7 +28,8 @@ export function wireKeys(store) {
     if (e.defaultPrevented || e.ctrlKey || e.metaKey || e.altKey) return;
     const target = /** @type {Element} */ (e.target);
     if (target.closest?.(OWN_KEYS) || document.querySelector("dialog[open]")) return;
-    const onButton = target.closest?.("button, a[href]") !== null;
+    // Space on a control of its own (a button, a link, the 3D view's note) works that control
+    const onButton = target.closest?.("button, a[href], summary, [role=button]") !== null;
     const id = store.state.current;
     if (e.key === " " && !onButton) act.play(store, id);
     else if (e.key === "ArrowRight") act.step(store, id);

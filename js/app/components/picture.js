@@ -87,7 +87,17 @@ export function picturePanel(store, o) {
     }
     g.stroke();
     g.globalAlpha = 1;
+    // the keyboard's square, while the paper has the keyboard
+    if (document.activeElement === grid && grid.matches(":focus-visible")) {
+      const k = Math.min(cursor.x, n - 1);
+      const m = Math.min(cursor.y, n - 1);
+      g.strokeStyle = token("--md-primary", "#9ccaff");
+      g.lineWidth = 2;
+      g.strokeRect(k * c + 1, m * c + 1, c - 2, c - 2);
+    }
   };
+  /** The square the arrow keys are on. */
+  let cursor = { x: 0, y: 0 };
 
   /** The square under a pointer, or null. @param {PointerEvent} e */
   const squareAt = (e) => {
@@ -98,6 +108,10 @@ export function picturePanel(store, o) {
     return x >= 0 && y >= 0 && x < n && y < n ? { x, y } : null;
   };
 
+  /** Where the keyboard is on the paper, said to a screen reader. @type {HTMLElement} */
+  let gridSaid;
+  /** What the note says, written again in another language. */
+  let note = () => "";
   /** @param {HTMLInputElement} input */
   const openImage = (input) => {
     const file = input.files?.[0];
@@ -129,7 +143,8 @@ export function picturePanel(store, o) {
     };
     img.onerror = () => {
       URL.revokeObjectURL(url);
-      ui.note.textContent = t("pic.imageFailed", { file: file.name });
+      note = () => t("pic.imageFailed", { file: file.name });
+      ui.note.textContent = note();
     };
     img.src = url;
   };
@@ -139,7 +154,8 @@ export function picturePanel(store, o) {
     const n = spec().rows.length;
     const level = Number(/** @type {HTMLInputElement} */ (ui.level).value);
     change({ rows: pictureFromPixels(image.data, image.width, image.height, n, n, level) });
-    ui.note.textContent = t("pic.imageOpened", { file: imageName, n });
+    note = () => t("pic.imageOpened", { file: imageName, n });
+    ui.note.textContent = note();
   };
 
   /**
@@ -166,7 +182,29 @@ export function picturePanel(store, o) {
   return {
     name: "comp.picture",
     mount(h) {
-      grid = el("canvas", { class: "pic-grid", role: "img" });
+      // painted by the pointer, or by the keyboard: the arrows move a square, Space or Enter paints it
+      grid = el("canvas", { class: "pic-grid", role: "application", tabindex: "0" });
+      const said = el("span", { class: "visually-hidden", "aria-live": "polite" });
+      const sayAt = () => {
+        const rows = spec().rows;
+        said.textContent = t(rows[cursor.y]?.[cursor.x] ? "pic.square.dark" : "pic.square.light", { row: cursor.y + 1, col: cursor.x + 1 });
+      };
+      grid.addEventListener("focus", () => (draw(spec().rows), sayAt()));
+      grid.addEventListener("blur", () => draw(spec().rows));
+      grid.addEventListener("keydown", (e) => {
+        const n = spec().rows.length;
+        const step = /** @type {Record<string, [number, number]>} */ ({ ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] })[e.key];
+        if (step) cursor = { x: Math.max(0, Math.min(n - 1, cursor.x + step[0])), y: Math.max(0, Math.min(n - 1, cursor.y + step[1])) };
+        else if (e.key === " " || e.key === "Enter") {
+          const rows = spec().rows.map((r) => [...r]);
+          rows[cursor.y][cursor.x] = !rows[cursor.y][cursor.x];
+          change({ rows });
+        } else return;
+        e.preventDefault();
+        draw(spec().rows);
+        sayAt();
+      });
+      gridSaid = said;
       // Painting: the first square pressed decides whether the stroke paints dark or light.
       /** @type {boolean | null} */
       let paint = null;
@@ -210,6 +248,7 @@ export function picturePanel(store, o) {
             run: () => {
               image = null;
               ui.threshold.hidden = true;
+              note = () => "";
               ui.note.textContent = "";
               change({ rows: presetPicture(name) });
             },
@@ -256,6 +295,7 @@ export function picturePanel(store, o) {
         ui.note,
         threshold,
         grid,
+        gridSaid,
       ]);
       h.appendChild(box);
     },
@@ -264,6 +304,7 @@ export function picturePanel(store, o) {
     },
     update(s) {
       const p = s.pictures[o.loom];
+      ui.note.textContent = note();
       if (!stroke) draw(p.rows);
       const n = p.rows.length;
       /** @type {HTMLSelectElement} */ (ui.size).value = String(n);

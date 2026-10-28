@@ -222,3 +222,22 @@ describe("the card tools, the loop and the play loop (js/app/looms.js)", () => {
     assert.equal(store.state.looms.mine.crossRow, 0);
   });
 });
+
+describe("each workspace keeps its own views (1.0.0 review)", () => {
+  it("Design and Games open on the cloth the first time, and each keeps what it was left with", () => {
+    const s = new Store(appState());
+    const weave = s.state.views;
+    act.setWorkspace(s, "create");
+    assert.deepEqual(s.state.views, ["cloth"]);
+    act.setViews(s, ["cloth", "section"]);
+    act.setWorkspace(s, "play");
+    assert.deepEqual(s.state.views, ["cloth"]);
+    act.setViews(s, ["front"]);
+    act.setWorkspace(s, "weave");
+    assert.deepEqual(s.state.views, weave);
+    act.setWorkspace(s, "create");
+    assert.deepEqual(s.state.views, ["cloth", "section"]);
+    act.setWorkspace(s, "play");
+    assert.deepEqual(s.state.views, ["front"]);
+  });
+});

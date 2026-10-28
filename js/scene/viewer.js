@@ -4,6 +4,7 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+import { reducedMotion } from "../ui/motion.js";
 import { token } from "../ui/theme.js";
 
 /**
@@ -98,6 +99,11 @@ export class Viewer {
   lastRender = 0;
   /** @type {((q: Quality) => void) | null} */
   onQualityChange = null;
+  /**
+   * Called after each frame actually drawn (the camera or the scene changed), not every tick.
+   * @type {(() => void)[]}
+   */
+  onDraw = [];
   /** @readonly */
   scene = new THREE.Scene();
   /**
@@ -182,7 +188,8 @@ export class Viewer {
     this.scene.add(new THREE.HemisphereLight(0xc8d8ec, 0x2a2018, HEMI)); // not a theme colour: the sky's and the floor's light
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
     this.controls.target.set(0, 0.09, 0.2);
-    this.controls.enableDamping = true;
+    // the orbit coasts to a stop, unless the reader asked for less motion
+    this.controls.enableDamping = !reducedMotion();
 
     this.controls.addEventListener("change", () => this.invalidate(false));
     this.resized = new ResizeObserver(() => this.resize());
@@ -294,6 +301,8 @@ export class Viewer {
     const t0 = this.controls.target.clone();
     const p1 = new THREE.Vector3().copy(position);
     const t1 = new THREE.Vector3().copy(target);
+    // with reduced motion, the camera is there at once
+    if (reducedMotion()) seconds = 1e-6;
     let t = 0;
     /** @param {number} dt */
     const step = (dt) => {
@@ -425,13 +434,15 @@ export class Viewer {
     this.renderedFrames++;
     // Auto quality: watch back-to-back frames (animation, orbiting); if they are slow,
     // drop shadows and the pixel ratio once.
-    if (this.qualityMode === "auto" && this.quality === "high" && this.lastRender > 0) {
+    // a gap of more than a quarter second is a pause (another tab, shaders compiling), not a slow frame
+    if (this.qualityMode === "auto" && this.quality === "high" && this.lastRender > 0 && time - this.lastRender < 250) {
       this.slowFrames.push(time - this.lastRender);
       if (this.slowFrames.length > 60) this.slowFrames.shift();
       const avg = this.slowFrames.reduce((a, b) => a + b, 0) / this.slowFrames.length;
       if (this.slowFrames.length === 60 && avg > 1000 / LITE_BELOW_FPS) this.setQuality("lite");
     }
     this.lastRender = time;
+    for (const cb of this.onDraw) cb();
   }
 
   /**
@@ -452,6 +463,8 @@ export class Viewer {
     });
     this.scene.environment?.dispose();
     this.renderer.dispose();
+    // the GL context given back now, not when the page is collected: views swapped often add up
+    this.renderer.forceContextLoss();
     this.renderer.domElement.remove();
   }
 }

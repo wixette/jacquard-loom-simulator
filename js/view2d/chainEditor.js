@@ -56,7 +56,44 @@ export class ChainList {
     host.appendChild(this.list);
     this.key = "";
     this.laces = events.onLace !== undefined;
+    /** The hole the keyboard is on (card -1: the hook numbers over the chain), the chain's one Tab stop. */
+    this.at = { card: 0, hook: 0 };
+    /** The card selected when last drawn: a new one (a click, a tool) takes the keyboard there. */
+    this.selected = -1;
     onPress(this.list, clicks(events));
+    this.list.addEventListener("focusin", (e) => {
+      const b = /** @type {HTMLElement} */ (e.target);
+      if (b.dataset.hook !== undefined) this.at = { card: Number(b.dataset.card), hook: Number(b.dataset.hook) };
+      else if (b.dataset.head !== undefined) this.at = { card: -1, hook: Number(b.dataset.head) };
+    });
+    // The arrow keys go from hole to hole and card to card (a card reached is selected, as a
+    // click selects it), Home and End to a card's first and last hole; Enter or Space punches.
+    this.list.addEventListener("keydown", (e) => {
+      const b = /** @type {HTMLElement} */ (e.target);
+      if (b.dataset.hook === undefined && b.dataset.head === undefined) return;
+      const cards = this.list.querySelectorAll(".card-line").length;
+      const hooks = this.list.querySelectorAll(".strip-head .hn").length;
+      let { card, hook } = this.at;
+      if (e.key === "ArrowRight") hook = Math.min(hooks - 1, hook + 1);
+      else if (e.key === "ArrowLeft") hook = Math.max(0, hook - 1);
+      else if (e.key === "ArrowDown") card = Math.min(cards - 1, card + 1);
+      else if (e.key === "ArrowUp") card = Math.max(-1, card - 1);
+      else if (e.key === "Home") hook = 0;
+      else if (e.key === "End") hook = hooks - 1;
+      else return;
+      e.preventDefault();
+      const changed = card !== this.at.card;
+      this.at = { card, hook };
+      this.focusAt();
+      if (changed && card >= 0) events.onSelect(card);
+    });
+  }
+
+  /** Focus the hole (or hook number) the keyboard is on. */
+  focusAt() {
+    const { card, hook } = this.at;
+    const sel = card < 0 ? `.hn[data-head="${hook}"]` : `.hole[data-card="${card}"][data-hook="${hook}"]`;
+    /** @type {HTMLElement | null} */ (this.list.querySelector(sel))?.focus();
   }
 
   /**
@@ -73,6 +110,12 @@ export class ChainList {
     if (key === this.key) return;
     this.key = key;
     const follow = trace ? trace.hook : null;
+    // the keyboard's hole kept in the chain; a card selected elsewhere takes it there
+    if (selected !== this.selected && this.at.card >= 0) this.at = { ...this.at, card: selected };
+    this.selected = selected;
+    this.at = { card: Math.min(this.at.card, deck.cards.length - 1), hook: Math.min(this.at.hook, deck.hooks - 1) };
+    const focused = this.list.contains(document.activeElement) && document.activeElement !== this.list.querySelector(".lace");
+    const stop = (/** @type {number} */ card, /** @type {number} */ hook) => (card === this.at.card && hook === this.at.hook ? "0" : "-1");
     const cell = Math.max(7, Math.min(18, Math.floor(250 / deck.hooks)));
     this.list.style.setProperty("--cell", `${cell}px`);
     this.list.style.setProperty("--hooks", String(deck.hooks));
@@ -80,7 +123,7 @@ export class ChainList {
 
     const rows = [];
     const head = [...Array(deck.hooks).keys()]
-      .map((h) => `<span class="hn${follow === h ? " follow" : ""}" data-head="${h}" title="${t("chain.followHook", { hook: h + 1 })}">${deck.hooks > 16 && (h + 1) % 8 !== 0 && h !== 0 ? "" : h + 1}</span>`)
+      .map((h) => `<button type="button" class="hn${follow === h ? " follow" : ""}" data-head="${h}" tabindex="${stop(-1, h)}" title="${t("chain.followHook", { hook: h + 1 })}" aria-label="${t("chain.followHook", { hook: h + 1 })}">${deck.hooks > 16 && (h + 1) % 8 !== 0 && h !== 0 ? "" : h + 1}</button>`)
       .join("");
     rows.push(`<div class="strip-head"><span class="num"></span><span class="strip">${head}</span><span class="tag"></span></div>`);
     const onNeedles = t("chain.onNeedles");
@@ -91,7 +134,7 @@ export class ChainList {
       else if (i === snap.nextIndex && !atRest) tag = t("chain.next");
       const cls = ["card-line", i === selected ? "selected" : "", i === snap.cardIndex ? "current" : "", trace && trace.pick !== null && i === trace.cardIndex ? "traced" : ""].filter(Boolean).join(" ");
       const holes = card
-        .map((p, h) => `<button type="button" class="hole${p ? " punched" : ""}${follow === h ? " follow" : ""}${h % 8 === 7 ? " col-end" : ""}" data-card="${i}" data-hook="${h}" aria-label="${t(p ? "chain.hole.punched" : "chain.hole.blank", { card: i + 1, hole: h + 1 })}" aria-pressed="${p}"></button>`)
+        .map((p, h) => `<button type="button" class="hole${p ? " punched" : ""}${follow === h ? " follow" : ""}${h % 8 === 7 ? " col-end" : ""}" data-card="${i}" data-hook="${h}" tabindex="${stop(i, h)}" aria-label="${t(p ? "chain.hole.punched" : "chain.hole.blank", { card: i + 1, hole: h + 1 })}" aria-pressed="${p}"></button>`)
         .join("");
       rows.push(`<div class="${cls}" data-card="${i}"><span class="num">${i + 1}</span><span class="strip">${holes}</span><span class="tag">${tag}</span></div>`);
     });
@@ -102,6 +145,8 @@ export class ChainList {
       );
     else rows.push(`<p class="chain-end">${t(deck.loop ? "chain.loop" : "chain.open")}</p>`);
     this.list.innerHTML = rows.join("");
+    // the chain is drawn anew as the loom moves on: the keyboard stays on its hole
+    if (focused) this.focusAt();
   }
 }
 

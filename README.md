@@ -13,7 +13,9 @@ weaving a picture by hand, and on to the punched cards that came after. Draw a p
 simulator cuts its cards; or play four games on the loom.
 
 **[▶ Try it online](https://wixette.github.io/jacquard-loom-simulator/)**, with nothing to
-install, on a computer or a phone, in ten languages.
+install, on a computer or a phone, in ten languages. It needs a current Chrome, Edge, Firefox or
+Safari: JavaScript modules with import maps, WebGL for the 3D views, and CompressionStream for
+the long links.
 
 ![The simulator: the cards on the left, the head cut through and the whole loom in 3D in the middle, the cloth on the right, and the controls along the bottom](./screenshots/readme-app.png)
 
@@ -110,7 +112,11 @@ the right, and the controls along the bottom.
 ![One unit in 3D, the selector, with its note on the idea it shows: a light needle decides, a heavy knife does the lifting](./screenshots/readme-units.png)
 
 **The keyboard:** Space plays or pauses, ← and → step, 1 to 4 show the section, the side, the
-front or the loom in 3D, F follows what is under the pointer, and Esc stops following.
+front or the loom in 3D, F follows what is under the pointer, and Esc stops following. Every
+control is reached with Tab. In the chain of cards the arrow keys go from hole to hole and card
+to card, and Enter or Space punches; on Design's paper the arrows move a square and Space
+paints it; in a 3D view the arrows move the model and Shift with the arrows turns it. The app
+honours the system's setting for reduced motion.
 
 **On a phone** the drawing sits on top with the controls under it, and the cards, the cloth
 and the tutorial share a sheet below it, dragged up or down.
@@ -210,7 +216,8 @@ browser.
 
 Start with [docs/development.md](docs/development.md): the commands, the page options, versions
 and releases. The rules the code follows are in [docs/conventions.md](docs/conventions.md), and
-the design principles in [docs/ui-design.md](docs/ui-design.md).
+the design principles in [docs/ui-design.md](docs/ui-design.md). What changed in each release
+is in [CHANGELOG.md](CHANGELOG.md).
 
 ### The link format
 

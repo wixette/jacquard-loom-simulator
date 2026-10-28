@@ -13,7 +13,7 @@ export const GAMES = /** @type {const} */ (["name", "byte", "guess", "drawboy"])
  * @typedef {object} PlayState
  * @property {GameName} game
  * @property {{ text: string; mode: "damask" | "direct" }} name
- * @property {{ text: string; secret: boolean; guess: string }} byte secret: the cards came from a link, the text is the friend's to find
+ * @property {{ text: string; secret: boolean; guess: string; deck?: import("../sim/deck.js").Deck }} byte secret: the cards came from a link (deck), the text is the friend's to find
  * @property {{ seed: number; picked: number | null; right: number; tried: number }} guess
  * @property {{ phase: "hand" | "cards"; hand: import("../game/drawBoy.js").DrawBoy; seconds: number; started: number | null }} drawboy
  */

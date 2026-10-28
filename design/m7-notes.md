@@ -59,7 +59,7 @@
 
 11. **A newcomer opens on Learn,** at the first step with the whole loom in 3D; after that the app opens on the workspace last used on the device (local storage), so a learner who went on to Weave opens there, and one who went back to the tutorial opens at their step (design/ui-layout.md §3). The author's first idea was a flag set once Weave is visited; the last workspace used covers that and also the learner who returns to finish the tutorial.
 12. **The step stacks from the top:** the card, Back and Next right under it, the cards with the height left. Pinned to the panel's foot, Back and Next sat far from the text on a tall window, and the cards were squeezed.
-13. **The view menu, flat in two groups,** without the units' codes; **no view twice** (choosing one on show swaps the panes), **one 3D model in the four-view grid**, and going to two or four keeps the views on show; the four-view grid is the two-view pair on top, the front and side below (design/ui-layout.md §4). The two views on a wide window stay as they were: chosen once, when Weave opens.
+13. **The view menu, flat in two groups** (0.2.0: and the cloth, after a divider), without the units' codes; **no view twice** (choosing one on show swaps the panes), **one 3D model in the four-view grid**, and going to two or four keeps the views on show; the four-view grid is the two-view pair on top, the front and side below (design/ui-layout.md §4). The two views on a wide window stay as they were: chosen once, when Weave opens.
 
 ## Acceptance spec
 
@@ -76,7 +76,7 @@
 | L-5 | The parts a step points at glow in the section, their labels in amber; nothing glows in Weave. | page |
 | L-6 | In every language every step speaks it, with no English left. | page |
 | L-7 | On a phone, Learn opens the sheet on the guide, at the step, with the controls under the stage. | page |
-| L-8 | The view menu is one list in two groups, the 2D drawings and the 3D models, with no unit codes; a view on show elsewhere says where, and choosing it swaps the two; four views keep one 3D model; going to two keeps the view on show. | page |
+| L-8 | The view menu is one list in two groups, the 2D drawings and the 3D models (0.2.0: and the cloth, after a divider), with no unit codes; a view on show elsewhere says where, and choosing it swaps the two; four views keep one 3D model; going to two keeps the view on show. | page |
 | L-9 | Without a link a newcomer opens on Learn, with the whole loom in 3D; after Weave, the app opens on Weave; a link decides for itself. | page |
 | L-10 | M6's checks and the prototypes' still pass (`pnpm selftest`). | page |
 

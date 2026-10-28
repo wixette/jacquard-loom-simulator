@@ -53,6 +53,8 @@ const MAX_ROWS = 1200;
 /** The largest square, in CSS pixels: in the panel, and as a view on the stage. */
 const CELL = 22;
 const LARGE_CELL = 33;
+/** Room left of the cloth for the row numbers, px. */
+const LEFT = 28;
 
 /** @type {number | null} */
 let scrollbar = null;
@@ -83,6 +85,19 @@ export function steadyWidth(host) {
   return inner - scrollbarWidth();
 }
 
+/**
+ * A square's size, px: by the width only, so the squares keep their size as the cloth grows and
+ * rows past the host's height scroll, in the panel and on the stage alike; at most CELL, or
+ * LARGE_CELL on the stage (1.5 times), and never under 3.
+ * @param {number} width the host's steady width (steadyWidth)
+ * @param {number} ends the warp ends across
+ * @param {boolean} large the cloth as a view on the stage
+ */
+export function cellSize(width, ends, large) {
+  const across = Math.floor((Math.max(200, width - 4) - LEFT - 6) / Math.max(1, ends));
+  return Math.max(3, Math.min(large ? LARGE_CELL : CELL, across));
+}
+
 export class ClothView {
   /**
    * @param {HTMLElement} host
@@ -97,7 +112,7 @@ export class ClothView {
     /** @type {ClothCell[][]} */
     this.cells = [];
     this.cell = 10;
-    this.left = 28;
+    this.left = LEFT;
     this.top = 6;
     this.canvas.addEventListener("click", (e) => {
       const r = this.canvas.getBoundingClientRect();
@@ -127,11 +142,7 @@ export class ClothView {
     // The width is the same whether or not the scrollbar shows: sizing the cells to the width
     // left beside a scrollbar that comes and goes made the cloth fit, then overflow, then fit
     // again at every redraw, so it blinked as it grew past its box.
-    const width = Math.max(200, steadyWidth(this.host) - 4);
-    const across = Math.floor((width - this.left - 6) / ends);
-    // The squares are sized by the width only, so they keep their size as the cloth grows, and
-    // rows past the host's height scroll, in the panel and on the stage alike.
-    const cell = Math.max(3, Math.min(o.large ? LARGE_CELL : CELL, across));
+    const cell = cellSize(steadyWidth(this.host), ends, !!o.large);
     this.cell = cell;
     const rows = Math.max(cells.length, 1);
     const w = this.left + ends * cell + 6;

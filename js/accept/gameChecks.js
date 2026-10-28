@@ -53,7 +53,7 @@ function rules() {
   }
   // A line of 8 characters fits both heads; one of 9 is refused before any cards are cut.
   const d = planName("ABCDEFGH", "damask");
-  if (!d.ok || d.plan.deck.hooks > REFERENCE_HOOKS) bad.push("8 characters do not fit the 400 head as damask");
+  if (!d.ok || d.plan.deck.hooks > REFERENCE_HOOKS || d.plan.deck.hooks !== 256) bad.push("8 characters do not take 256 of the 400 head's hooks as damask");
   const q = planName("ABCDEFGH", "direct");
   if (!q.ok || q.plan.deck.hooks !== DIRECT_HOOKS_MAX) bad.push("8 characters do not fill the 64-hook head directly");
   return result("G-2", `Printable ASCII, wrapped at the spaces into lines of ${MAX_CHARS}, up to ${MAX_LINES} lines, is accepted; anything else is refused with a reason; 8 characters fit the 400 head as damask (256 hooks) and the 64-hook head directly`, bad.length === 0, bad.slice(0, 3).join("; ") || `${ok.length} texts accepted, ${refused.length} refused`);

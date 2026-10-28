@@ -1,7 +1,7 @@
 // Guess the cloth (design/public-app.md §2): shown a small deck and three cloths, the player
 // picks the one it weaves. The wrong two are what a learner reading the cards carelessly would
-// expect: the chain read in the other order, each card read from the other end, holes and
-// blanks swapped. Every puzzle comes from a number (its seed), so a link can give a friend the
+// expect: two of the four misreadings (the chain read in the other order, each card read from
+// the other end, holes and blanks swapped, or each card read one hook along). Every puzzle comes from a number (its seed), so a link can give a friend the
 // same one, and the three cloths are always different. Pure: no DOM.
 
 import { makeDeck } from "../sim/deck.js";
@@ -62,7 +62,25 @@ const key = (c) => c.map((r) => r.map(Number).join("")).join("/");
  */
 
 /**
- * The puzzle a seed gives: a small looped deck whose three readings all differ.
+ * A list in a seeded order (Fisher–Yates). Not sort() with a random comparator: what that gives,
+ * and how often it asks, is each browser's own, so a seed gave Safari another puzzle than Chrome.
+ * @template T
+ * @param {readonly T[]} list
+ * @param {() => number} rand
+ * @returns {T[]}
+ */
+function shuffled(list, rand) {
+  const out = [...list];
+  for (let i = out.length - 1; i > 0; i--) {
+    const j = Math.floor(rand() * (i + 1));
+    [out[i], out[j]] = [out[j], out[i]];
+  }
+  return out;
+}
+
+/**
+ * The puzzle a seed gives: a small looped deck whose three readings all differ, the same in
+ * every browser (since 1.0.0; 0.2.0's seeds gave other puzzles).
  * @param {number} seed
  * @returns {Puzzle}
  */
@@ -73,7 +91,7 @@ export function puzzle(seed) {
     const cards = [...Array(n)].map(() => [...Array(HOOKS)].map(() => (rand() < 0.45 ? "O" : ".")).join(""));
     const right = weaveCards(cards);
     // two misreadings, in a seeded order, whose cloths differ from the right one and each other
-    const ways = [...MISREADINGS].sort(() => rand() - 0.5);
+    const ways = shuffled(MISREADINGS, rand);
     /** @type {{ cloth: boolean[][]; how: Misreading | null }[]} */
     const shown = [{ cloth: right, how: null }];
     for (const how of ways) {
@@ -83,7 +101,7 @@ export function puzzle(seed) {
     }
     // a deck too regular to be misread three ways (all blank, say) is drawn again
     if (shown.length < 3 || cards.every((c) => c === cards[0])) continue;
-    const order = [0, 1, 2].sort(() => rand() - 0.5);
+    const order = shuffled([0, 1, 2], rand);
     const ordered = order.map((i) => shown[i]);
     return { seed, deck: makeDeck(HOOKS, cards, true), cloths: ordered.map((s) => s.cloth), answer: ordered.findIndex((s) => s.how === null), how: ordered.map((s) => s.how) };
   }

@@ -119,6 +119,8 @@ describe("every link round-trips", () => {
         sectionView: rand() < 0.5 ? "whole" : "crooks",
         views: rand() < 0.5 ? ["section"] : ["section", "front", "side", "3d"],
       };
+      // an open chain goes no further than its end, where it rests after its last pick
+      if (l.deck && !l.deck.loop && l.pick >= l.deck.cards.length) Object.assign(l, { pick: l.deck.cards.length, stop: 0 });
       const back = await read(await encodeLink(l));
       // a cross-row equal to the followed hook's (or the first) is not written: it reads as null
       const own = l.follow ? Math.floor(l.follow.hook / 8) : 0;
@@ -339,7 +341,7 @@ describe("Weave: a loom, field by field (design/links.md, Weave)", () => {
     assert.equal((await read("#v=2&bits=0")).bits, false);
     for (const f of ["#v=2&sv=Whole", "#v=2&face=Back", "#v=2&bits=true", "#v=2&bits=2"]) await refused(f);
   });
-  it("view: one, two or four of the nine views, in order; anything else falls back", async () => {
+  it("view: one, two or four of the ten views, in order; anything else falls back", async () => {
     for (const v of STAGE_VIEWS) assert.deepEqual((await read(`#v=2&view=${v}`)).views, [v]);
     assert.deepEqual((await read("#v=2&view=u3,section")).views, ["u3", "section"]);
     assert.deepEqual((await read("#v=2&view=3d,side,front,section")).views, ["3d", "side", "front", "section"]);
@@ -462,5 +464,66 @@ describe("Play: a game (design/links.md, Play; 0.2.0)", () => {
   });
   it("a text too long, a reading or a seed out of range is refused", async () => {
     for (const f of [`#v=2&w=play&game=name&text=${"x".repeat(145)}`, "#v=2&w=play&game=name&text=Ada&mode=fast", "#v=2&w=play&game=guess&seed=0"]) assert.ok(!(await decodeLink(f)).ok, f);
+  });
+});
+
+describe("after the 1.0.0 review", () => {
+  it("the step names of 0.2.0 are frozen too", async () => {
+    const { stepIndex } = await import("../../js/teach/tutorial.js");
+    const frozen = [
+      "debug-swapped", "debug-hole", "debug-tie-up", "debug-loop",
+      "tools-picture", "tools-loose", "tools-follow", "tools-setup", "tools-share", "tools-create", "tools-games",
+      "next-babbage", "next-lovelace", "next-hollerith", "next-three-cards", "next-computer",
+    ];
+    for (const name of frozen) assert.ok(stepIndex(name) >= 0, `${name} no longer opens a step: keep it as an alias`);
+  });
+  it("each s is the moment design/links.md names, by what the machine shows there", async () => {
+    const { Loom, POSITIONS } = await import("../../js/sim/loom.js");
+    const { griffeHeight, shuttleAcross } = await import("../../js/sim/cycle.js");
+    const top = Math.max(...POSITIONS.map(griffeHeight));
+    // s: the griffe (down, rising, up), the shuttle across, the rows woven at pick 0
+    const want = [["down", false, 0], ["rising", false, 0], ["up", false, 0], ["up", true, 0], ["up", true, 1], ["down", true, 1]];
+    for (const [s, [griffe, across, rows]] of want.entries()) {
+      const g = griffeHeight(POSITIONS[s]);
+      const seen = g > top * 0.95 ? "up" : g > top * 0.05 ? "rising" : "down";
+      const l = new Loom({ hooks: 8, cards: [Array(8).fill(true)], loop: true });
+      l.moveTo(0, POSITIONS[s]);
+      assert.deepEqual([seen, shuttleAcross(POSITIONS[s]) > 0.99, l.cloth.length], [griffe, across, rows], `s=${s}`);
+    }
+  });
+  it("an open chain rests at its end (p = the cards, s = 0) and goes no further; a loop goes on", async () => {
+    assert.ok((await decodeLink("#v=2&h=8&c=x.ff-00&l=0&p=2")).ok);
+    for (const f of ["#v=2&h=8&c=x.ff-00&l=0&p=3", "#v=2&h=8&c=x.ff-00&l=0&p=2&s=1"]) {
+      const r = await decodeLink(f);
+      assert.ok(!r.ok && /** @type {any} */ (r.reason).params?.why?.key === "link.range", f);
+    }
+    assert.ok((await decodeLink("#v=2&h=8&c=x.ff-00&p=1000000&s=3")).ok);
+  });
+  it("a chain longer than a link holds is refused before it is unpacked", async () => {
+    const x = await decodeDeck(`x.${Array(MAX_CARDS + 1).fill("ff").join("-")}`, 8);
+    assert.ok(!x.ok && /** @type {any} */ (x.reason).key === "link.tooMany");
+    const t0 = performance.now();
+    const b = await decodeDeck(`b.${"A".repeat(4_000_000)}`, 8);
+    assert.ok(!b.ok && /** @type {any} */ (b.reason).key === "link.tooMany");
+    assert.ok(performance.now() - t0 < 200, "refused without decoding 3 MB");
+  });
+  it("the rules design/links.md states for fp, step and view", async () => {
+    assert.ok((await decodeLink("#v=2&h=8&c=x.ff&f=1&fe=1&fp=1000000")).ok, "fp up to 1,000,000");
+    assert.ok(!(await decodeLink("#v=2&h=8&c=x.ff&f=1&fe=1&fp=1000001")).ok);
+    assert.ok(!(await decodeLink(`#v=2&w=learn&step=${"a".repeat(65)}`)).ok, "a step's name is at most 64 characters");
+    const v = await decodeLink("#v=2&view=side,microscope");
+    assert.ok(v.ok && v.link.views.join() === "side", "an unknown view is skipped, the rest kept");
+    const none = await decodeLink("#v=2&view=microscope");
+    assert.ok(none.ok && none.link.views.join() === DEFAULT_LINK.views.join(), "none known: the default");
+  });
+  it("a long loop from a link costs a reference a pick: the picks of one card share its row", async () => {
+    const { Loom } = await import("../../js/sim/loom.js");
+    const l = new Loom({ hooks: 64, cards: [Array(64).fill(true), Array(64).fill(false)], loop: true });
+    l.moveTo(1_000_000, 0);
+    assert.equal(l.cloth.length, 1_000_000);
+    assert.equal(l.cloth[0], l.cloth[2]);
+    assert.notEqual(l.cloth[0], l.cloth[1]);
+    l.moveTo(3, 0);
+    assert.equal(l.cloth.length, 3);
   });
 });

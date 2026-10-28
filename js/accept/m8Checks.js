@@ -1,6 +1,6 @@
 // M8's checks on the app (design/m8-notes.md), run by index.html?selftest after M7's: C-1 Design
 // opens on its picture and the large cloth, C-2 painting the paper weaves it again, C-3 the two
-// readings and what the status line says of them, C-4 Weave it, C-5 Design's link, C-6 what
+// readings and what the status line says of them, C-4 Open in Weave, C-5 Design's link, C-6 what
 // Design's loom refuses, C-7 an image opened. The picture's reading itself needs no page (tests/sim/picture.test.js).
 
 import { openCreate } from "../app/create.js";
@@ -41,7 +41,7 @@ export async function runM8Checks(page) {
 }
 
 /**
- * C-1: Create opens on its own loom, the picture tool on the left, the cloth alone on the stage
+ * C-1: Design opens on its own loom, the picture tool on the left, the cloth alone on the stage
  * and the picture's cards on the right.
  * @param {AppPage} page
  * @returns {Promise<CheckResult>}
@@ -52,12 +52,12 @@ async function opens({ store }) {
   if (store.state.current !== "create") bad.push(`the loom is ${store.state.current}`);
   if (store.state.views.join() !== "cloth") bad.push(`views ${store.state.views.join()}`);
   if (!$(".panel.left .pic-grid")) bad.push("no paper");
-  if (!$(".panel.left .weave-it") || !$(".panel.left .chain-slot .chain-box")) bad.push("no cards and Weave it under the paper");
+  if (!$(".panel.left .weave-it") || !$(".panel.left .chain-slot .chain-box")) bad.push("no cards and Open in Weave under the paper");
   if (!$(".panel.right svg.section")) bad.push("no machine on the right");
   if (!$(".stage .cloth-box.large canvas")) bad.push("no large cloth");
   const l = store.state.looms.create.loom;
   if (l.pick !== l.deck.cards.length) bad.push("the cloth is not woven to its end");
-  return result("C-1", "Design opens on its loom: the paper on the left with its cards and Weave it under it, the cloth alone and large, the machine on the right", bad.length === 0, bad.slice(0, 4).join("; ") || `${l.deck.cards.length} cards, ${l.deck.hooks} hooks`);
+  return result("C-1", "Design opens on its loom: the paper on the left with its cards and Open in Weave under it, the cloth alone and large, the machine on the right", bad.length === 0, bad.slice(0, 4).join("; ") || `${l.deck.cards.length} cards, ${l.deck.hooks} hooks`);
 }
 
 /**
@@ -115,7 +115,7 @@ async function readings({ store }) {
 }
 
 /**
- * C-4: Weave it puts the picture's cards on the learner's own loom, in Weave.
+ * C-4: Open in Weave puts the picture's cards on the learner's own loom, in Weave.
  * @param {AppPage} page
  * @returns {Promise<CheckResult>}
  */
@@ -128,11 +128,11 @@ async function weaveIt({ store }) {
   if (store.state.workspace !== "weave" || store.state.current !== "mine") bad.push(`went to ${store.state.workspace}, ${store.state.current}`);
   if (JSON.stringify(store.state.looms.mine.loom.deck.cards) !== cards) bad.push("not the picture's cards");
   if (keyOf(store.state.looms.mine.status.msg) !== "pic.woven") bad.push("the status line does not say whose cards they are");
-  return result("C-4", "Weave it puts the picture's cards on the learner's own loom, in Weave, and says so", bad.length === 0, bad.slice(0, 4).join("; ") || `${JSON.parse(cards).length} cards on Weave's loom`);
+  return result("C-4", "Open in Weave puts the picture's cards on the learner's own loom, in Weave, and says so", bad.length === 0, bad.slice(0, 4).join("; ") || `${JSON.parse(cards).length} cards on Weave's loom`);
 }
 
 /**
- * C-5: Share in Create writes the picture and its reading; the link opens them again.
+ * C-5: Share in Design writes the picture and its reading; the link opens them again.
  * @param {AppPage} page
  * @returns {Promise<CheckResult>}
  */
@@ -149,11 +149,11 @@ async function link({ store }) {
   const got = store.state.pictures.create;
   if (store.state.workspace !== "create") bad.push(`opened ${store.state.workspace}`);
   if (rowsKey(got.rows) !== rowsKey(want.rows) || got.mode !== "damask" || got.k !== 3) bad.push("not the same picture and reading");
-  return result("C-5", "Create's link holds the picture and its reading, and opens them again", bad.length === 0, bad.slice(0, 4).join("; ") || `${fragment.length} characters`);
+  return result("C-5", "Design's link holds the picture and its reading, and opens them again", bad.length === 0, bad.slice(0, 4).join("; ") || `${fragment.length} characters`);
 }
 
 /**
- * C-6: Create's loom is the picture's: a control that would change its cards refuses and says
+ * C-6: Design's loom is the picture's: a control that would change its cards refuses and says
  * why; its colours are free.
  * @param {AppPage} page
  * @returns {Promise<CheckResult>}
@@ -167,7 +167,7 @@ async function refuses({ store }) {
   if (keyOf(store.state.looms.create.status.msg) !== "pic.locked") bad.push("it does not say why");
   act.setColours(store, { warp: "#336699" }, "create");
   if (store.state.looms.create.warp !== "#336699") bad.push("the colours are not free");
-  return result("C-6", "Create's loom refuses a change to its cards and says why; its colours are free", bad.length === 0, bad.slice(0, 4).join("; ") || "add refused with pic.locked; the warp recoloured");
+  return result("C-6", "Design's loom refuses a change to its cards and says why; its colours are free", bad.length === 0, bad.slice(0, 4).join("; ") || "add refused with pic.locked; the warp recoloured");
 }
 
 /**

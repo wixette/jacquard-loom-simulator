@@ -1,5 +1,5 @@
-// The tutorial, parts 1 to 3 (design/public-app.md §1; design/m7-notes.md): the story, how it
-// works and what it is, and weaving. A step is data: its texts are message keys made from its
+// The tutorial, 37 steps in six parts (design/public-app.md §1; design/m7-notes.md, m8, m10):
+// the story, how it works and what it is, weaving, challenges, your tools, and what came next. A step is data: its texts are message keys made from its
 // name (tut.<name>.title, .text, and .task, .q, .a1…, .right, .wrong, .done where it has them),
 // what it puts on the stage, the loom it sets up, the parts it points at, and its task, which
 // is checked on the loom as it is (its cards, its moment, its cloth), not on the clicks that got
@@ -62,13 +62,17 @@ export const CONTROLS = /** @type {const} */ (["punch", "cards", "loop", "setup"
  * @property {number} rows
  */
 
+/** @import { PictureSpec } from "../sim/picture.js" */
+
 /**
  * Something for the learner to do on the loom.
  * @typedef {object} Task
  * @property {Asked[]} ask the controls its task line offers
  * @property {Control[]} [allow] the controls it unlocks
- * @property {(l: Loom) => boolean} check whether the loom shows it done
- * @property {(l: Loom) => void} solve do it (going on from it, and the tests)
+ * @property {(l: Loom, pic: PictureSpec | null) => boolean} check whether the loom (and, on a
+ *   picture's step, how the picture is read) shows it done
+ * @property {(l: Loom) => Partial<PictureSpec> | void} solve do it (going on from it, and the
+ *   tests); on a picture's step, what it changes in the picture's reading
  * @property {(l: Loom) => void} wrong a likely mistake, which check must not take (the tests)
  */
 
@@ -378,16 +382,25 @@ export const STEPS = [
     task: {
       ask: [],
       allow: ["picture"],
-      // the cloth holds together: no thread loose over more than eight others
-      check: (l) => l.cloth.length > 0 && findFloats(l.cloth).floats.length === 0,
+      // read as damask, and the cloth holds together: no thread loose over more than eight others
+      // (a small picture read square by square can hold together too, but that is not the task)
+      check: (l, pic) => pic?.mode === "damask" && l.cloth.length > 0 && findFloats(l.cloth).floats.length === 0,
       solve: (l) => {
         const r = readPicture({ rows: presetPicture("heart"), mode: "damask", k: 4, perRow: 1, invert: false });
         if (!r.ok) return;
         l.deck = r.cards.deck;
         l.reset();
         weave(l, r.cards.deck.cards.length);
+        return { mode: "damask" };
       },
-      wrong: () => {},
+      // the ready-made arrow, read square by square: no loose thread, and still not damask
+      wrong: (l) => {
+        const r = readPicture({ rows: presetPicture("arrow"), mode: "direct", k: 4, perRow: 1, invert: false });
+        if (!r.ok) return;
+        l.deck = r.cards.deck;
+        l.reset();
+        weave(l, r.cards.deck.cards.length);
+      },
     },
   },
   { id: "tools-follow", part: 5, views: ["front"], cards: true, setup: { hooks: 8, cards: TWILL, loop: true, tie: { kind: "straight", repeats: 2 }, woven: 8 } },
@@ -477,7 +490,7 @@ export function shownAt(i) {
 export function loomAt(i) {
   let k = i;
   while (k > 0 && !STEPS[k].setup && !STEPS[k].startPicture) k--;
-  const pic = STEPS[k].startPicture ? pictureAt(k) : null;
+  let pic = STEPS[k].startPicture ? pictureAt(k) : null;
   const read = pic ? readPicture(pic) : null;
   const s = STEPS[k].setup ?? { hooks: 8, cards: TWILL, loop: true };
   const loom = read?.ok ? new Loom(read.cards.deck) : new Loom(deckOf(s), s.tie ?? STRAIGHT);
@@ -485,7 +498,10 @@ export function loomAt(i) {
   else if (s.woven) loom.moveTo(s.woven, 0);
   for (let j = k; j < i; j++) {
     const task = STEPS[j].task;
-    if (task && !task.check(loom)) task.solve(loom);
+    if (task && !task.check(loom, pic)) {
+      const changed = task.solve(loom);
+      if (pic && changed) pic = { ...pic, ...changed };
+    }
   }
   return { loom, follow: pic ? null : (s.follow ?? null) };
 }
@@ -524,13 +540,14 @@ export function runTutorial() {
   STEPS.forEach((s, i) => {
     const task = s.task;
     if (!task) return;
-    if (task.check(loomAt(i).loom)) problems.push(`${s.id}: done before the learner acts`);
+    const pic = pictureAt(i);
+    if (task.check(loomAt(i).loom, pic)) problems.push(`${s.id}: done before the learner acts`);
     const mistaken = loomAt(i).loom;
     task.wrong(mistaken);
-    if (task.check(mistaken)) problems.push(`${s.id}: takes a mistake`);
+    if (task.check(mistaken, pic)) problems.push(`${s.id}: takes a mistake`);
     const solved = loomAt(i).loom;
-    task.solve(solved);
-    if (!task.check(solved)) problems.push(`${s.id}: not done by its solution`);
+    const changed = task.solve(solved);
+    if (!task.check(solved, pic && changed ? { ...pic, ...changed } : pic)) problems.push(`${s.id}: not done by its solution`);
   });
   return problems;
 }

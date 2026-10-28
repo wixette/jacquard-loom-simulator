@@ -14,7 +14,8 @@ A link is the app's address with a **fragment**: `https://…/jacquard-loom-simu
 
 - **The fragment, not the query:** nothing in it reaches a server or its logs; the app changes it without reloading; and a fragment has no practical length limit in a browser.
 - **Unknown fields are ignored,** so a link written by a later release opens in an earlier one, as well as it can.
-- **A link that cannot be read** is refused with a reason in the status line, and the app opens as it would without it. A link never half-applies: either every field is read, or none is.
+- **A link that cannot be read** is refused: the app opens Weave, whose status line says why (design/ui-layout.md §3). A value outside its table refuses the whole link; the link is not opened in part. Two rules let a later release's link open as well as it can: unknown fields are ignored (above), and `view` skips the views it does not know (Weave, below).
+- **Every field is checked, whatever `w` says:** a bad Design or Games field (`pw`, `mode`, …) refuses a Weave link too.
 
 | Field | Values | Default | Meaning |
 |---|---|---|---|
@@ -32,17 +33,17 @@ The learner's loom: its head and tie-up, its cards, the moment it is at, and how
 | `c` | a deck (below) | the app's opening deck | The chain of cards, the first card first |
 | `l` | `0`, `1` | `1` | `1`: the chain is laced into a loop |
 | `t` | `s1`, `s2`, `s3`, `s4`, `p` | `s1` | Tie-up: straight, repeated 1 to 4 times across the warp, or point |
-| `p` | 0 … 1,000,000 | `0` | The pick being woven, from 0 |
+| `p` | 0 … 1,000,000; on an open chain (`l=0`), 0 … the number of cards | `0` | The pick being woven, from 0. On an open chain, `p` equal to the number of cards is its end, where the loom rests after the last pick: it needs `s=0`, and a chain woven to its end reopens there. A larger `p`, or `s` above 0 at the end, is refused ("a number in it is out of range") |
 | `s` | 0 … 5 | `0` | The moment within it: 0 at rest (the card pressed against the needles), then hooks taken, shed open, shuttle across, beaten up, shed closed |
 | `wc`, `fc` | 6 hex digits | `5b3f8c`, `efe3c2` | The warp's and the weft's colours |
 | `f` | 1 … h | none | The hook followed |
 | `fe` | 1 … ends | none | With `f`: the warp end followed (a cell of the cloth) |
-| `fp` | 1 … picks woven | none | With `fe`: the pick of that cell |
+| `fp` | 1 … 1,000,000 | none | With `fe`: the pick of that cell |
 | `x` | 1 … h/8 | the followed hook's, or 1 | The cross-row the section cuts |
 | `sv` | `whole`, `needles`, `crooks` | `whole` | How close the section looks |
 | `face` | `front`, `back` | `front` | The face of the cloth shown |
 | `bits` | `0`, `1` | `0` | The 0/1 overlay on the cloth |
-| `view` | one, two or four of `section`, `side`, `front`, `cloth` (0.2.0), `3d`, `u1` … `u5`, joined by `,` | the screen's: `section,3d` where the stage is wide enough for two, else `section` | The stage's views, in order: one fills the stage, two stand side by side, four make the quad view. `3d` is the whole loom, `u1` to `u5` its units alone. A link written with the one view `section` leaves it out. |
+| `view` | one, two or four of `section`, `side`, `front`, `cloth` (0.2.0), `3d`, `u1` … `u5`, joined by `,` | in Weave and Learn, the screen's: `section,3d` where the stage is wide enough for two, else `section`; in Design and Games, `cloth` | The stage's views, in order: one fills the stage, two stand side by side, four make the quad view. `3d` is the whole loom, `u1` to `u5` its units alone. A name this release does not know is skipped, so a link that names a later release's view still opens; if no name is left, or a number other than 1, 2 or 4, the default is used. A link written with the one view `section` leaves it out. |
 
 **A deck** (`c`) is written in one of three encodings, named by its first letter and a dot. Every reader reads all three; which one a writer chooses is not part of the contract (today: readable hex up to 80 characters, so a teacher can read a small deck, and otherwise the shorter of the other two).
 
@@ -52,13 +53,13 @@ The learner's loom: its head and tie-up, its cards, the moment it is at, and how
 | `b.` packed: every card as h/8 bytes, hook 1 in the highest bit of the first byte, the cards one after another, in base64url without padding | `b.paVaWg` | Middling decks |
 | `z.` compressed: the packed bytes, compressed with DEFLATE (raw, RFC 1951), in base64url without padding | `z.…` | Most decks: patterns repeat, and a 64-card satin on 64 hooks takes 39 characters instead of 683 |
 
-A deck holds up to 1,024 cards. **Length:** any deck of up to 64 cards on up to 64 hooks gives a link under 2,000 characters, the length that email programs and chat apps pass through whole; a longer link works, and the app says that some apps may cut it.
+`h` without `c` is refused ("it gives a head (h) but no cards (c)"). A deck holds up to 1,024 cards. **Length:** any deck of up to 64 cards on up to 64 hooks gives a link under 2,000 characters, the length that email programs and chat apps pass through whole; a longer link works, and the app says that some apps may cut it.
 
 ## Learn: a step of the tutorial (0.1.0)
 
 | Field | Values | Default | Meaning |
 |---|---|---|---|
-| `step` | a step's name: lower-case letters, digits and `-` | the tutorial's start, or where the learner left it | The step to open, by its name (`weave-twill`), not its number, so a step added before it moves nothing. A step that is renamed keeps its old name as an alias for ever. |
+| `step` | a step's name: lower-case letters, digits and `-`, at most 64 characters | the tutorial's start, or where the learner left it | The step to open, by its name (`weave-twill`), not its number, so a step added before it moves nothing. A step that is renamed keeps its old name as an alias for ever. |
 
 The step sets up its own loom (design/ui-layout.md §2, rule 3), so a Learn link carries no loom. A name no step has (or a step of a later release) opens the tutorial's start, and says so in the status line. *Copy link* in Learn writes the step on show: `#v=2&w=learn&step=how-loop`.
 
@@ -78,9 +79,9 @@ The steps added in 0.2.0, frozen with it:
 | 5. Your tools | `tools-picture`, `tools-loose`, `tools-follow`, `tools-setup`, `tools-share`, `tools-create`, `tools-games` |
 | 6. What came next | `next-babbage`, `next-lovelace`, `next-hollerith`, `next-three-cards`, `next-computer` |
 
-## Create: a picture (0.2.0)
+## Design: a picture (`w=create`, 0.2.0)
 
-Create's picture and how it is read (design/m8-notes.md). The cards are not in the link: the picture and its reading make them again. The cloth's colours (`wc`, `fc`), its face and bits, and the views are read as in Weave.
+Design's picture and how it is read (design/m8-notes.md; the workspace was first called Create, and the link keeps `w=create`). The cards are not in the link: the picture and its reading make them again. The cloth's colours (`wc`, `fc`), its face and bits, and the views are read as in Weave.
 
 | Field | Values | Default | Meaning |
 |---|---|---|---|
@@ -92,16 +93,16 @@ Create's picture and how it is read (design/m8-notes.md). The cards are not in t
 
 A `pic` that is not square (more or fewer rows than `pw`) is refused, and so is a `pw` without `pic`.
 
-## Play: a game (0.2.0)
+## Games: a game (`w=play`, 0.2.0)
 
-The game Play opens on (design/m9-notes.md), and what it needs; each game starts as a newcomer's would.
+The game the Games workspace opens on (design/m9-notes.md; the workspace was first called Play, and the link keeps `w=play`), and what it needs; each game starts as a newcomer's would. The views are read as in Weave.
 
 | Field | Values | Default | Meaning |
 |---|---|---|---|
 | `game` | `name`, `byte`, `guess`, `drawboy` | `name` | The game. A name this release does not know opens the name game |
 | `text` | up to 144 characters | the game's own | With `game=name`: the text to weave, its lines joined by a line break |
-| `mode` | `damask`, `direct` | `damask` | With `game=name`: how the name is read, as damask or square by square (`direct`), as Design reads a picture |
-| `seed` | 1 … 1,000,000,000 | `1` | With `game=guess`: the puzzle |
+| `mode` | `damask`, `direct` | `damask` | With `game=name`: how the name is read, as damask or square by square (`direct`), as Design reads a picture; read with or without `text` |
+| `seed` | 1 … 1,000,000,000 | `1` | With `game=guess`: the puzzle, the same in every browser. (Before 1.0.0 a seed's puzzle was shuffled as each browser chose, so Chrome and Safari showed different ones; 1.0.0 fixed the shuffle, and with it every seed's puzzle, the one change of reading the format has made. Since then a seed's puzzle is pinned by a test.) |
 
 **One byte per card's secret** carries the message as cards only, in `h=8` and `c` (as in Weave), so the friend it is sent to reads it from the holes or the cloth: the link never holds the text.
 
@@ -112,10 +113,10 @@ Each is decoded by `tests/sim/link.test.js` as stated here.
 | Link (the fragment) | Opens |
 |---|---|
 | `#v=2` | Weave, with its opening loom and views |
-| `#v=2&w=weave&h=16&c=x.a5a5-5a5a&p=3&s=2&f=5` | A 16-hook head with two cards (holes 1, 3, 6, 8, 9, 11, 14, 16, then the others), laced into a loop, straight tie; pick 4 with the shuttle across; following hook 5 |
+| `#v=2&w=weave&h=16&c=x.a5a5-5a5a&p=3&s=2&f=5` | A 16-hook head with two cards (holes 1, 3, 6, 8, 9, 11, 14, 16, then the others), laced into a loop, straight tie; pick 4 with its shed open; following hook 5 |
 | `#v=2&h=8&c=x.18-18-18-18-99-5a-3c-18&l=0&view=section,3d` | The research's arrow on one cross-row, an open chain, the section beside the loom in 3D |
 | `#v=2&w=learn&step=weave-twill` | The tutorial at the step named `weave-twill` |
-| `#v=2&w=create&pw=8&pic=x.18-3c-5a-99-18-18-18-18&rd=damask&k=3` | Create, with the research's arrow read as damask in blocks of three threads |
+| `#v=2&w=create&pw=8&pic=x.18-3c-5a-99-18-18-18-18&rd=damask&k=3` | Design, with the research's arrow read as damask in blocks of three threads |
 | `#v=2&w=play&game=name&text=Ada&mode=direct` | The name game, weaving "Ada" square by square |
 | `#v=2&w=play&game=guess&seed=7` | Guess the cloth, puzzle 7 |
 | `#v=2&w=play&game=byte&h=8&c=x.48-69` | One byte per card: a secret of two cards (it reads "Hi") |

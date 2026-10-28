@@ -86,8 +86,10 @@ async function walk({ store }) {
     }
     if (s.task) {
       if ($(".taskline")?.hidden) bad.push(`${s.id}: no task line once answered`);
-      s.task.solve(store.state.looms.tutorial.loom);
-      act.touch(store, "tutorial");
+      // a picture's step is solved as the learner would: by the picture's reading, which weaves it again
+      const changed = s.task.solve(store.state.looms.tutorial.loom);
+      if (changed) act.setPicture(store, changed, "tutorial");
+      else act.touch(store, "tutorial");
       await frames();
       if (!$(".taskline.done")) bad.push(`${s.id}: the task line does not say done`);
       if (s.done && $(".step-done")?.hidden) bad.push(`${s.id}: no done text`);
@@ -323,32 +325,36 @@ async function opening() {
     await new Promise((r) => f.addEventListener("load", r, { once: true }));
     const doc = /** @type {Document} */ (f.contentDocument);
     for (let k = 0; k < 50 && !doc.querySelector(".app .player"); k++) await sleep(100);
-    const app = /** @type {HTMLElement} */ (doc.querySelector(".app"));
+    const app = /** @type {HTMLElement | null} */ (doc.querySelector(".app"));
     const views = [...doc.querySelectorAll(".stage .view-chip .view-name")].map((e) => e.textContent).join(",");
-    const game = /** @type {HTMLElement | null} */ (doc.querySelector('.game-tabs [aria-selected="true"]'))?.dataset.game ?? "";
+    const game = /** @type {HTMLSelectElement | null} */ (doc.querySelector(".game-chooser"))?.value ?? "";
     f.remove();
-    return { ws: app.dataset.ws ?? "", views, game };
+    return { ws: app?.dataset.ws ?? "no app", views, game };
   };
-  localStorage.removeItem("jacquard.workspace");
-  localStorage.removeItem("jacquard.tutorial");
-  const first = await open("index.html");
-  if (first.ws !== "learn" || first.views !== t("view.in3d", { name: t("view.3d") })) bad.push(`a newcomer opens on ${first.ws}, ${first.views}`);
-  localStorage.setItem("jacquard.workspace", "weave");
-  const again = await open("index.html");
-  if (again.ws !== "weave") bad.push(`after Weave the app opens on ${again.ws}`);
-  localStorage.setItem("jacquard.workspace", "create");
-  const design = await open("index.html");
-  if (design.ws !== "create") bad.push(`after Design the app opens on ${design.ws}`);
-  localStorage.setItem("jacquard.workspace", "play");
-  localStorage.setItem("jacquard.game", "guess");
-  const games = await open("index.html");
-  if (games.ws !== "play" || games.game !== "guess") bad.push(`after Games on guess the cloth the app opens on ${games.ws}, ${games.game}`);
-  localStorage.setItem("jacquard.workspace", "learn");
-  const linked = await open("index.html#v=2&w=weave");
-  if (linked.ws !== "weave") bad.push(`a Weave link opens ${linked.ws}`);
-  for (const [k, v] of Object.entries({ "jacquard.workspace": kept.ws, "jacquard.tutorial": kept.tut, "jacquard.game": kept.game })) {
-    if (v === null) localStorage.removeItem(k);
-    else localStorage.setItem(k, v);
+  try {
+    localStorage.removeItem("jacquard.workspace");
+    localStorage.removeItem("jacquard.tutorial");
+    const first = await open("index.html");
+    if (first.ws !== "learn" || first.views !== t("view.in3d", { name: t("view.3d") })) bad.push(`a newcomer opens on ${first.ws}, ${first.views}`);
+    localStorage.setItem("jacquard.workspace", "weave");
+    const again = await open("index.html");
+    if (again.ws !== "weave") bad.push(`after Weave the app opens on ${again.ws}`);
+    localStorage.setItem("jacquard.workspace", "create");
+    const design = await open("index.html");
+    if (design.ws !== "create") bad.push(`after Design the app opens on ${design.ws}`);
+    localStorage.setItem("jacquard.workspace", "play");
+    localStorage.setItem("jacquard.game", "guess");
+    const games = await open("index.html");
+    if (games.ws !== "play" || games.game !== "guess") bad.push(`after Games on guess the cloth the app opens on ${games.ws}, ${games.game}`);
+    localStorage.setItem("jacquard.workspace", "learn");
+    const linked = await open("index.html#v=2&w=weave");
+    if (linked.ws !== "weave") bad.push(`a Weave link opens ${linked.ws}`);
+  } finally {
+    // what this device kept is given back, even if a page threw
+    for (const [k, v] of Object.entries({ "jacquard.workspace": kept.ws, "jacquard.tutorial": kept.tut, "jacquard.game": kept.game })) {
+      if (v === null) localStorage.removeItem(k);
+      else localStorage.setItem(k, v);
+    }
   }
   return result("L-9", "A newcomer opens on Learn with the whole loom in 3D; after that, on the workspace last used (Games on its game); a link decides for itself", bad.length === 0, bad.slice(0, 4).join("; ") || "newcomer: Learn, 3D; then Weave, Design, Games on guess the cloth; a Weave link: Weave");
 }

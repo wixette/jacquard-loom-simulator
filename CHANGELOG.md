@@ -2,6 +2,34 @@
 
 What changed in each release. Versions follow `package.json` and are tagged `vX.Y.Z` ([docs/development.md](docs/development.md), *Versions and releases*). Each stage's details are in its notes in [design/](design/).
 
+## 1.0.0
+
+The first full release (2026-10-28): the same loom, tutorial, picture tool and games as 0.2.0,
+reviewed: its links, its state, the keyboard and screen readers, phones, speed, the texts in ten
+languages and the docs.
+
+- **For everyone:** every control is reached by the keyboard, the chain of cards and Design's
+  paper included; screen readers hear what changes, not every moment of a pick; reduced motion
+  is honoured; the frame fits a 320 px phone; a first visit loads a third less.
+- **Links:** every link the app writes opens as it was written, and a link to a puzzle gives the
+  same puzzle in every browser ([design/links.md](design/links.md)).
+- **Games:** chosen from a list of the games by their titles.
+
+**The release review (M11, [design/m11-notes.md](design/m11-notes.md))**
+- Links: an open chain woven to its end, and a loom paused between two moments, reopen as they were; a pick past an open chain's end is refused; Games links open their views, and the name game's reading without a text; a Weave link without a cross-row opens on the first.
+- State: Design's picture is kept from a link; a friend's secret stays across games; the next puzzle wraps within a link's range; a chain holds at most a link's 1,024 cards; a followed end is let go when another tie gives it another hook; the damask task asks for damask.
+- The keyboard and screen readers: the chain of cards is one Tab stop, worked by the arrow keys; Design's paper is painted by the keyboard; the 3D view is named and moved by the keyboard; the games' and the workspaces' tabs work by the arrow keys; popovers, tooltips, focus rings and names as the WAI-ARIA patterns ask; the status line no longer floods a screen reader while the loom plays; reduced motion honoured.
+- Phones: on a 320 px phone the frame was wider than the screen, its right side cut off; the view on show stays in sight in the strip.
+- Speed: a change of views no longer loads a 3D view again; less is done every frame while the loom plays; a long looped link no longer fills the memory.
+- Save a picture draws the cloth afresh; the printed cards' note is in the page's language, and a card wider than A4 is refused.
+- Translations: Open in Weave's tooltip in all nine languages, and the errors the review found.
+- The docs made to match the app, and tests for each fix (476 unit tests; `pnpm selftest` fails a page that runs no checks).
+
+**After the review**
+- Games: the game is chosen from a list of the games by their titles, in place of four tabs, so more games fit.
+- Guess the cloth: a seed gives the same puzzle in every browser (it was shuffled as each browser chose). Every seed's puzzle changed with it, so a 0.2.0 link to a puzzle shows another one.
+- three.js minified: a first visit loads about 1.4 MB less, in one request fewer.
+
 ## 0.2.0
 
 Make and play (2026-10-28): the picture tool, four games and the whole tutorial, in ten languages.

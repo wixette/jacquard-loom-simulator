@@ -153,3 +153,11 @@
 /* a button's icon never takes the pointer: a press and its release fall on the button itself,
    even when the icon is changed between them */
 button .icon { pointer-events: none; }
+
+/* Less motion, when the reader asks for it (docs/ui-design.md, Accessibility). */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition: none !important; animation: none !important; scroll-behavior: auto !important; }
+}
+
+/* Text for screen readers only. */
+.visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }

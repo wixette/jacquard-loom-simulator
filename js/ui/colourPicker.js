@@ -25,7 +25,8 @@ const clamp = (/** @type {number} */ x) => Math.max(0, Math.min(1, x));
 export function colourPicker({ value, onInput, names }) {
   let c = hexToHsv(value);
   const thumb = el("span", { class: "cp-thumb" });
-  const area = el("div", { class: "cp-area", role: "slider", tabindex: "0", "aria-label": names.area }, [thumb]);
+  // a slider in two directions: its value the saturation (0 to 100), the brightness said in its text
+  const area = el("div", { class: "cp-area", role: "slider", tabindex: "0", "aria-label": names.area, "aria-valuemin": "0", "aria-valuemax": "100" }, [thumb]);
   const hue = el("input", { type: "range", class: "cp-hue", min: "0", max: "359", step: "1", "aria-label": names.hue });
   const hex = el("input", { type: "text", class: "cp-hex", id: "colour-hex", spellcheck: "false", autocomplete: "off", maxlength: "7", "aria-label": names.hex });
   const swatch = el("span", { class: "cp-swatch", "aria-hidden": "true" });
@@ -37,6 +38,7 @@ export function colourPicker({ value, onInput, names }) {
     thumb.style.left = `${c.s * 100}%`;
     thumb.style.top = `${(1 - c.v) * 100}%`;
     thumb.style.background = now;
+    area.setAttribute("aria-valuenow", String(Math.round(c.s * 100)));
     area.setAttribute("aria-valuetext", names.areaValue(Math.round(c.s * 100), Math.round(c.v * 100)));
     hue.value = String(Math.round(c.h));
     swatch.style.background = now;

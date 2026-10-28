@@ -1,7 +1,7 @@
 # The name game: prototype notes
 
 - **Status:** prototype built 2026-10-26, to show the simulator is ready for games ([design/public-app.md](public-app.md) §2). The checks below pass in `pnpm test` (G-1 to G-4) and on [`dev/06-name-game/`](../dev/06-name-game/) with `?selftest` (with G-5, the page's own).
-- **Page:** type a name (up to 8 characters a line, up to 4 lines, plain ASCII); choose **Real cloth** (damask) or **Quick** (direct); press **Weave** to watch the loom read the cards one by one, or **Weave it all**; the page then reads the cloth back as text. **Save a picture** gives a PNG of the cloth, **Copy a link** a link that opens the game with that name (`?text=…&mode=damask|direct`).
+- **Page:** type a name (up to 8 characters a line, up to 4 lines, plain ASCII; since 0.2.0 a message, wrapped at the spaces into up to 16 lines, as in the app's name game, since the page shares its `checkText()`); choose **Real cloth** (damask) or **Quick** (direct); press **Weave** to watch the loom read the cards one by one, or **Weave it all**; the page then reads the cloth back as text. **Save a picture** gives a PNG of the cloth, **Copy a link** a link that opens the game with that name (`?text=…&mode=damask|direct`).
 
 ## How it works
 
@@ -26,7 +26,7 @@
 | ID | Statement | Kind |
 |---|---|---|
 | G-1 | The font (Unscii 8 × 16) has all 95 printable ASCII characters, each 8 × 16 pixels, no two alike, none blank but the space. | data |
-| G-2 | Up to 8 printable ASCII characters a line, up to 4 lines, are accepted; anything else is refused with a reason; 8 characters fit the 400 head as damask (256 hooks) and the 64-hook head directly. | logic |
+| G-2 | Up to 8 printable ASCII characters a line, up to 4 lines, are accepted; anything else is refused with a reason; 8 characters fit the 400 head as damask (256 hooks) and the 64-hook head directly. (0.2.0: printable ASCII wrapped at the spaces into lines of 8, up to 16 lines, design/m9-notes.md, 5.) | logic |
 | G-3 | As damask (4 × 4 threads of satin a pixel, on up to 256 of the 400 head's hooks), with no loose thread longer than 8, every text's cards, woven through the loom, give a cloth that reads back as the text. | logic |
 | G-4 | Directly (one pixel per thread, on up to 64 hooks), every text's cards, woven through the loom, give a cloth that reads back as the text. | logic |
 | G-5 | On the page, a name typed is woven (all at once) into its rows and read back from the cloth, in both modes; a text outside the font greys Weave and says why; the cloth saves as a PNG picture; the link carries the text and the mode. | page |
@@ -40,6 +40,17 @@
 | G-3 | 6 texts, 512 cards; longest float 8 |
 | G-4 | 6 texts, 128 cards |
 | G-5 | 2 names woven and read back; a 32 kB picture; at 1440 × 900 and 375 × 812 (phone, no sideways scroll) |
+
+### Results (2026-10-28, 0.2.0)
+
+With the text wrapped into up to 16 lines (G-2's new rule), the checks' texts grew; G-5 is unchanged.
+
+| ID | Result |
+|---|---|
+| G-1 | 95 glyphs |
+| G-2 | 8 texts accepted, 5 refused |
+| G-3 | 7 texts, 1024 cards; longest float 8 |
+| G-4 | 7 texts, 256 cards |
 
 ## Next, for the public app
 

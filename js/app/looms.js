@@ -5,6 +5,7 @@
 
 import { msg } from "../l10n/l10n.js";
 import { addCard, duplicateCard, invertCard, moveCard, presetDeck, PRESETS, removeCard, resizeDeck, setLoop, toggleHole } from "../sim/deck.js";
+import { MAX_CARDS } from "../sim/link.js";
 import { Loom, STOPS } from "../sim/loom.js";
 import { endCount, hookOfEnd, STRAIGHT, tieLabel } from "../sim/tieup.js";
 import { followCell } from "../sim/trace.js";
@@ -57,7 +58,7 @@ import { Store } from "./store.js";
  * @property {import("./playState.js").PlayState} play the games' own state, the game loom's cards made from it
  */
 
-/** The looms a picture is read onto: Create's, and the tutorial's in its picture steps. @typedef {"create" | "tutorial"} PictureLoom */
+/** The looms a picture is read onto: Design's, and the tutorial's in its picture steps. @typedef {"create" | "tutorial"} PictureLoom */
 
 /**
  * The tutorial's place (js/teach/tutorial.js): the step on show, the answers given to its
@@ -165,7 +166,9 @@ const said = (m, warn = false) => ({ msg: m, warn });
  * @returns {Partial<LoomState>}
  */
 function fresh(ls, deck, tie) {
-  const follow = ls.follow && (ls.follow.hook >= deck.hooks || (ls.follow.end !== null && ls.follow.end > endCount(tie, deck.hooks))) ? null : ls.follow;
+  let follow = ls.follow && ls.follow.hook >= deck.hooks ? null : ls.follow;
+  // an end no longer lifted by the hook followed (another tie, another head) is let go; the hook stays
+  if (follow && follow.end !== null && (follow.end > endCount(tie, deck.hooks) || hookOfEnd(tie, deck.hooks, follow.end) !== follow.hook + 1)) follow = { hook: follow.hook, end: null, pick: null };
   return { loom: new Loom(deck, tie), selected: 0, playing: false, follow, crossRow: Math.min(ls.crossRow, deck.hooks / 8 - 1) };
 }
 
@@ -174,14 +177,14 @@ const cur = (store) => store.state.current;
 
 /**
  * Whether a control is locked on this loom, and if so it says why: in Learn, the tutorial's loom
- * leaves free only what its step uses (design/public-app.md §1, P6); Create's leaves free only
+ * leaves free only what its step uses (design/public-app.md §1, P6); Design's leaves free only
  * its colours, its cards being read from its picture.
  * @param {AppStore} store
  * @param {LoomId} id
  * @param {Control} control
  */
 function locked(store, id, control) {
-  // Create's cards are read from its picture, a game's made by the game: they change with it,
+  // Design's cards are read from its picture, a game's made by the game: they change with it,
   // and only their colours by hand
   if ((id === "create" || id === "game") && control !== "colours" && control !== "picture") {
     say(store, msg(id === "create" ? "pic.locked" : "play.locked"), true, id);
@@ -229,7 +232,7 @@ export const setSectionView = (store, v) => store.set({ sectionView: v });
 export function setWorkspace(store, w) {
   const s = store.state;
   if (w === s.workspace) return;
-  // each workspace keeps its own views: Create opens on the cloth, large, the first time
+  // each workspace keeps its own views: Design and Games open on the cloth, large, the first time
   const views = s.viewsBy[w] ?? (w === "create" || w === "play" ? /** @type {StageView[]} */ (["cloth"]) : s.views);
   store.set({ workspace: w, current: /** @type {const} */ ({ learn: "tutorial", weave: "mine", create: "create", play: "game" })[w], viewsBy: { ...s.viewsBy, [s.workspace]: s.views }, views });
 }
@@ -367,6 +370,7 @@ const clamp = (ls, selected) => Math.max(0, Math.min(selected, ls.loom.deck.card
 export function add(store, id = cur(store)) {
   if (locked(store, id, "cards")) return;
   change(store, id, (ls) => {
+    if (ls.loom.deck.cards.length >= MAX_CARDS) return { status: said(msg("status.full", { max: MAX_CARDS }), true), keepRev: true };
     ls.loom.setDeck(addCard(ls.loom.deck, ls.selected));
     const selected = clamp(ls, ls.selected + 1);
     return { selected, status: said(msg("status.added", { card: selected + 1 })) };
@@ -378,6 +382,7 @@ export function duplicate(store, id = cur(store)) {
   if (locked(store, id, "cards")) return;
   change(store, id, (ls) => {
     if (!ls.loom.deck.cards.length) return null;
+    if (ls.loom.deck.cards.length >= MAX_CARDS) return { status: said(msg("status.full", { max: MAX_CARDS }), true), keepRev: true };
     ls.loom.setDeck(duplicateCard(ls.loom.deck, ls.selected));
     return { selected: ls.selected + 1, status: said(msg("status.duplicated", { card: ls.selected + 1 })) };
   });
@@ -574,7 +579,7 @@ export function setPicture(store, patch, id) {
 }
 
 /**
- * Weave a picture's cards on the learner's own loom ("Weave it"), from the start, and go to
+ * Weave a picture's cards on the learner's own loom (Open in Weave), from the start, and go to
  * Weave: the picture's head, its cards on an open chain.
  * @param {AppStore} store
  * @param {PictureLoom} from

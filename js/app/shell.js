@@ -12,7 +12,9 @@ import { HOOK_COUNTS, PRESETS } from "../sim/deck.js";
 import { encodeLink, LONG_LINK, STAGE_VIEWS } from "../sim/link.js";
 import { linkOf } from "./links.js";
 import { tieLabel } from "../sim/tieup.js";
-import { printDocument } from "../teach/printCards.js";
+import { fitsPage, printDocument } from "../teach/printCards.js";
+import { realCard } from "../view2d/cardLayout.js";
+import { ClothView } from "../view2d/clothView.js";
 import { applyIcons, applyL10n, el, icon, setText, setTip, showMenu, showPopover, tabs } from "../ui/components.js";
 import { colourPicker } from "../ui/colourPicker.js";
 import { wireEdge } from "../ui/edge.js";
@@ -24,7 +26,7 @@ import { benchPanel, chainPanel, clothPanel, statusPanel, tracePanel, transportP
 import { frontView, sectionView, sideView, UNIT_VIEWS, unitsView } from "./components/views.js";
 import { chooseLanguage } from "./language.js";
 import { leaveLearn, openLearn, watchDone } from "./learn.js";
-import { openCreate, watchPicture } from "./create.js";
+import { openCreate } from "./create.js";
 import { picturePanel } from "./components/picture.js";
 import { gamesPanel } from "./components/games.js";
 import { openPlay } from "./play.js";
@@ -158,6 +160,8 @@ export function createShell(store, root) {
   let unwatch = [];
   /** @type {Mode | null} */
   let mode = null;
+  /** The phone sheet's tab on show, kept across a rebuild. @type {string | null} */
+  let sheetTab = null;
 
   /**
    * Put a component in a host.
@@ -229,7 +233,8 @@ export function createShell(store, root) {
   // ---- the parts of the frame ------------------------------------------------------------------
 
   function brand() {
-    return el("a", { class: "brand", href: "./" }, [el("img", { src: "images/logo.svg", alt: "", draggable: "false" }), label("span", "app.name")]);
+    // named even where its words are hidden (a phone shows the logo alone)
+    return el("a", { class: "brand", href: "./", "data-l10n-name": "app.name" }, [el("img", { src: "images/logo.svg", alt: "", draggable: "false" }), label("span", "app.name")]);
   }
 
   /** @param {HTMLElement} anchor */
@@ -261,8 +266,15 @@ export function createShell(store, root) {
   }
 
   function savePicture() {
-    const canvas = /** @type {HTMLCanvasElement | null} */ (root.querySelector("canvas.cloth-canvas"));
-    if (!canvas) return;
+    // drawn afresh, off the page, from the loom as it is: not whichever cloth the page shows
+    // (one in a closed panel is blank or old; a phone's Cards tab has none)
+    const s = ls();
+    const host = el("div", { style: "position: fixed; left: -10000px; top: 0; width: 900px" });
+    document.body.appendChild(host);
+    const view = new ClothView(host, { onCell: () => {} });
+    view.render(s.loom.snapshot(), { face: s.face, warp: s.warp, weft: s.weft, bits: false, trace: null, large: true });
+    const canvas = view.canvas;
+    host.remove();
     canvas.toBlob((blob) => {
       if (!blob) return;
       const a = el("a", { href: URL.createObjectURL(blob), download: "jacquard-cloth.png" });
@@ -274,7 +286,12 @@ export function createShell(store, root) {
 
   function printCards() {
     const deck = ls().loom.deck;
-    const url = URL.createObjectURL(new Blob([printDocument(deck, t("app.title"))], { type: "text/html" }));
+    const rc = realCard(deck.hooks);
+    const size = { hooks: deck.hooks, w: rc.width.toFixed(1), h: rc.height.toFixed(1) };
+    // a 400 head's card is wider than the paper: it cannot be printed at its true size
+    if (!fitsPage(deck.hooks)) return act.say(store, { key: "share.tooWide", params: size }, true);
+    const note = tn("print.note", deck.cards.length, size);
+    const url = URL.createObjectURL(new Blob([printDocument(deck, t("app.title"), { note, lang: store.state.locale })], { type: "text/html" }));
     const w = window.open(url, "_blank");
     act.say(store, w ? { key: "share.printed", n: deck.cards.length } : { key: "share.blocked" }, !w);
   }
@@ -424,7 +441,10 @@ export function createShell(store, root) {
       list.appendChild(tab);
     }
     tabs(list, (id) => goWorkspace(/** @type {Workspace} */ (id.slice(3))));
-    for (const tab of list.children) tab.setAttribute("aria-selected", String(tab.id === `ws-${store.state.workspace}`));
+    for (const tab of /** @type {HTMLElement[]} */ ([...list.children])) {
+      tab.setAttribute("aria-selected", String(tab.id === `ws-${store.state.workspace}`));
+      tab.tabIndex = tab.id === `ws-${store.state.workspace}` ? 0 : -1;
+    }
     const share = el("button", { type: "button", class: "btn has-icon", "aria-haspopup": "menu" }, [icon("share"), label("span", "bar.share")]);
     share.dataset.l10nTip = "bar.share.tip";
     share.setAttribute("data-tip-describes", "");
@@ -541,7 +561,7 @@ export function createShell(store, root) {
     if (store.state.workspace === "create") return picturesPanel();
     if (store.state.workspace === "play") {
       const slot = el("div", { class: "games-slot" });
-      const panel = el("aside", { class: "panel left" }, [rail("left"), el("div", { class: "panel-head" }, [label("h2", "game.title")]), slot]);
+      const panel = el("aside", { class: "panel left", "data-l10n-name": "game.title" }, [rail("left"), el("div", { class: "panel-head" }, [label("h2", "game.title")]), slot]);
       put(gamesPanel(store), slot);
       return panel;
     }
@@ -552,7 +572,7 @@ export function createShell(store, root) {
     const setup = setupRow();
     // in Learn, a step on a picture has the picture tool under the guide, in place of the cards
     const picture = el("div", { class: "picture-slot", hidden: true });
-    const panel = el("aside", { class: "panel left" }, [rail("left"), ...(learn ? [guide(), picture] : []), head, setup, bench, chain]);
+    const panel = el("aside", { class: "panel left", "data-l10n-name": learn ? "sheet.guide" : "cards.title" }, [rail("left"), ...(learn ? [guide(), picture] : []), head, setup, bench, chain]);
     put(benchPanel(store), bench);
     put(chainPanel(store), chain);
     if (learn) put(picturePanel(store, { loom: "tutorial" }), picture);
@@ -574,12 +594,12 @@ export function createShell(store, root) {
 
   /**
    * Design's left panel: the picture and how it is read (js/app/components/picture.js), and
-   * under it the cards it makes, with Weave it, as Learn stacks its guide over the cards.
+   * under it the cards it makes, with Open in Weave, as Learn stacks its guide over the cards.
    */
   function picturesPanel() {
     const slot = el("div", { class: "picture-slot" });
     const chain = el("div", { class: "chain-slot" });
-    const panel = el("aside", { class: "panel left on-design" }, [
+    const panel = el("aside", { class: "panel left on-design", "data-l10n-name": "pic.title" }, [
       rail("left"),
       el("div", { class: "panel-head" }, [label("h2", "pic.title")]),
       slot,
@@ -591,7 +611,7 @@ export function createShell(store, root) {
     return panel;
   }
 
-  /** "Weave it": the picture's cards on the learner's own loom, in Weave. */
+  /** Open in Weave: the picture's cards on the learner's own loom, in Weave. */
   function weaveIt() {
     const b = el("button", { type: "button", class: "btn filled weave-it" }, [icon("open_in_new"), label("span", "pic.weaveIt")]);
     b.dataset.l10nTip = "pic.weaveIt.tip";
@@ -608,14 +628,14 @@ export function createShell(store, root) {
     if (store.state.workspace === "play" || store.state.workspace === "create") {
       const machine = el("div", { class: "machine-slot" });
       const trace = el("div", { class: "trace-slot" });
-      const panel = el("aside", { class: "panel right" }, [rail("right"), el("div", { class: "panel-head" }, [label("h2", "game.machine")]), machine, trace]);
+      const panel = el("aside", { class: "panel right", "data-l10n-name": "game.machine" }, [rail("right"), el("div", { class: "panel-head" }, [label("h2", "game.machine")]), machine, trace]);
       put(sectionView(store), machine);
       put(tracePanel(store), trace);
       return panel;
     }
     const cloth = el("div", { class: "cloth-slot" });
     const trace = el("div", { class: "trace-slot" });
-    const panel = el("aside", { class: "panel right" }, [rail("right"), el("div", { class: "panel-head" }, [label("h2", "cloth.title"), ...clothTools()]), cloth, trace]);
+    const panel = el("aside", { class: "panel right", "data-l10n-name": "cloth.title" }, [rail("right"), el("div", { class: "panel-head" }, [label("h2", "cloth.title"), ...clothTools()]), cloth, trace]);
     put(clothPanel(store), cloth);
     put(tracePanel(store), trace);
     return panel;
@@ -700,16 +720,17 @@ export function createShell(store, root) {
     // how close the section looks: a zoom on the same drawing, so a tool of the view, not a view;
     // a plain magnifier before the chips says so (a mark, not a control: it looks like none)
     const zoom = el("div", { class: "chip-row", role: "group", "data-l10n-name": "section.zoom" });
-    const zoomTool = el("div", { class: "zoom-tool", "data-l10n-tip": "section.zoom" }, [el("span", { class: "zoom-mark", "aria-hidden": "true" }, [icon("zoom_in")]), zoom]);
+    const zoomTool = el("div", { class: "zoom-tool" }, [el("span", { class: "zoom-mark", "aria-hidden": "true" }, [icon("zoom_in")]), zoom]);
     for (const z of /** @type {const} */ (["whole", "needles", "crooks"])) {
-      const b = label("button", `section.${z}`, { type: "button", class: "chip" });
+      const b = label("button", `section.${z}`, { type: "button", class: "chip", "data-tip-describes": "" });
+      b.dataset.l10nTip = "section.zoom";
       b.addEventListener("click", () => act.setSectionView(store, z));
       zoom.appendChild(b);
     }
     const cross = el("select", { "data-l10n-name": "section.name" });
     cross.addEventListener("change", () => act.setCrossRow(store, Number(cross.value)));
     const crossChip = el("label", { class: "chip" }, [cross]);
-    follow((s) => [s.sectionView, s.looms[s.current].crossRow, s.looms[s.current].rev, s.locale], () => {
+    follow((s) => [s.sectionView, s.looms[s.current].crossRow, s.looms[s.current].loom.deck.hooks, s.locale], () => {
       for (const b of zoom.querySelectorAll("button")) b.setAttribute("aria-pressed", String(/** @type {HTMLElement} */ (b).dataset.l10n === `section.${store.state.sectionView}`));
       const n = ls().loom.deck.hooks / 8;
       // the options are made anew only when the head or the language changes: made every frame
@@ -736,12 +757,24 @@ export function createShell(store, root) {
     const chipFollow = el("button", { type: "button", class: "chip follow-chip" });
     chipFollow.addEventListener("click", () => act.follow(store, null));
     const panes = el("div", { class: "panes", style: "display: contents" });
-    let mine = { placed: /** @type {Placed[]} */ ([]), unwatch: /** @type {(() => void)[]} */ ([]) };
+    /** The panes on show, each with its place and view, its node, and its components and watchers. @type {{ key: string; node: HTMLElement; mine: { placed: Placed[]; unwatch: (() => void)[] } }[]} */
+    let shownPanes = [];
     follow((s) => [s.views], () => {
       st.dataset.n = String(store.state.views.length);
-      const made = remake(mine, () => store.state.views.map((v, i) => pane(i, v)));
-      panes.replaceChildren(...made.nodes);
-      mine = made.mine;
+      const keys = store.state.views.map((v, i) => `${i}:${v}`);
+      for (const p of shownPanes) if (!keys.includes(p.key)) remake(p.mine, () => []);
+      shownPanes = keys.map((key, i) => {
+        const kept = shownPanes.find((p) => p.key === key);
+        if (kept) return kept;
+        const made = remake({ placed: [], unwatch: [] }, () => [pane(i, store.state.views[i])]);
+        return { key, node: made.nodes[0], mine: made.mine };
+      });
+      // focus on a view's chip (its menu, keys 1 to 4) goes back to the same pane's chip
+      const focused = /** @type {HTMLElement | null} */ (document.activeElement)?.closest(".pane");
+      const at = focused ? [...panes.children].indexOf(focused) : -1;
+      panes.replaceChildren(...shownPanes.map((p) => p.node));
+      if (at >= 0 && !panes.contains(document.activeElement)) /** @type {HTMLElement | undefined} */ (panes.children[at]?.querySelector(".view-chip"))?.focus();
+      greyLocked();
       for (const b of arrangement.children) b.setAttribute("aria-pressed", String(/** @type {HTMLElement} */ (b).dataset.n === String(store.state.views.length)));
       relabel();
     });
@@ -775,6 +808,9 @@ export function createShell(store, root) {
       one.replaceChildren(...made.nodes);
       mine = made.mine;
       for (const b of chips.children) b.setAttribute("aria-pressed", String(/** @type {HTMLElement} */ (b).dataset.view === v));
+      // the view on show is in sight in the strip (Design and Games open on the cloth, its end)
+      const on = /** @type {HTMLElement | undefined} */ ([...chips.children].find((b) => /** @type {HTMLElement} */ (b).dataset.view === v));
+      if (on) requestAnimationFrame(() => (chips.scrollLeft = Math.max(0, on.offsetLeft - (chips.clientWidth - on.offsetWidth) / 2)));
       relabel();
     });
     st.append(chips, one);
@@ -840,9 +876,15 @@ export function createShell(store, root) {
       if (y0 === null) return;
       const dy = e.clientY - y0;
       y0 = null;
+      dragged = Math.abs(dy) > 24;
       if (dy < -24) to(now() + (dy < -200 ? 2 : 1));
       else if (dy > 24) to(now() - (dy > 200 ? 2 : 1));
-      else to(now() === 2 ? 1 : 2);
+    });
+    // a tap, Enter or Space (a click without a drag) opens the sheet fully, or brings it back
+    let dragged = false;
+    b.addEventListener("click", () => {
+      if (!dragged) to(now() === 2 ? 1 : 2);
+      dragged = false;
     });
     b.addEventListener("keydown", (e) => {
       if (e.key === "ArrowUp") to(now() + 1);
@@ -860,15 +902,21 @@ export function createShell(store, root) {
     const list = el("div", { class: "tabs", role: "tablist" });
     const body = el("div", { class: "sheet-body" });
     for (const id of ids) list.appendChild(label("button", `sheet.${id}`, { type: "button", role: "tab", class: "tab", id: `sheet-${id}` }));
-    /** @type {Placed[]} */
-    let mine = [];
+    list.dataset.l10nName = "sheet.name";
+    /** @type {{ placed: Placed[]; unwatch: (() => void)[] }} */
+    let mine = { placed: [], unwatch: [] };
     const show = (/** @type {string} */ id) => {
-      for (const p of mine) {
-        p.unmount();
-        placed = placed.filter((x) => x !== p);
-      }
-      const before = placed.length;
-      body.replaceChildren();
+      sheetTab = id;
+      mine = remake(mine, () => {
+        body.replaceChildren();
+        fill(id);
+        return [];
+      }).mine;
+      relabel();
+      greyLocked();
+    };
+    /** The tab's own parts, in the sheet's body. @param {string} id */
+    const fill = (id) => {
       if (id === "guide") {
         body.appendChild(guide());
         // a step on a picture brings the picture tool under it
@@ -906,18 +954,17 @@ export function createShell(store, root) {
         put(clothPanel(store), cloth);
         put(tracePanel(store), trace);
       }
-      mine = placed.slice(before);
-      relabel();
-      greyLocked();
     };
     const select = tabs(list, (tab) => show(tab.slice("sheet-".length)));
-    select(`sheet-${ids[0]}`);
+    // the tab on show stays when the frame is built again (the phone turned, the workspace changed)
+    select(`sheet-${sheetTab && ids.includes(sheetTab) ? sheetTab : ids[0]}`);
     return el("section", { class: "sheet" }, [grab(), list, body]);
   }
 
   // ---- building the frame ------------------------------------------------------------------------
 
   function build() {
+    const tabFocused = !!document.activeElement?.closest(".workspaces");
     for (const p of placed) p.unmount();
     for (const u of unwatch) u();
     placed = [];
@@ -949,13 +996,14 @@ export function createShell(store, root) {
     }
     applyIcons(root);
     relabel();
-    follow((s) => [s.current, s.learn.step, s.looms[s.current].rev], greyLocked);
+    follow((s) => [s.current, s.learn.step, s.looms[s.current].loom.deck, s.looms[s.current].loom.pick, s.looms[s.current].selected, s.looms[s.current].follow], greyLocked);
+    // a workspace chosen by the keyboard: focus stays on its tab, which the frame made anew
+    if (tabFocused) document.getElementById(`ws-${store.state.workspace}`)?.focus();
   }
 
   build();
   wireKeys(store);
   watchDone(store);
-  watchPicture(store);
   window.addEventListener("resize", () => {
     if (modeOf() !== mode) build();
   });

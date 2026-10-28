@@ -1,5 +1,5 @@
 // Links that open the app in a state: the workspace, a loom (its head, tie-up, cards, moment
-// and how it is shown) or a step of the tutorial. Worksheets and textbooks keep such links for
+// and how it is shown), a step of the tutorial, Design's picture or a game. Worksheets and textbooks keep such links for
 // years, so the format is a public contract (design/links.md, docs/ui-design.md P8): fields may
 // be added; an existing field is never renamed, dropped or read differently.
 // tests/sim/link.test.js pins it, with the examples of design/links.md.
@@ -34,6 +34,8 @@ const LANGS = ["en", "es", "fr", "de", "it", "pt-BR", "zh", "zh-TW", "ja", "ko"]
 
 /** The longest chain a link may carry. */
 export const MAX_CARDS = 1024;
+/** The largest puzzle a link names (guess the cloth's seed). */
+export const MAX_SEED = 1_000_000_000;
 
 /** A link longer than this may be cut by an email program or a chat app. */
 export const LONG_LINK = 2000;
@@ -57,8 +59,8 @@ export const LONG_LINK = 2000;
  * @property {"front" | "back"} face
  * @property {boolean} bits
  * @property {StageView[]} views one, two or four
- * @property {LinkPicture | null} picture Create's picture and how it is read, or null
- * @property {LinkGame | null} game the game Play opens on, and its own fields, or null
+ * @property {LinkPicture | null} picture Design's picture and how it is read, or null
+ * @property {LinkGame | null} game the game Games opens on, and its own fields, or null
  */
 
 /**
@@ -96,7 +98,7 @@ export const DEFAULT_LINK = {
 /** The games a link can open, and the longest name text it carries. */
 export const LINK_GAMES = /** @type {const} */ (["name", "byte", "guess", "drawboy"]);
 // the name game takes 16 lines of 8 characters, and the spaces and line breaks between them
-const MAX_TEXT = 144;
+export const MAX_TEXT = 144;
 
 // ---- decks: x. (hex), b. (packed), z. (compressed) -----------------------------------------------
 
@@ -211,9 +213,13 @@ export async function decodeDeck(text, hooks) {
   let cards;
   if (text.startsWith("x.")) {
     const parts = text === "x." ? [] : text.slice(2).split("-");
+    if (parts.length > MAX_CARDS) return bad("link.tooMany", { n: parts.length, max: MAX_CARDS });
     for (const [i, p] of parts.entries()) if (!new RegExp(`^[0-9a-fA-F]{${hooks / 4}}$`).test(p)) return bad("link.card", { card: i + 1, digits: hooks / 4, hooks });
     cards = parts.map((p) => [...p].flatMap((ch) => [3, 2, 1, 0].map((j) => ((parseInt(ch, 16) >> j) & 1) === 1)));
   } else if (text.startsWith("b.") || text.startsWith("z.")) {
+    // far more than the longest chain, told before it is decoded
+    const most = Math.floor(((text.length - 2) * 3) / 4 / per);
+    if (text.startsWith("b.") && most > MAX_CARDS + 1) return bad("link.tooMany", { n: most, max: MAX_CARDS });
     let bytes = fromBase64url(text.slice(2));
     if (bytes && text.startsWith("z.")) {
       // a stream that is not DEFLATE, or one that would grow past the longest chain: refused
@@ -367,7 +373,7 @@ export async function decodeLink(fragment) {
     if (text.length > MAX_TEXT) return noBecause("link.textLong", { most: MAX_TEXT });
     const mode = q.get("mode") ?? "damask";
     if (mode !== "damask" && mode !== "direct") return noBecause("link.value", { field: "mode", value: mode });
-    const seed = q.has("seed") ? int(q.get("seed"), 1, 1_000_000_000) : 1;
+    const seed = q.has("seed") ? int(q.get("seed"), 1, MAX_SEED) : 1;
     if (seed === null) return noBecause("link.range");
     l.game = { name, text, mode, seed };
   }
@@ -417,6 +423,8 @@ export async function decodeLink(fragment) {
   const x = optional("x", 1, hooks / 8, 0);
   if (pick === null || stop === null || f === null || fe === null || fp === null || x === null) return noBecause("link.range");
   if ((fe && !f) || (fp && !fe) || (fe && hookOfEnd(l.tie, hooks, fe) !== f)) return noBecause("link.follow");
+  // an open chain rests at its end, after its last pick (p = the cards, s = 0), and goes no further
+  if (!l.deck.loop && (pick > l.deck.cards.length || (pick === l.deck.cards.length && stop > 0))) return noBecause("link.range");
   l.pick = pick;
   l.stop = stop;
   l.follow = f ? { hook: f - 1, end: fe || null, pick: fp ? fp - 1 : null } : null;

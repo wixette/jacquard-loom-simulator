@@ -9,7 +9,7 @@ import { say as words, t, tn } from "../l10n/l10n.js";
 import { HOOK_COUNTS, PRESETS } from "../sim/deck.js";
 import { decodeLink, encodeLink, LONG_LINK } from "../sim/link.js";
 import { Loom, POSITIONS, STOP_KEYS, STOPS } from "../sim/loom.js";
-import { endCount, tieLabel } from "../sim/tieup.js";
+import { tieLabel } from "../sim/tieup.js";
 import { traceOf } from "../sim/trace.js";
 import { place } from "./components/component.js";
 import { benchPanel, chainPanel, clothPanel } from "./components/panels.js";
@@ -17,6 +17,7 @@ import { frontView, sectionView, sideView } from "./components/views.js";
 import * as act from "./looms.js";
 import { appState, loomState, TIES, tieKey } from "./looms.js";
 import { Store } from "./store.js";
+import { whereText } from "./where.js";
 /** @import { Msg } from "../l10n/l10n.js" */
 /** @import { Deck } from "../sim/deck.js" */
 /** @import { Snapshot } from "../sim/loom.js" */
@@ -146,8 +147,7 @@ export function createLoomPage(options = {}) {
       li.classList.toggle("done", snap.phi > 0 && STOPS[i] <= snap.phi + 1e-9);
       li.classList.toggle("here", i === atStop);
     }
-    const card = snap.cardIndex === null ? t("where.noCard") : t("where.card", { card: snap.cardIndex + 1 });
-    $("where").textContent = snap.cardIndex === null && snap.cloth.length > 0 && snap.phi === 0 ? tn("where.end", snap.cloth.length, { ends: endCount(snap.tie, snap.deck.hooks) }) : tn("where", snap.cloth.length, { pick: snap.pick + 1, card, percent: Math.round(snap.phi * 100), ends: endCount(snap.tie, snap.deck.hooks) });
+    $("where").textContent = whereText(snap);
     options.onDraw?.(snap);
   }
   store.watch((s) => [s.looms.mine, s.sectionView], sync);

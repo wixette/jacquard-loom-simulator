@@ -135,7 +135,7 @@ svg.bench-card .collbl { fill: var(--label); font-family: var(--font); }
 .chain { margin-top: 8px; overflow-x: auto; display: grid; grid-template-columns: minmax(max-content, 1fr); gap: 2px; }
 .strip-head, .card-line { display: grid; grid-template-columns: 26px max-content 1fr; align-items: center; gap: 6px; }
 .strip { display: grid; grid-template-columns: repeat(var(--hooks), var(--cell)); gap: 1px; }
-.strip-head .hn { font-size: 9px; color: var(--md-on-surface-variant); text-align: center; cursor: pointer; overflow: visible; white-space: nowrap; }
+.strip-head .hn { background: none; border: 0; padding: 0; font: inherit; font-size: 9px; color: var(--md-on-surface-variant); text-align: center; cursor: pointer; overflow: visible; white-space: nowrap; }
 .strip-head .hn.follow { color: var(--md-primary); font-weight: 700; }
 .card-line { padding: 3px 4px; border-radius: 4px; background: var(--paste-dim); border: 1px solid var(--paste-edge); cursor: pointer; }
 .card-line.selected { outline: 2px solid var(--md-primary); outline-offset: 1px; }

@@ -9,6 +9,7 @@ import * as drawBoy from "../../game/drawBoy.js";
 import { puzzle } from "../../game/guessGame.js";
 import { decodeCloth, MAX_CHARS, MAX_LINES, planName } from "../../game/nameGame.js";
 import { cardToString } from "../../sim/deck.js";
+import { MAX_TEXT } from "../../sim/link.js";
 import { el, icon, setText } from "../../ui/components.js";
 import { clothThumb } from "../../view2d/clothThumb.js";
 import * as play from "../play.js";
@@ -28,8 +29,8 @@ export function gamesPanel(store) {
   let box;
   /** @type {HTMLElement} */
   let body;
-  /** @type {HTMLElement} */
-  let tabs;
+  /** The game chooser: a list of the games by their titles, as many as there come to be. @type {HTMLSelectElement} */
+  let chooser;
   /** The game laid out, and the language, to know when to lay it out again. */
   let shown = "";
   /** What follows the state, set by the game laid out. @type {(s: AppState) => void} */
@@ -38,7 +39,7 @@ export function gamesPanel(store) {
   /** The name game: a name, how it is read (as Design reads a picture), Weave to the end, and the cloth read back. */
   const nameGame = () => {
     // up to MAX_LINES lines of MAX_CHARS, with room for the spaces and line breaks between them
-    const text = el("textarea", { class: "game-input", rows: "3", maxlength: String(MAX_LINES * (MAX_CHARS + 1)), spellcheck: "false", "aria-label": t("name.label") });
+    const text = el("textarea", { class: "game-input", rows: "3", maxlength: String(MAX_TEXT), spellcheck: "false", "aria-label": t("name.label") });
     text.value = store.state.play.name.text;
     text.addEventListener("input", () => play.setName(store, { text: text.value }));
     const modes = el("div", { class: "seg", role: "group" });
@@ -50,7 +51,7 @@ export function gamesPanel(store) {
     }
     const all = el("button", { type: "button", class: "btn filled" }, [icon("skip_next"), el("span", { text: t("game.weaveAll") })]);
     all.addEventListener("click", () => play.weaveAll(store));
-    const read = el("p", { class: "game-result", "aria-live": "polite" });
+    const read = el("p", { class: "game-result" });
     follow = (s) => {
       for (const b of /** @type {HTMLElement[]} */ ([...modes.children])) b.setAttribute("aria-pressed", String(b.dataset.mode === s.play.name.mode));
       const r = planName(s.play.name.text, s.play.name.mode);
@@ -58,6 +59,8 @@ export function gamesPanel(store) {
       // the cloth read back line by line; when it is the text's lines, the text as typed (its line breaks as " / ")
       const back = r.ok && cloth.length >= r.plan.deck.cards.length ? decodeCloth(cloth, r.plan) : [];
       const typed = s.play.name.text.split("\n").map((l) => l.trim().replace(/ +/g, " ")).filter((l, i, all) => l !== "" || all.slice(i).some((x) => x.trim() !== "")).join(" / ");
+      // said aloud once the cloth reads back, not at every row woven
+      read.setAttribute("aria-live", back.length ? "polite" : "off");
       setText(read, !r.ok ? "" : back.length === 0 ? t("name.weaving", { rows: cloth.length, of: r.plan.deck.cards.length }) : t("name.reads", { text: back.join("\n") === r.plan.lines.join("\n") ? typed : back.join(" / ") }));
     };
     return [p("name.about", { per: MAX_CHARS, lines: MAX_LINES }), text, el("div", { class: "game-row" }, [el("span", { class: "game-label", text: t("pic.reading.label") }), modes]), p("name.modes"), el("div", { class: "game-row" }, [all]), read];
@@ -67,8 +70,12 @@ export function gamesPanel(store) {
   const byteGame = () => {
     const rows = el("table", { class: "byte-rows" });
     const secret = store.state.play.byte.secret;
+    let filled = -1;
     const fill = (/** @type {AppState} */ s) => {
       const cloth = s.looms.game.loom.cloth;
+      // made anew only when a row is woven or unwoven, not every frame (a selection in it stays)
+      if (cloth.length === filled) return;
+      filled = cloth.length;
       rows.replaceChildren(
         el("tr", {}, [el("th", { text: t("byte.row") }), el("th", { text: t("byte.bits") }), el("th", { text: t("byte.code") }), el("th", { text: t("byte.char") })]),
         ...cloth.map((row, i) => el("tr", {}, [el("td", { text: String(i + 1) }), el("td", { class: "bits", text: rowBits(row) }), el("td", { text: secret ? "" : String(rowByte(row)) }), el("td", { text: secret ? "" : byteChar(rowByte(row)) })])),
@@ -179,27 +186,23 @@ export function gamesPanel(store) {
   /** Lay the panel out for the game on show. @param {AppState} s */
   const build = (s) => {
     shown = `${s.play.game}/${s.play.byte.secret}/${s.play.guess.seed}/${s.locale}`;
-    for (const b of /** @type {HTMLElement[]} */ ([...tabs.children])) {
-      b.setAttribute("aria-selected", String(b.dataset.game === s.play.game));
-      b.tabIndex = b.dataset.game === s.play.game ? 0 : -1;
-      setText(b, t(`game.${b.dataset.game}`));
-    }
+    chooser.setAttribute("aria-label", t("game.choose"));
+    for (const o of chooser.options) o.text = t(`game.${o.value}.title`);
+    chooser.value = s.play.game;
     const game = { name: nameGame, byte: byteGame, guess: guessGame, drawboy: drawBoyGame }[s.play.game];
-    body.replaceChildren(el("h3", { class: "game-title", text: t(`game.${s.play.game}.title`) }), ...game());
+    // the title is the chooser's, on show; kept as the heading a screen reader goes by
+    body.replaceChildren(el("h3", { class: "game-title visually-hidden", text: t(`game.${s.play.game}.title`) }), ...game());
   };
 
   return {
     name: "comp.games",
     mount(h) {
-      tabs = el("div", { class: "tabs game-tabs", role: "tablist", "aria-label": t("game.choose") });
-      for (const g of GAMES) {
-        const b = el("button", { type: "button", role: "tab", class: "tab" });
-        b.dataset.game = g;
-        b.addEventListener("click", () => play.chooseGame(store, g));
-        tabs.append(b);
-      }
+      // a list, not tabs: a game is chosen, not a page of the panel shown, and more games fit it
+      chooser = /** @type {HTMLSelectElement} */ (el("select", { class: "game-chooser" }));
+      for (const g of GAMES) chooser.add(new Option("", g));
+      chooser.addEventListener("change", () => play.chooseGame(store, /** @type {import("../playState.js").GameName} */ (chooser.value)));
       body = el("div", { class: "game-body" });
-      box = el("div", { class: "games-box" }, [tabs, body]);
+      box = el("div", { class: "games-box" }, [el("div", { class: "game-choose" }, [chooser]), body]);
       h.appendChild(box);
     },
     watch(s) {
