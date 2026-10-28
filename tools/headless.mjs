@@ -34,8 +34,8 @@ export const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
  * @property {(method: string, params?: object) => Promise<any>} send a DevTools command
  * @property {(expression: string) => Promise<any>} evaluate run JavaScript in the page, awaiting a promise
  * @property {(path: string, ready?: string) => Promise<void>} open open a page of the site (a path from its root), and wait until the expression `ready` is true
- * @property {(width: number, height: number, mobile?: boolean) => Promise<void>} resize the window's size
- * @property {(options?: { format?: "png" | "jpeg"; quality?: number }) => Promise<Buffer>} shot a picture of the page as it is
+ * @property {(width: number, height: number, mobile?: boolean, scale?: number) => Promise<void>} resize the window's size (and its pixel ratio)
+ * @property {(options?: { format?: "png" | "jpeg"; quality?: number; clip?: { x: number; y: number; width: number; height: number; scale: number } }) => Promise<Buffer>} shot a picture of the page as it is, or of a part of it
  * @property {string[]} errors exceptions the page threw since the last open
  * @property {() => Promise<void>} close
  */
@@ -129,12 +129,12 @@ export async function openBrowser({ width, height }) {
       }
       await sleep(400);
     },
-    async resize(w, h, mobile = false) {
-      await send("Emulation.setDeviceMetricsOverride", { width: w, height: h, deviceScaleFactor: 1, mobile });
+    async resize(w, h, mobile = false, scale = 1) {
+      await send("Emulation.setDeviceMetricsOverride", { width: w, height: h, deviceScaleFactor: scale, mobile });
       await sleep(300);
     },
-    async shot({ format = "png", quality } = {}) {
-      const r = await send("Page.captureScreenshot", { format, ...(quality ? { quality } : {}) });
+    async shot({ format = "png", quality, clip } = {}) {
+      const r = await send("Page.captureScreenshot", { format, ...(quality ? { quality } : {}), ...(clip ? { clip } : {}) });
       return Buffer.from(r.result.data, "base64");
     },
     async close() {

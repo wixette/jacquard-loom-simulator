@@ -34,7 +34,7 @@ Pages cannot be opened from `file://`, because browsers do not load modules from
 
 - **Git LFS**, for the 3D models: run `git lfs install` once, then clone as usual (or `git lfs pull` in an existing clone). Without it the `.glb` files are small pointer files, and the 3D views and tests fail.
 - **Node 22 or later** and **pnpm** (the version is in `package.json`'s `packageManager`), for the checks: `pnpm install` brings three.js for Node and TypeScript's checker. The pages themselves need neither.
-- **Google Chrome**, for `pnpm selftest` and `pnpm shots`, which drive it headless (`tools/headless.mjs`). It is looked for at its default path on macOS and Windows; elsewhere, Linux included, set `CHROME` to its path.
+- **Google Chrome**, for `pnpm selftest`, `pnpm shots` and `pnpm video`, which drive it headless (`tools/headless.mjs`). It is looked for at its default path on macOS and Windows; elsewhere, Linux included, set `CHROME` to its path.
 - **The REUSE tool**, for `reuse lint`: `pipx install reuse`. `pnpm install` does not bring it.
 - **Blender 5.2**, only to rebuild the models (`pnpm build:model`). Set `BLENDER` to its path if it is not at `/Applications/Blender.app`.
 
@@ -49,7 +49,8 @@ Pages cannot be opened from `file://`, because browsers do not load modules from
 | `pnpm build:model` | Rebuilds the five units and the ghosted machine into `assets/` with Blender, headless |
 | `pnpm vendor` | Copies three.js (minified by esbuild: one module for the build, the addons each on its own) and the font from `node_modules` into `vendor/`, and writes the icons the pages use into one module |
 | `pnpm selftest` | Every page's `?selftest`, run in headless Chrome: the browser half of the checks |
-| `pnpm shots` | Screenshots of every view, from headless Chrome, into `shots/` (`--out`, `--only`): for reviewing a change of the theme or the layout side by side. `pnpm shots --only readme- --out screenshots` takes the README's screenshots again |
+| `pnpm shots` | Screenshots of every view, from headless Chrome, into `shots/` (`--out`, `--only`): for reviewing a change of the theme or the layout side by side. `pnpm shots --only readme- --out screenshots` takes the README's screenshots again; `pnpm shots --only post- --lang en,zh --out <folder>` takes the set for posts (1920 × 1080: the app, the loom in 3D and in section, the five units, a satin, Design, the four games, the tutorial, two phones) in each language, into `<folder>/<lang>/` |
+| `pnpm video` | Short clips for posts, 1920 × 1080 MP4 with the machine's sound, into `videos/<lang>/` (`--lang en,zh`, `--out`, `--only`, `--fps`, 30 by default): weaving in section and 3D, one pick slowly, the loom in 3D going round, its units, the name game, a heart drawn in Design and read as damask, a thread followed. Made frame by frame, not in real time: the page's clock is replaced and advanced one frame at a time, so a clip is smooth however slow the rendering; the soundtrack is mixed afterwards from `audio/`, from a log of every sound the app played. Needs ffmpeg; a few minutes for each language |
 | `pnpm stamp` | Writes the version into every file name the pages load |
 | `reuse lint` | Every file's licence is declared (the REUSE tool, installed apart; CI runs it) |
 

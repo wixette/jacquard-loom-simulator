@@ -2,6 +2,30 @@
 
 What changed in each release. Versions follow `package.json` and are tagged `vX.Y.Z` ([docs/development.md](docs/development.md), *Versions and releases*). Each stage's details are in its notes in [design/](design/).
 
+## 1.1.0
+
+Fixes from use (2026-10-29): the 3D views framed alike and easier to work on a phone, the section's
+shuttle, the ready-made decks easier to find, and tools to make pictures and clips for posts.
+
+- **3D:** each view frames its object centred and the same size, the whole loom and each of the
+  five units alone, framed again when the view changes shape (the selector took a fifth of the
+  view, the shed and batten went past its top). A unit opened by a click in the whole loom is the
+  view on show: the view's chip and menu name it, a link keeps it, and Whole loom brings the
+  machine back (the menu still said the whole loom, and choosing it did nothing); going between
+  the 3D views flies the same view's camera, without loading the models again. The counts over
+  the whole loom (416 hooks, 1,600 warp ends…) show by themselves only where the view is large
+  enough not to be covered by them, and a switch by the view's ⓘ turns them on or off.
+- **Phones:** Share, the language and About on the right of the top bar, each a button of its
+  own, as in the sibling simulators; the 3D chip opens a menu of the whole loom and its five
+  units.
+- **Weave:** the ready-made decks a chip with its name, beside the head's over the cards (an icon
+  among the card tools, a tester missed it); the head's chip says just "16 hooks · Straight tie".
+  The head's section shows the shuttle crossing the shed, laying its weft, as the front view does.
+- **Games:** room above and below the draw boy's eight cords.
+- **For developers:** `pnpm shots --only post- --lang en,zh` takes a set of pictures for posts,
+  and `pnpm video` short clips with the machine's sound, in any language
+  ([docs/development.md](docs/development.md)); `?debug` gives the tools the app's store.
+
 ## 1.0.0
 
 The first full release (2026-10-28): the same loom, tutorial, picture tool and games as 0.2.0,

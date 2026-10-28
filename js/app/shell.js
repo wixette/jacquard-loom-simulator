@@ -23,7 +23,7 @@ import { wireKeys } from "./keys.js";
 import { Sound } from "./sound.js";
 import { place } from "./components/component.js";
 import { benchPanel, chainPanel, clothPanel, statusPanel, tracePanel, transportPanel } from "./components/panels.js";
-import { frontView, sectionView, sideView, UNIT_VIEWS, unitsView } from "./components/views.js";
+import { frontView, labelsShown, sectionView, setLabels, sideView, UNIT_VIEWS, unitsView } from "./components/views.js";
 import { chooseLanguage } from "./language.js";
 import { leaveLearn, openLearn, watchDone } from "./learn.js";
 import { openCreate } from "./create.js";
@@ -58,6 +58,17 @@ const MENU_VIEWS = /** @type {const} */ (["section", "side", "front", "3d", "u1"
 
 /** The workspaces of this release, in the order the bar shows them. */
 const WORKSPACES = /** @type {const} */ (["learn", "weave", "create", "play"]);
+
+/** The 3D view that shows a unit alone, or the whole machine. @param {"machine" | UnitId} unit @returns {StageView} */
+const viewOfUnit = (unit) => /** @type {StageView} */ (Object.entries(UNIT_VIEWS).find(([, u]) => u.unit === unit)?.[0] ?? "3d");
+
+/**
+ * What a pane keeps across a change of views: the 3D views are one pane, which shows the whole
+ * machine or a unit alone by flying its camera (a click on a unit opens it in the same view), so
+ * going between them neither loads the models again nor loses the camera.
+ * @param {StageView} v
+ */
+const paneKind = (v) => (is3d(v) ? "3d" : v);
 
 /**
  * A view's component.
@@ -160,6 +171,8 @@ export function createShell(store, root) {
   let unwatch = [];
   /** @type {Mode | null} */
   let mode = null;
+  /** How a 3D pane is told to show another 3D view, by its node. @type {WeakMap<HTMLElement, (v: StageView) => void>} */
+  const retarget = new WeakMap();
   /** The phone sheet's tab on show, kept across a rebuild. @type {string | null} */
   let sheetTab = null;
 
@@ -461,28 +474,22 @@ export function createShell(store, root) {
     for (const w of WORKSPACES) ws.appendChild(label("option", `ws.${w}`, { value: w }));
     ws.value = store.state.workspace;
     ws.addEventListener("change", () => goWorkspace(/** @type {Workspace} */ (ws.value)));
-    const menu = iconButton("menu", "bar.menu", () =>
-      showMenu(menu, [
-        { label: t("bar.language"), run: () => languageMenu(menu) },
-        { label: t("bar.about"), run: showAbout },
-      ]),
-    );
+    // on the right, each a button of its own, as on the desktop and in the sibling simulators:
+    // Share, the language (by its 文A alone) and About
     const share = iconButton("share", "bar.share.tip", () => shareMenu(share));
-    return el("header", { class: "appbar" }, [brand(), ws, el("span", { class: "spacer" }), share, menu]);
+    share.setAttribute("aria-haspopup", "menu");
+    const lang = iconButton("translate", "bar.language", () => languageMenu(lang));
+    lang.setAttribute("aria-haspopup", "menu");
+    const about = iconButton("info", "bar.about", showAbout);
+    about.setAttribute("aria-haspopup", "dialog");
+    return el("header", { class: "appbar" }, [brand(), ws, el("span", { class: "spacer" }), share, lang, about]);
   }
 
   /** The card tools, over the chain. */
   function cardTools() {
-    const decks = controls(iconButton("menu_book", "cards.decks", () =>
-      showMenu(
-        decks,
-        Object.entries(PRESETS).map(([key, p]) => ({ label: tn("preset.option", p.rows.length, { name: t(p.name) }), run: () => act.loadPreset(store, key) })),
-      ),
-    ), "cards");
     const loop = controls(iconButton("repeat", "cards.loop", () => act.lace(store, !ls().loom.deck.loop)), "loop");
     follow((s) => [s.looms[s.current].rev], () => loop.setAttribute("aria-pressed", String(ls().loom.deck.loop)));
     return [
-      decks,
       ...[
         iconButton("add", "cards.add", () => act.add(store)),
         iconButton("content_copy", "cards.duplicate", () => act.duplicate(store)),
@@ -540,6 +547,17 @@ export function createShell(store, root) {
 
   /** The head and its tie-up, shown as they are, over the cards; pressed, they can be changed. */
   function setupRow() {
+    // The ready-made decks, a chip with its name beside the head's: the two things to choose
+    // before punching, alike and side by side (as an icon among the card tools it was missed).
+    const decks = controls(el("button", { type: "button", class: "chip decks-chip", "aria-haspopup": "menu" }, [icon("menu_book"), label("span", "cards.decks"), icon("keyboard_arrow_down")]), "cards");
+    decks.addEventListener("click", () =>
+      decks.classList.contains("locked")
+        ? act.say(store, msg("learn.locked"), true)
+        : showMenu(
+            decks,
+            Object.entries(PRESETS).map(([key, p]) => ({ label: tn("preset.option", p.rows.length, { name: t(p.name) }), run: () => act.loadPreset(store, key) })),
+          ),
+    );
     const text = el("span");
     const chip = controls(el("button", { type: "button", class: "chip setup-chip", "aria-haspopup": "dialog" }, [icon("tune"), text, icon("keyboard_arrow_down")]), "setup");
     chip.dataset.l10nTip = "setup.tip";
@@ -548,9 +566,9 @@ export function createShell(store, root) {
     chip.addEventListener("click", () => (chip.classList.contains("locked") ? act.say(store, msg("learn.locked"), true) : setupPopover(chip)));
     follow((s) => [s.looms[s.current].rev, s.locale], () => {
       const { deck, tie } = ls().loom;
-      setText(text, t("setup.chip", { head: tn("hooks.option", deck.hooks / 8, { hooks: deck.hooks }), tie: words(tieLabel(tie)) }));
+      setText(text, t("setup.chip", { head: t("setup.head", { hooks: deck.hooks }), tie: words(tieLabel(tie)) }));
     });
-    return el("div", { class: "setup-row" }, [chip]);
+    return el("div", { class: "setup-row" }, [decks, chip]);
   }
 
   /**
@@ -656,7 +674,9 @@ export function createShell(store, root) {
   function pane(i, v) {
     const host = el("div", { class: "pane-host" });
     const chip = el("button", { type: "button", class: "chip view-chip", "aria-haspopup": "menu" }, [el("span", { class: "view-name" }), icon("keyboard_arrow_down")]);
-    follow((s) => [s.locale], () => (/** @type {HTMLElement} */ (chip.firstChild).textContent = viewName(v)));
+    /** The view this pane shows now: a 3D pane, whichever 3D view the store says (a unit opened by a click included). */
+    const now = () => (paneKind(store.state.views[i] ?? v) === paneKind(v) ? store.state.views[i] : v);
+    follow((s) => [s.locale, s.views[i]], () => (/** @type {HTMLElement} */ (chip.firstChild).textContent = viewName(now())));
     // One flat list: the 2D drawings, the 3D models, then the cloth; a view on show in another
     // pane says where, and choosing it swaps the two (js/app/arrange.js).
     chip.addEventListener("click", () => {
@@ -668,7 +688,7 @@ export function createShell(store, root) {
           const name = viewName(x, true);
           return {
             label: at >= 0 && at !== i ? `${name} · ${t(placeKey(at, views.length))}` : name,
-            checked: x === v,
+            checked: x === now(),
             divider: x === "section" ? t("view.group.2d") : x === "cloth" ? true : x === "3d" ? t("view.group.3d") : undefined,
             run: () => act.setViews(store, choose(store.state.views, i, x)),
           };
@@ -682,11 +702,24 @@ export function createShell(store, root) {
     let onMode;
     if (v in UNIT_VIEWS) {
       const note = unitNote(/** @type {keyof typeof UNIT_VIEWS} */ (v));
-      tools.append(note.element);
-      onMode = note.show;
+      const counts = labelsSwitch(host);
+      tools.append(note.element, counts.element);
+      counts.shownFor(UNIT_VIEWS[/** @type {keyof typeof UNIT_VIEWS} */ (v)].unit);
+      onMode = (unit) => {
+        note.show(unit);
+        counts.shownFor(unit);
+        // a unit opened by a click in the whole machine is the view on show: the menu, the
+        // chip, a link and the way back to the whole machine all know it
+        const want = viewOfUnit(unit);
+        if (paneKind(store.state.views[i] ?? "") === "3d" && store.state.views[i] !== want) act.setViews(store, choose(store.state.views, i, want));
+      };
     }
-    put(viewComponent(store, v, onMode), host);
-    return el("div", { class: "pane" }, [host, tools]);
+    const component = viewComponent(store, v, onMode);
+    put(component, host);
+    const node = el("div", { class: "pane" }, [host, tools]);
+    // the same 3D pane told to show another 3D view: its camera flies there
+    if ("showUnit" in component) retarget.set(node, (/** @type {StageView} */ nv) => /** @type {any} */ (component).showUnit(UNIT_VIEWS[/** @type {keyof typeof UNIT_VIEWS} */ (nv)].unit));
+    return node;
   }
 
   /**
@@ -713,6 +746,30 @@ export function createShell(store, root) {
       write();
     };
     return { element, show };
+  }
+
+  /**
+   * The counts over the whole machine in 3D (416 hooks, 1,600 warp ends…), on or off: by
+   * themselves they show where the view is large enough not to be covered by them (not on a
+   * phone); pressed, as the reader chooses, in every 3D view and kept on this device.
+   * @param {HTMLElement} host the view's host, whose size decides by itself
+   */
+  function labelsSwitch(host) {
+    const b = el("button", { type: "button", class: "chip labels-switch", "data-l10n-tip": "view3d.labels" });
+    const draw = () => {
+      const on = labelsShown(host.clientWidth, host.clientHeight);
+      if (b.getAttribute("aria-pressed") === String(on)) return;
+      b.replaceChildren(icon(on ? "label" : "label_off"));
+      b.setAttribute("aria-pressed", String(on));
+    };
+    b.addEventListener("click", () => {
+      setLabels(labelsShown(host.clientWidth, host.clientHeight) ? "off" : "on");
+      draw();
+    });
+    // by itself, the switch follows the view's size
+    new ResizeObserver(draw).observe(host);
+    draw();
+    return { element: b, shownFor: (/** @type {"machine" | UnitId} */ unit) => (b.hidden = unit !== "machine") };
   }
 
   /** The section's tools: how close it looks, and which cross-row it cuts. */
@@ -761,11 +818,15 @@ export function createShell(store, root) {
     let shownPanes = [];
     follow((s) => [s.views], () => {
       st.dataset.n = String(store.state.views.length);
-      const keys = store.state.views.map((v, i) => `${i}:${v}`);
+      const keys = store.state.views.map((v, i) => `${i}:${paneKind(v)}`);
       for (const p of shownPanes) if (!keys.includes(p.key)) remake(p.mine, () => []);
       shownPanes = keys.map((key, i) => {
         const kept = shownPanes.find((p) => p.key === key);
-        if (kept) return kept;
+        // a 3D pane kept, to show another 3D view: its camera flies there
+        if (kept) {
+          retarget.get(kept.node)?.(store.state.views[i]);
+          return kept;
+        }
         const made = remake({ placed: [], unwatch: [] }, () => [pane(i, store.state.views[i])]);
         return { key, node: made.nodes[0], mine: made.mine };
       });
@@ -791,25 +852,49 @@ export function createShell(store, root) {
   function smallStage() {
     const st = el("main", { class: "stage" });
     const chips = el("div", { class: "view-chips", role: "group", "data-l10n-name": "stage.views" });
+    // One chip for 3D: it opens the whole loom and its five units, as the desktop's view menu does,
+    // and names the one on show.
+    const THREE_D = /** @type {StageView[]} */ (["3d", "u1", "u2", "u3", "u4", "u5"]);
     for (const v of STAGE_VIEWS.filter((x) => !x.startsWith("u"))) {
       const b = el("button", { type: "button", class: "chip" });
       b.dataset.view = v;
-      b.addEventListener("click", () => act.setViews(store, [v]));
+      if (v === "3d") {
+        b.setAttribute("aria-haspopup", "menu");
+        b.addEventListener("click", () =>
+          showMenu(
+            b,
+            THREE_D.map((x) => ({ label: viewName(x, true), checked: x === store.state.views[0], run: () => act.setViews(store, [x]) })),
+          ),
+        );
+      } else b.addEventListener("click", () => act.setViews(store, [v]));
       chips.appendChild(b);
     }
-    follow((s) => [s.locale], () => {
-      for (const b of /** @type {HTMLElement[]} */ ([...chips.children])) b.textContent = viewName(/** @type {StageView} */ (b.dataset.view));
+    /** The view a chip stands for now: the 3D chip, the 3D view on show (or the whole loom). @param {HTMLElement} b */
+    const chipView = (b) => /** @type {StageView} */ (b.dataset.view === "3d" && THREE_D.includes(store.state.views[0]) ? store.state.views[0] : b.dataset.view);
+    follow((s) => [s.locale, s.views[0]], () => {
+      for (const b of /** @type {HTMLElement[]} */ ([...chips.children])) {
+        const name = viewName(chipView(b));
+        if (b.dataset.view === "3d") b.replaceChildren(el("span", { text: name }), icon("keyboard_arrow_down"));
+        else b.textContent = name;
+      }
     });
     const one = el("div", { class: "panes", style: "display: contents" });
     let mine = { placed: /** @type {Placed[]} */ ([]), unwatch: /** @type {(() => void)[]} */ ([]) };
+    /** The pane's kind on show (the 3D views are one pane, its camera flying between them). */
+    let kind = "";
     follow((s) => [s.views[0]], () => {
       const v = store.state.views[0];
-      const made = remake(mine, () => [pane(0, v)]);
-      one.replaceChildren(...made.nodes);
-      mine = made.mine;
-      for (const b of chips.children) b.setAttribute("aria-pressed", String(/** @type {HTMLElement} */ (b).dataset.view === v));
+      const node = /** @type {HTMLElement | undefined} */ (one.firstElementChild ?? undefined);
+      if (node && paneKind(v) === kind) retarget.get(node)?.(v);
+      else {
+        const made = remake(mine, () => [pane(0, v)]);
+        one.replaceChildren(...made.nodes);
+        mine = made.mine;
+        kind = paneKind(v);
+      }
+      for (const b of /** @type {HTMLElement[]} */ ([...chips.children])) b.setAttribute("aria-pressed", String(chipView(b) === v));
       // the view on show is in sight in the strip (Design and Games open on the cloth, its end)
-      const on = /** @type {HTMLElement | undefined} */ ([...chips.children].find((b) => /** @type {HTMLElement} */ (b).dataset.view === v));
+      const on = /** @type {HTMLElement | undefined} */ ([...chips.children].find((b) => chipView(/** @type {HTMLElement} */ (b)) === v));
       if (on) requestAnimationFrame(() => (chips.scrollLeft = Math.max(0, on.offsetLeft - (chips.clientWidth - on.offsetWidth) / 2)));
       relabel();
     });

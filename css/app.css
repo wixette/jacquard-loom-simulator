@@ -114,6 +114,7 @@ body.resizing .stage { pointer-events: none; }
 /* ---- phones and small tablets: the same components, other slots --------------------------------- */
 .appbar { display: flex; align-items: center; gap: 2px; padding: 0 4px 0 8px; height: 52px; background: var(--md-surface-low); border-bottom: 1px solid var(--md-outline-variant); }
 .appbar .brand { margin-right: 4px; }
+.appbar .spacer { flex: 1; }
 .appbar .brand span { display: none; }
 .appbar select.ws { font-weight: 620; padding: 6px 8px; }
 .app.phone { grid-template-rows: 52px minmax(0, 54fr) auto minmax(0, 46fr); }
@@ -161,10 +162,11 @@ body.resizing .stage { pointer-events: none; }
 .popover { position: fixed; z-index: 25; max-height: calc(100dvh - 16px); overflow-y: auto; display: grid; grid-template-columns: auto 1fr; gap: 10px 14px; align-items: center; padding: 14px 16px; border-radius: var(--radius-m); background: var(--md-surface-highest); box-shadow: 0 8px 28px rgba(0, 0, 0, 0.5); }
 .popover label { font-size: 12px; color: var(--md-on-surface-variant); }
 .popover .btn { justify-self: start; height: 32px; padding: 0 12px; }
-.setup-row { padding: 8px 10px 0; }
-.chip.setup-chip { max-width: 100%; gap: 6px; padding: 0 8px; color: var(--md-on-surface); }
-.chip.setup-chip span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.chip.setup-chip .icon { width: 18px; height: 18px; color: var(--md-on-surface-variant); }
+/* the two things to choose before punching, alike and side by side: the ready-made decks and the head (on two lines where they do not fit one) */
+.setup-row { display: flex; flex-wrap: wrap; gap: 8px; padding: 8px 10px 0; }
+.chip.setup-chip, .chip.decks-chip { max-width: 100%; gap: 6px; padding: 0 8px; color: var(--md-on-surface); }
+.chip.setup-chip span, .chip.decks-chip span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.chip.setup-chip .icon, .chip.decks-chip .icon { width: 18px; height: 18px; color: var(--md-on-surface-variant); }
 .popover input[type="color"] { width: 44px; height: 28px; padding: 0; border: 1px solid var(--md-outline-variant); border-radius: 6px; background: none; }
 
 /* ---- the guide (Learn): the tutorial's step card above the panel it needs ---------------------- */
@@ -376,7 +378,10 @@ dialog::backdrop { background: var(--md-scrim); }
 .guess-choice.wrong { border-color: var(--attention); }
 .guess-choice[aria-disabled="true"] { cursor: default; }
 .drawboy-figure { margin: 0; display: flex; align-items: center; gap: 10px; font-size: 12px; color: var(--md-on-surface-variant); }
-.cords { display: grid; grid-template-columns: repeat(8, 1fr); gap: 4px; }
+/* the cords between the words that ask for them and the shuttle, spaced as the panel's own rows; a pulled cord rises 6 px into the room above */
+.drawboy-hand { display: flex; flex-direction: column; gap: 10px; }
+.drawboy-hand > p { margin: 0; }
+.cords { display: grid; grid-template-columns: repeat(8, 1fr); gap: 4px; margin: 6px 0 2px; }
 .cord { height: 52px; border: 1px solid var(--md-outline-variant); border-radius: 6px; background: var(--md-surface-high); color: var(--md-on-surface); font-weight: 650; cursor: pointer; }
 .cord[aria-pressed="true"] { background: var(--lift); color: var(--md-surface); border-color: transparent; transform: translateY(-6px); }
 .machine-slot { flex: 1 1 auto; min-height: 0; display: flex; }

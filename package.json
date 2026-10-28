@@ -1,6 +1,6 @@
 {
   "name": "jacquard-loom-simulator",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
   "type": "module",
   "description": "Interactive simulator of the Jacquard loom: punch the cards, turn the loom, and watch the head choose every thread. Mechanism in 2D and 3D, lessons and games.",
@@ -22,6 +22,7 @@
     "version": "node tools/stamp.mjs",
     "serve": "node tools/serve.mjs 8000",
     "shots": "node tools/shots.mjs",
+    "video": "node tools/video.mjs",
     "selftest": "node tools/selftest.mjs",
     "vendor": "node tools/vendor.mjs",
     "build:model": "\"${BLENDER:-/Applications/Blender.app/Contents/MacOS/Blender}\" --background --factory-startup --python-exit-code 1 --python blender/scripts/build_units.py"

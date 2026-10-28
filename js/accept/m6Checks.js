@@ -2,13 +2,14 @@
 // size (the phone's and the tablet's in frames of their sizes), S-2 the machine's settings beside
 // what they change, S-3 the transport and its stepper, S-4 the keyboard, S-5 the panels' edges,
 // S-6 every view in every arrangement, S-7 links, S-8 the languages, S-9 the sounds, S-12 the
-// griffe's labels, S-13 clicks while the loom plays. S-10, the 3D
+// griffe's labels, S-13 clicks while the loom plays, S-14 each 3D view's framing, S-15 a unit
+// opened by a click is the view on show. S-10, the 3D
 // parts' names, needs no page (tests/scene/partNames.test.js).
 
 import { linkOf, openLink } from "../app/links.js";
 import * as act from "../app/looms.js";
 import { MESSAGES } from "../l10n/all.js";
-import { LOCALES } from "../l10n/l10n.js";
+import { LOCALES, t } from "../l10n/l10n.js";
 import { encodeLink, STAGE_VIEWS } from "../sim/link.js";
 import { STOP_KEYS } from "../sim/loom.js";
 import { result } from "./harness.js";
@@ -52,7 +53,7 @@ export async function runM6Checks(page) {
   const { store } = page;
   act.setWorkspace(store, "weave");
   const out = [];
-  for (const check of [frame, settings, transport, keyboard, edges, views, links, languages, sounds, griffeLabels, clicksWhilePlaying]) {
+  for (const check of [frame, settings, transport, keyboard, edges, views, links, languages, sounds, griffeLabels, clicksWhilePlaying, framing, unitClicked]) {
     act.reset(store);
     act.follow(store, null);
     out.push(await check(page));
@@ -583,4 +584,90 @@ async function clicksWhilePlaying({ store }) {
   if (ls().loom.deck.cards[card][0] === before) bad.push("a key's click on a hole after a press did not count");
   act.loadPreset(store, "plain");
   return result("S-13", "While the loom plays no click is lost: no control is replaced, and a press on a part drawn anew counts once", bad.length === 0, bad.slice(0, 4).join("; ") || "0.8 s of playing: no control replaced; a hook and a hole pressed across a redraw; a click sent late counted once, a key's counted");
+}
+
+/**
+ * S-14 (1.1.0): each 3D view, the whole loom and the five units alone, frames its object
+ * centred and as large as the others, filling about 80 % of the view's width or height,
+ * whichever binds (it was framed on a sphere round it, and before the loom first posed it: the
+ * selector took a fifth of the view, the shed and batten went past its top).
+ * @param {AppPage} page
+ * @returns {Promise<CheckResult>}
+ */
+async function framing({ store }) {
+  /** @type {string[]} */
+  const bad = [];
+  const THREE = await import("three");
+  /** @type {string[]} */
+  const seen = [];
+  for (const v of /** @type {const} */ (["3d", "u1", "u2", "u3", "u4", "u5"])) {
+    act.setViews(store, [v]);
+    await frames();
+    await loaded();
+    await sleep(1200); // the camera's flight, and the first pose
+    const canvas = /** @type {any} */ ($(".stage canvas"));
+    const view = canvas?.unitsView;
+    if (!view) {
+      bad.push(`${v}: no 3D view`);
+      continue;
+    }
+    const cam = view.viewer.camera;
+    cam.updateMatrixWorld();
+    let [x0, x1, y0, y1] = [Infinity, -Infinity, Infinity, -Infinity];
+    const p = new THREE.Vector3();
+    view.viewer.scene.traverseVisible((/** @type {any} */ m) => {
+      if (!m.isMesh) return;
+      const b = new THREE.Box3().setFromObject(m, true);
+      if (b.isEmpty()) return;
+      for (const x of [b.min.x, b.max.x]) for (const y of [b.min.y, b.max.y]) for (const z of [b.min.z, b.max.z]) {
+        p.set(x, y, z).project(cam);
+        [x0, x1, y0, y1] = [Math.min(x0, p.x), Math.max(x1, p.x), Math.min(y0, p.y), Math.max(y1, p.y)];
+      }
+    });
+    const fill = Math.max(x1 - x0, y1 - y0) / 2;
+    const off = Math.max(Math.abs(x0 + x1), Math.abs(y0 + y1)) / 4;
+    seen.push(`${v} ${Math.round(fill * 100)} %`);
+    if (fill < 0.7 || fill > 0.9) bad.push(`${v} fills ${Math.round(fill * 100)} %`);
+    if (off > 0.05) bad.push(`${v} is ${Math.round(off * 100)} % off centre`);
+  }
+  act.setViews(store, ["section"]);
+  return result("S-14", "Each 3D view, the whole loom and the five units alone, frames its object centred and as large as the others: about 80 % of the view's width or height", bad.length === 0, bad.slice(0, 4).join("; ") || seen.join(", "));
+}
+
+/**
+ * S-15 (1.1.0): a unit opened by a click in the whole machine is the view on show: the view's
+ * chip and its menu name it, and Whole loom from the menu brings the machine back; going
+ * between them keeps the same 3D view (its camera flies; the models are not loaded again).
+ * (The click opened the unit in the view while the app still had the whole loom on show, so
+ * the menu's Whole loom did nothing.)
+ * @param {AppPage} page
+ * @returns {Promise<CheckResult>}
+ */
+async function unitClicked({ store }) {
+  /** @type {string[]} */
+  const bad = [];
+  act.setViews(store, ["section", "3d"]);
+  await frames();
+  await loaded();
+  await sleep(800);
+  const canvas = $(".stage canvas");
+  const tag = $$(".band-tag").find((e) => e.textContent?.includes("1,600") || e.textContent?.includes("1600")) ?? $$(".band-tag")[0];
+  if (!tag) bad.push("no unit's band to click in the whole machine");
+  else {
+    tag.click();
+    await sleep(1200);
+    const v = store.state.views[1];
+    if (!v.startsWith("u")) bad.push(`after a click on a unit the view on show is ${v}`);
+    if ($$(".stage .view-chip .view-name")[1]?.textContent === t("view.in3d", { name: t("view.3d") })) bad.push("the chip still says the whole loom");
+    /** @type {HTMLElement} */ ($$(".stage .view-chip")[1]).click();
+    await frames();
+    const ticked = $$('[role=menu] [aria-checked="true"]').map((e) => e.textContent?.trim()).join();
+    if (ticked !== t(`view.${v}`)) bad.push(`the menu ticks ${ticked}`);
+    $$("[role=menu] [role=menuitemradio]").find((e) => e.textContent?.trim() === t("view.3d"))?.click();
+    await sleep(1200);
+    if (store.state.views[1] !== "3d" || /** @type {any} */ ($(".stage canvas"))?.unitsView?.mode !== "machine") bad.push("Whole loom from the menu did not bring the machine back");
+    if ($(".stage canvas") !== canvas) bad.push("the 3D view was made anew");
+  }
+  act.setViews(store, ["section"]);
+  return result("S-15", "A unit opened by a click in the whole machine is the view on show (its chip and menu say so), and Whole loom from the menu brings the machine back, in the same 3D view", bad.length === 0, bad.slice(0, 4).join("; ") || "a unit clicked, named, and the whole loom chosen back, one 3D view throughout");
 }

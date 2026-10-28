@@ -6,7 +6,7 @@
 import * as THREE from "three";
 import { t } from "../l10n/l10n.js";
 import { P, PARAMS } from "../sim/params.js";
-import { anchors, gltfName } from "./rig.js";
+import { anchors } from "./rig.js";
 import { partName } from "./partNames.js";
 import { Unit, UNITS } from "./units.js";
 import { Viewer } from "./viewer.js";
@@ -21,15 +21,6 @@ const VIEW_FROM = /** @type {Record<UnitId | "machine", THREE.Vector3Like>} */ (
   griffe: { x: 1, y: 0.25, z: 0.55 },
   harness: { x: 0.25, y: 0.15, z: 1 },
   shed: { x: 0.9, y: 0.5, z: 0.6 },
-});
-
-/** The parts each unit is framed on when opened (the rest is in reach by zooming out). */
-const FOCUS = /** @type {Record<UnitId, string[]>} */ ({
-  selector: ["needles.needle.0", "needles.needle.7", "facing-card", "springs.box", "hooks.hook.0.crook"],
-  cylinder: ["cylinder.block", "cylinder.lantern", "cylinder.hammer", "cylinder.catch_top", "cylinder.catch_bottom", "cards"],
-  griffe: ["unit.griffe"],
-  harness: ["unit.harness"],
-  shed: ["batten.race", "batten.reed", "shuttle.body", "warp.sheet.upper.front"],
 });
 
 /** The version of this module's URL (?v=…), for the files it fetches. */
@@ -64,6 +55,10 @@ export class UnitsView {
     this.mode = "machine";
     this.loaded = false;
     this.disposed = false;
+    /** Not yet posed by the loom since it loaded. */
+    this.unposed = true;
+    /** Whether the bands' labels (the counts) show over the whole machine: the page decides (by the reader's choice, or the view's size). */
+    this.showTags = () => true;
     this.tip = document.createElement("div");
     this.tip.className = "part-tip";
     this.tip.hidden = true;
@@ -71,6 +66,8 @@ export class UnitsView {
     if (getComputedStyle(host).position === "static") host.style.position = "relative";
     this.raycaster = new THREE.Raycaster();
     const canvas = this.viewer.renderer.domElement;
+    // the view, from its canvas: for the tools that steer its camera (tools/shots.mjs, tools/video.mjs)
+    /** @type {any} */ (canvas).unitsView = this;
     // named, and worked by the keyboard too: the arrows move the model, Shift and the arrows turn it
     canvas.setAttribute("role", "img");
     canvas.tabIndex = 0;
@@ -198,8 +195,8 @@ export class UnitsView {
     const u = this.units[id];
     if (u) {
       u.root.updateMatrixWorld(true);
-      const parts = FOCUS[id].map((n) => u.root.getObjectByName(gltfName(n))).filter((o) => o !== undefined);
-      this.viewer.fit(parts.length ? parts : u.root, VIEW_FROM[id], fly);
+      // the whole unit, as the whole machine is framed whole: each the same size on the screen
+      this.viewer.fit(u.root, VIEW_FROM[id], fly);
     }
     this.viewer.invalidate();
     this.events.onChange?.(id);
@@ -213,6 +210,10 @@ export class UnitsView {
    */
   pose(snap, hook) {
     for (const u of Object.values(this.units)) u.pose(snap, hook);
+    // framed again once the loom has first posed it: framed as loaded, its parts at their rest
+    // in the model, a unit took more room than it does at work (the selector a fifth of the view)
+    if (this.unposed && this.viewer.framed) this.viewer.fit(this.viewer.framed.object, this.viewer.framed.from, false);
+    this.unposed = false;
     this.viewer.invalidate();
   }
 
@@ -221,7 +222,7 @@ export class UnitsView {
    * @returns {void}
    */
   placeTags() {
-    const show = this.mode === "machine" && this.host.clientWidth > 0;
+    const show = this.mode === "machine" && this.host.clientWidth > 0 && this.showTags();
     const w = this.host.clientWidth;
     const h = this.host.clientHeight;
     /** @type {{ b: Band, x: number, y: number }[]} */

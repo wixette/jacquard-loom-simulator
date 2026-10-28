@@ -111,6 +111,12 @@ export class SectionView {
       out.push(`<ellipse class="mail${m.up ? " up" : ""}${fol(m.hook)}"${dh(m.hook)} cx="${f(m.centre[0])}" cy="${f(Y(m.centre[1]))}" rx="3.2" ry="5"/>`);
       out.push(`<circle class="warp${m.up ? " up" : ""}" cx="${f(m.centre[0])}" cy="${f(Y(m.centre[1]))}" r="1.6"/>`);
     }
+    // the weft laid as the shuttle crosses the shed, between the ends lifted and the ends left down
+    if (L.weft) out.push(line(L.weft[0], L.weft[1], "weft"));
+    if (L.shuttle) {
+      const s = L.shuttle;
+      out.push(`<rect class="shuttle" x="${f(s.x)}" y="${f(Y(s.y + s.h))}" width="${f(s.w)}" height="${f(s.h)}" rx="${f(s.h / 2)}"/>`);
+    }
 
     // The card cylinder and the chain near it, under the needles, so a needle going into a
     // hole can be seen inside the cylinder. Each card is a pasteboard strip with all eight

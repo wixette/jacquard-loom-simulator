@@ -106,6 +106,10 @@ const LINGO_DRAWN = P.lingoLength / 3;
  * @property {(Rect & { k: number, hook: number })[]} lingoes
  * @property {[number, number]} breakY
  * @property {{ rest: number, top: number }} shed y of the lower and upper shed lines at the mails
+ * @property {Rect | null} shuttle while it crosses: through the shed between the two lines, across the
+ *   cross-row's ends as the front view has it across the warp (the mails of a cross-row stand side by side
+ *   for its ends here), from beyond the left of the shed to beyond its right
+ * @property {[Pt, Pt] | null} weft the weft it lays, from the shed's left to the shuttle, while the shed is open
  * @property {Record<"whole" | "needles" | "crooks", Rect>} views
  */
 
@@ -419,6 +423,19 @@ export function sectionLayout(snap, crossRow = 0) {
   const mails = hooks.map((h) => ({ k: h.k, hook: h.hook, centre: /** @type {Pt} */ ([h.shank[0][0], MAIL_REST_Y + h.lift]), up: h.lift > 1 }));
   const lingoes = hooks.map((h) => ({ k: h.k, hook: h.hook, x: h.shank[0][0] - 1.8, y: MAIL_REST_Y - 20 - LINGO_DRAWN + h.lift, w: 3.6, h: LINGO_DRAWN }));
 
+  // The shuttle through the shed, while it crosses (the front view's, seen across this cross-row's ends).
+  const shedTop = MAIL_REST_Y + P.griffeLift - P.restGap;
+  const mid = (MAIL_REST_Y + shedTop) / 2;
+  const sh = Math.min(10, (shedTop - MAIL_REST_Y) * 0.45);
+  const sw = 46;
+  const left = boards.bottom.x - 10;
+  const right = boards.bottom.x + boards.bottom.w + 10;
+  const sx = left - sw + (right - left + sw) * snap.shuttle;
+  const crossing = snap.shuttle > 0 && snap.shuttle < 1;
+  const shuttle = crossing ? { x: sx, y: mid - sh / 2, w: sw, h: sh } : null;
+  /** @type {[Pt, Pt] | null} */
+  const weft = snap.pendingRow !== null && snap.shuttle > 0 ? [[left, mid], [Math.min(right, Math.max(left, sx + sw / 2)), mid]] : null;
+
   const x0 = -150;
   const x1 = P.springBoxBack + 20;
   const yTop = P.hookHeight + P.griffeLift + 110;
@@ -441,7 +458,9 @@ export function sectionLayout(snap, crossRow = 0) {
     mails,
     lingoes,
     breakY: BREAK,
-    shed: { rest: MAIL_REST_Y, top: MAIL_REST_Y + P.griffeLift - P.restGap },
+    shed: { rest: MAIL_REST_Y, top: shedTop },
+    shuttle,
+    weft,
     views: {
       whole: { x: x0, y: yBottom, w: x1 - x0, h: yTop - yBottom },
       needles: { x: -175, y: tierMid - 215, w: 290, h: 300 },
