@@ -66,6 +66,9 @@ const LITE_BELOW_FPS = 25;
 
 /** @typedef {"high" | "lite"} Quality */
 
+/** How much of the view's width or height a framed object takes (fit), at most. */
+const FRAME_FILL = 0.8;
+
 export class Viewer {
   /**
    * @readonly
@@ -99,6 +102,12 @@ export class Viewer {
   lastRender = 0;
   /** @type {((q: Quality) => void) | null} */
   onQualityChange = null;
+  /**
+   * What fit() framed last, and from where: framed again when the view changes shape, until the
+   * camera is moved by hand.
+   * @type {{ object: THREE.Object3D | THREE.Object3D[]; from: THREE.Vector3Like } | null}
+   */
+  framed = null;
   /**
    * Called after each frame actually drawn (the camera or the scene changed), not every tick.
    * @type {(() => void)[]}
@@ -192,6 +201,8 @@ export class Viewer {
     this.controls.enableDamping = !reducedMotion();
 
     this.controls.addEventListener("change", () => this.invalidate(false));
+    // a hand on the camera: it stays where it is put when the view changes shape
+    this.controls.addEventListener("start", () => (this.framed = null));
     this.resized = new ResizeObserver(() => this.resize());
     this.resized.observe(host);
     this.resize();
@@ -329,8 +340,12 @@ export class Viewer {
   }
 
   /**
-   * Frames an object: the camera looks at its centre from the given direction (a three.js
-   * vector, need not be unit), far enough back to see all of it, and the shadows fit it.
+   * Frames an object: the camera looks at it from the given direction (a three.js vector, need
+   * not be unit), centred and as large as FRAME_FILL of the view allows, by the view's width or its
+   * height, whichever binds; and the shadows fit it. Framed by what the camera sees of it (its
+   * meshes' boxes, projected), not by a sphere round it, so a long or a thin part (the selector's
+   * needles, the harness's cords) is as large on the screen as a compact one. It is framed again
+   * when the view changes shape, until the camera is moved by hand.
    * @param {THREE.Object3D | THREE.Object3D[]} object one object, or several to frame together
    * @param {THREE.Vector3Like} [from]
    * @param {boolean} [fly] move there smoothly rather than at once
@@ -339,26 +354,67 @@ export class Viewer {
   fit(object, from = { x: 0.6, y: 0.35, z: 1 }, fly = false) {
     // Only what is shown counts (the card pool keeps hidden cards at the origin).
     const box = new THREE.Box3();
+    /** @type {THREE.Vector3[]} */
+    const points = [];
     for (const o of /** @type {THREE.Object3D[]} */ ([]).concat(object)) {
       o.updateWorldMatrix(true, true);
       o.traverseVisible((m) => {
-        if (/** @type {THREE.Mesh} */ (m).isMesh) box.union(new THREE.Box3().setFromObject(m, false));
+        if (!(/** @type {THREE.Mesh} */ (m).isMesh)) return;
+        const b = new THREE.Box3().setFromObject(m, false);
+        if (b.isEmpty()) return;
+        box.union(b);
+        for (const x of [b.min.x, b.max.x]) for (const y of [b.min.y, b.max.y]) for (const z of [b.min.z, b.max.z]) points.push(new THREE.Vector3(x, y, z));
       });
     }
+    if (points.length === 0) return;
     const sphere = box.getBoundingSphere(new THREE.Sphere());
-    const dir = new THREE.Vector3().copy(from).normalize();
-    const fov = THREE.MathUtils.degToRad(this.camera.fov);
-    const dist = (sphere.radius / Math.sin(fov / 2)) * (this.camera.aspect < 1 ? 1 / Math.max(0.45, this.camera.aspect) : 1) * 1.05;
-    const pos = sphere.center.clone().addScaledVector(dir, dist);
+    const back = new THREE.Vector3().copy(from).normalize();
+    // the camera's axes looking along -back, the world's up kept up
+    const right = new THREE.Vector3().crossVectors(new THREE.Vector3(0, 1, 0), back).normalize();
+    const up = new THREE.Vector3().crossVectors(back, right);
+    const tanY = Math.tan(THREE.MathUtils.degToRad(this.camera.fov) / 2) * FRAME_FILL;
+    const tanX = tanY * this.camera.aspect;
+    // The target moves across the view until the object's projection is centred, and the camera
+    // back along `back` until its farthest-out corner is at the edge: a few rounds, as each
+    // depends on the other in perspective.
+    const target = sphere.center.clone();
+    let dist = sphere.radius;
+    for (let round = 0; round < 4; round++) {
+      dist = 0;
+      let [x0, x1, y0, y1] = [Infinity, -Infinity, Infinity, -Infinity];
+      for (const p of points) {
+        const d = p.clone().sub(target);
+        const [x, y, z] = [d.dot(right), d.dot(up), d.dot(back)];
+        // the camera's distance from the target that puts this corner at the view's edge
+        dist = Math.max(dist, z + Math.abs(x) / tanX, z + Math.abs(y) / tanY);
+        x0 = Math.min(x0, x);
+        x1 = Math.max(x1, x);
+        y0 = Math.min(y0, y);
+        y1 = Math.max(y1, y);
+      }
+      if (round === 3) break;
+      // centred as seen from that distance (the near corners count for more: they look larger)
+      const seen = points.map((p) => {
+        const d = p.clone().sub(target);
+        const k = dist / Math.max(1e-6, dist - d.dot(back));
+        return [d.dot(right) * k, d.dot(up) * k];
+      });
+      const cx = (Math.min(...seen.map((q) => q[0])) + Math.max(...seen.map((q) => q[0]))) / 2;
+      const cy = (Math.min(...seen.map((q) => q[1])) + Math.max(...seen.map((q) => q[1]))) / 2;
+      target.addScaledVector(right, cx).addScaledVector(up, cy);
+    }
+    const pos = target.clone().addScaledVector(back, dist);
     this.camera.near = Math.max(0.001, dist / 200);
-    this.camera.far = dist * 20;
+    this.camera.far = (dist + sphere.radius) * 20;
     this.camera.updateProjectionMatrix();
     this.setShadowExtent(sphere.radius * 1.2, sphere.center);
-    if (fly) this.flyTo(pos, sphere.center);
+    // framed again when the view changes shape, till the camera is moved by hand
+    this.framed = { object, from };
+    if (fly) this.flyTo(pos, target);
     else {
       if (this.flight) this.endFlight(this.flight);
       this.camera.position.copy(pos);
-      this.controls.target.copy(sphere.center);
+      this.controls.target.copy(target);
       this.controls.update();
       this.invalidate();
     }
@@ -375,6 +431,8 @@ export class Viewer {
     this.camera.aspect = w / Math.max(1, h);
     this.camera.updateProjectionMatrix();
     for (const cb of this.onResize) cb(w, h);
+    // the same framing for the new shape, unless the camera was moved by hand since
+    if (this.framed && w > 0 && h > 0) this.fit(this.framed.object, this.framed.from, false);
     this.invalidate(false);
   }
 
